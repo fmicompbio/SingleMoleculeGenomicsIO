@@ -1,0 +1,119 @@
+#' Get names of assays containing read-level data
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @param se A \code{SummarizedExperiment} object.
+#'
+#' @author Charlotte Soneson
+#'
+#' @return A (possibly empty) character vector with the names of the assays of
+#' se containing read-level data.
+#'
+#' @importFrom SummarizedExperiment assayNames
+.getReadLevelAssayNames <- function(se) {
+    intersect(metadata(se)$readLevelData$assayNames,
+              assayNames(se))
+}
+
+#' Get names of colData columns containing read-level data
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @param se A \code{SummarizedExperiment} object.
+#'
+#' @author Charlotte Soneson
+#'
+#' @return A (possibly empty) character vector with the names of the columns of
+#' colData(se) containing read-level data.
+#'
+#' @importFrom SummarizedExperiment colData
+#' @importFrom BiocGenerics colnames
+#' @importFrom S4Vectors metadata
+.getReadLevelColDataNames <- function(se) {
+    intersect(metadata(se)$readLevelData$colDataColumns,
+              colnames(colData(se)))
+}
+
+#' Check internal consistency of SummarizedExperiment object
+#'
+#' All assays with read-level data must have the same number and order of
+#' the reads, which must also agree with the order in \code{se$QC} if that
+#' exists. All assays must have the same column names, which must also
+#' agree with the column names of the object, and the \code{sample} column
+#' in the \code{colData}.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @param se A \code{SummarizedExperiment object}.
+#' @param verbose A logical scalar. If \code{TRUE}, report on progress.
+#'
+#' @author Charlotte Soneson
+#'
+#' @return Silently returns \code{NULL}. If the object is not valid, an error
+#' will be raised.
+#'
+#' @importFrom SummarizedExperiment colData assayNames assay
+#' @importFrom BiocGenerics nrow
+#' @importFrom cli cli_abort
+#' @importFrom S4Vectors metadata
+.checkSEValidity <- function(se, verbose = FALSE) {
+    stopifnot(is(se, "SummarizedExperiment"))
+
+    .message("Checking assay names")
+    stopifnot(!is.null(assayNames(se)) &&
+                  all(assayNames(se) != "") &&
+                  !any(duplicated(assayNames(se))))
+
+    if (nrow(se) > 0) {
+        .message("Checking row names")
+        stopifnot(!is.null(rownames(se)) &&
+                      !any(duplicated(rownames(se))))
+    }
+
+    stopifnot(!is.null(metadata(se)$readLevelData) &&
+                  is.list(metadata(se)$readLevelData) &&
+                  all(c("assayNames", "colDataColumns") %in%
+                          names(metadata(se)$readLevelData)))
+
+    .message("Checking consistency of sample names")
+    stopifnot("sample" %in% colnames(colData(se)))
+
+    for (an in assayNames(se)) {
+        stopifnot(colnames(assay(
+            se, an, withDimnames = FALSE)) == colnames(se))
+    }
+    for (cn in .getReadLevelColDataNames(se)) {
+        stopifnot(names(se[[cn]]) == colnames(se))
+    }
+
+    rlAssays <- .getReadLevelAssayNames(se)
+    if (length(rlAssays) > 0) {
+        .message("Read-level assay found")
+        ## Choose one assay as the reference to compare to
+        refAssay <- rlAssays[1]
+        refReads <- lapply(assay(se, refAssay), colnames)
+        for (an in setdiff(rlAssays, refAssay)) {
+            .message("Comparing {refAssay} and {an}")
+            for (sn in colnames(se)) {
+                if (!all(colnames(assay(se, an)[[sn]]) == refReads[[sn]])) {
+                    cli_abort(paste0(
+                        "Mismatching reads for assays {refAssay} and {an}, ",
+                        "sample {sn}"))
+                }
+            }
+        }
+        for (cn in .getReadLevelColDataNames(se)) {
+            .message("Read-level column data found, checking consistency")
+            for (sn in colnames(se)) {
+                if (!all(rownames(se[[cn]][[sn]]) == refReads[[sn]])) {
+                    cli_abort(paste0(
+                        "Mismatching reads for assay {refAssay} and ",
+                         "colData column {cn}, sample {sn}"))
+                }
+            }
+        }
+    }
+}

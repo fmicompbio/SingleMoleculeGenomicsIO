@@ -1,0 +1,150 @@
+suppressPackageStartupMessages({
+    library(SummarizedExperiment)
+    library(S4Vectors)
+})
+
+## -------------------------------------------------------------------------- ##
+## Checks, subsetReads
+## -------------------------------------------------------------------------- ##
+test_that("subsetReads works", {
+    # example data
+    modbamfiles <- system.file("extdata",
+                            c("6mA_1_10reads.bam", "6mA_2_10reads.bam"),
+                            package = "SingleMoleculeGenomicsIO")
+    se <- readModBam(bamfiles = modbamfiles,
+                     regions = "chr1:6940000-6955000", modbase = "a",
+                     BPPARAM = BiocParallel::SerialParam())
+    se2 <- flattenReadLevelAssay(se, keepReads = FALSE)
+    se3 <- se
+    assays(se3) <- SimpleList(mod_prob = assay(se, "mod_prob"),
+                              mod_prob2 = assay(se, "mod_prob"))
+    metadata(se3)$readLevelData$assayNames <- c("mod_prob", "mod_prob2")
+
+    read_ids <- c("s1-233e48a7-f379-4dcf-9270-958231125563",
+                  "s2-034b625e-6230-4f8d-a713-3a32cd96c298")
+
+    # expected errors
+    expect_error(subsetReads(se = "error", reads = read_ids),
+                 "must be of class .SummarizedExperiment.")
+    expect_error(subsetReads(se = se, reads = read_ids, prune = "error"),
+                 ".prune. must be of class .logical.")
+    expect_error(subsetReads(se = se, reads = list(error = 1)),
+                 ".reads. of type .list. must have names in: s1 and s2")
+    expect_error(subsetReads(se = se, reads = list(s1 = FALSE)),
+                 "logical .reads. for sample .s1. must be of length 3")
+    expect_error(subsetReads(se = se, reads = TRUE),
+                 ".reads. must be either a .character. vector")
+    expect_error(subsetReads(se = se, reads = NULL, randomSubset = NULL),
+                 ".reads. must be either a .character. vector")
+
+    # expected results
+    # ... no read-level assay
+    expect_warning(seSub <- subsetReads(se = se2, reads = read_ids),
+                   ".se. contains no read-level assays")
+    expect_identical(seSub, se2)
+
+    # ... several read-level assays
+    seSub <- subsetReads(se = se3, reads = read_ids)
+    expect_identical(assay(seSub, "mod_prob"), assay(seSub, "mod_prob2"))
+
+    # ... prune
+    seSub <- subsetReads(se = se, reads = list(s1 = 1), prune = FALSE)
+    expect_identical(dim(seSub), c(7967L, 2L))
+    expect_identical(nrow(colData(seSub)), 2L)
+    expect_identical(ncols(assays(seSub)), c(mod_prob = 2L))
+    expect_identical(colnames(seSub), c("s1", "s2"))
+    seSub <- subsetReads(se = se, reads = list(s1 = 1), prune = TRUE)
+    expect_identical(dim(seSub), c(7967L, 1L))
+    expect_identical(nrow(colData(seSub)), 1L)
+    expect_identical(ncols(assays(seSub)), c(mod_prob = 1L))
+    expect_identical(colnames(seSub), c("s1"))
+
+    # ... subset by character vector
+    seSub <- subsetReads(se, c("s1-233e48a7-f379-4dcf-9270-958231125563",
+                               "s2-034b625e-6230-4f8d-a713-3a32cd96c298"))
+    expect_s4_class(seSub, "RangedSummarizedExperiment")
+
+    # ... subset by list with numeric index
+    seSub2 <- subsetReads(se, list(s1 = 1, s2 = 1))
+    expect_identical(seSub2, seSub)
+
+    # ... subset by list with logical index
+    seSub2 <- subsetReads(se, list(s1 = c(TRUE, FALSE, FALSE), s2 = c(TRUE, FALSE)))
+    expect_identical(seSub2, seSub)
+
+    # ... subset by list with character index
+    seSub <- subsetReads(se, list(s1 = "s1-233e48a7-f379-4dcf-9270-958231125563",
+                                  s2 = "s2-034b625e-6230-4f8d-a713-3a32cd96c298"))
+    expect_identical(seSub2, seSub)
+    expect_warning(
+        seSub3 <- subsetReads(se, reads = list(s1 = "s1-233e48a7-f379-4dcf-9270-958231125563",
+                                               s2 = "s2-034b625e-6230-4f8d-a713-3a32cd96c298"),
+                              randomSubset = 1),
+        "ignoring")
+    expect_identical(seSub, seSub3)
+
+    # ... add non-existing read names
+    expect_warning(expect_warning(
+        seSub3 <- subsetReads(se, list(s1 = c("s1-233e48a7-f379-4dcf-9270-958231125563",
+                                              "error"),
+                                       s2 = c("missing",
+                                              "s2-034b625e-6230-4f8d-a713-3a32cd96c298"))),
+        "These will be ignored"), "These will be ignored")
+    expect_identical(seSub3, seSub)
+    expect_warning(
+        seSub3 <- subsetReads(se, c("s1-233e48a7-f379-4dcf-9270-958231125563",
+                                    "s2-034b625e-6230-4f8d-a713-3a32cd96c298",
+                                    "error", NA)),
+        "These will be ignored")
+    expect_identical(seSub3, seSub)
+    expect_warning(expect_warning(
+        seSub3 <- subsetReads(se, list(s1 = c(1, 4), s2 = c(-1, 1))),
+        "These will be ignored"), "These will be ignored")
+    expect_identical(seSub3, seSub)
+
+    # ... only non-existing read names
+    expect_warning(seSub4 <- subsetReads(se, c("missing", "error")),
+                   "These will be ignored")
+    expect_equal(dim(seSub4), c(7967L, 0L))
+
+    expect_warning(expect_warning(
+        seSub4 <- subsetReads(se, list(s1 = "error", s2 = "missing")),
+        "These will be ignored"), "These will be ignored")
+    expect_equal(dim(seSub4), c(7967L, 0L))
+
+    # ... invert
+    seSub <- subsetReads(se, list(s1 = 2, s2 = 2))
+    seSub2 <- subsetReads(se, list(s1 = c(1, 3), s2 = 1), invert = TRUE)
+    expect_identical(seSub, seSub2)
+    # ... ... with non-existing read names
+    expect_warning(expect_warning(
+        seSub3 <- subsetReads(se, list(s1 = c(-1, 1, 3, 4), s2 = c(1, 3)),
+                              invert = TRUE),
+        "These will be ignored"), "These will be ignored")
+    expect_identical(seSub, seSub3)
+
+    # ... remove all-NA positions
+    seSub <- subsetReads(se, list(s1 = 2, s2 = 2))
+    seSub2 <- subsetReads(se, list(s1 = 2, s2 = 2), removeAllNApos = TRUE,
+                          assayNameNA = "mod_prob")
+    expect_lt(nrow(seSub2), nrow(seSub))
+    expect_equal(nrow(seSub2), 6364L)
+    expect_equal(nrow(seSub2),
+                 sum(rowSums(is_nonna(as.matrix(assay(seSub, "mod_prob")))) > 0))
+
+    # ... select random subset
+    set.seed(42L)
+    seSub5 <- subsetReads(se, randomSubset = 1)
+    expect_equal(lapply(assay(seSub5, "mod_prob"), ncol),
+                 list(s1 = 1L, s2 = 1L))
+    set.seed(42L)
+    seSub6 <- subsetReads(se, randomSubset = 1)
+    expect_identical(seSub5, seSub6)
+
+    seSub7 <- subsetReads(se, randomSubset = 100)
+    expect_equal(lapply(assay(seSub7, "mod_prob"), ncol),
+                 list(s1 = 3L, s2 = 2L))
+    seSub8 <- subsetReads(se, randomSubset = 0.49)
+    expect_equal(lapply(assay(seSub8, "mod_prob"), ncol),
+                 list(s1 = 1L, s2 = 1L))
+})
