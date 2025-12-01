@@ -50,7 +50,7 @@ coordinate is not provided (for example in "chr1:10-", which means "to
 the end of chr1"), it will be obtained from \code{seqinfo} or default
 to a large value if \code{seqinfo} is not provided.}
 
-\item{seqinfo}{\code{NULL} or a \code{\link[GenomeInfoDb]{Seqinfo}} object
+\item{seqinfo}{\code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 containing information about the set of genomic sequences (chromosomes).
 Alternatively, a named numeric vector with genomic sequence names and
 lengths.}

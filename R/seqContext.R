@@ -49,7 +49,7 @@
 #'
 #' @importFrom SummarizedExperiment rowRanges
 #' @importFrom GenomicRanges GRanges resize trim
-#' @importFrom GenomeInfoDb seqlengths seqlengths<-
+#' @importFrom Seqinfo seqlengths seqlengths<-
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom BSgenome getSeq
 #' @importFrom BiocGenerics as.list

@@ -77,7 +77,7 @@
 #' @noRd
 #' @importFrom SummarizedExperiment rowRanges assayNames assay
 #' @importFrom BiocGenerics pos
-#' @importFrom GenomeInfoDb seqnames
+#' @importFrom Seqinfo seqnames
 #' @importFrom cli cli_warn
 #'
 .pruneAmbiguousStrandPositions <- function(se, assayName = "Nvalid",
@@ -179,7 +179,7 @@
 #'     coordinate is not provided (for example in "chr1:10-", which means "to
 #'     the end of chr1"), it will be obtained from \code{seqinfo} or default
 #'     to a large value if \code{seqinfo} is not provided.
-#' @param seqinfo \code{NULL} or a \code{\link[GenomeInfoDb]{Seqinfo}} object
+#' @param seqinfo \code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 #'     containing information about the set of genomic sequences (chromosomes).
 #'     Alternatively, a named numeric vector with genomic sequence names and
 #'     lengths.
@@ -211,7 +211,7 @@
 #'
 #' @importFrom SparseArray colSums is_nonna
 #' @importFrom SummarizedExperiment assay
-#' @importFrom GenomeInfoDb seqinfo
+#' @importFrom Seqinfo seqinfo
 filterPositions <- function(se,
                             filters = c("sequenceContext", "coverage",
                                         "all.na"),

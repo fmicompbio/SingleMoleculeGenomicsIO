@@ -26,7 +26,7 @@
 #'     \code{"sample"}, which must contain all the values of
 #'     \code{names(fnames)}. The provided annotations will be propagated to
 #'     the returned \code{SummarizedExperiment} object.
-#' @param seqinfo \code{NULL} or a \code{\link[GenomeInfoDb]{Seqinfo}} object
+#' @param seqinfo \code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 #'     containing information about the set of genomic sequences (chromosomes).
 #'     Alternatively, a named numeric vector with genomic sequence names and
 #'     lengths. Useful to set the sorting order of sequence names.
@@ -64,7 +64,7 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom data.table fread
 #' @importFrom GenomicRanges GPos match resize trim
-#' @importFrom GenomeInfoDb seqlengths seqlengths<-
+#' @importFrom Seqinfo seqlengths seqlengths<-
 #' @importFrom S4Vectors mcols mcols<- DataFrame
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom BSgenome getSeq

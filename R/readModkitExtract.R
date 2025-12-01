@@ -33,7 +33,7 @@
 #'     \code{"sample"}, which must contain all the values of
 #'     \code{names(fnames)}. The provided annotations will be propagated to
 #'     the returned \code{SummarizedExperiment} object.
-#' @param seqinfo \code{NULL} or a \code{\link[GenomeInfoDb]{Seqinfo}} object
+#' @param seqinfo \code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 #'     containing information about the set of genomic sequences (chromosomes).
 #'     Alternatively, a named numeric vector with genomic sequence names and
 #'     lengths. Useful to set the sorting order of sequence names.
@@ -77,7 +77,7 @@
 #' @importFrom S4Vectors make_zero_col_DFrame DataFrame SimpleList
 #' @importFrom SparseArray NaArray
 #' @importFrom BiocGenerics pos strand do.call cbind sort
-#' @importFrom GenomeInfoDb seqnames
+#' @importFrom Seqinfo seqnames
 #' @importFrom cli cli_abort
 #'
 #' @export

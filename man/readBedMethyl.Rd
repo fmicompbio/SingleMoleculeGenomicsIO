@@ -43,7 +43,7 @@ for the samples. It must contain at least one column, named
 \code{names(fnames)}. The provided annotations will be propagated to
 the returned \code{SummarizedExperiment} object.}
 
-\item{seqinfo}{\code{NULL} or a \code{\link[GenomeInfoDb]{Seqinfo}} object
+\item{seqinfo}{\code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 containing information about the set of genomic sequences (chromosomes).
 Alternatively, a named numeric vector with genomic sequence names and
 lengths. Useful to set the sorting order of sequence names.}
