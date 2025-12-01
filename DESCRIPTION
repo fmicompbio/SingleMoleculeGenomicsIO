@@ -1,0 +1,64 @@
+Package: SingleMoleculeGenomicsIO
+Title: Tools for reading single molecule genomics data 
+Version: 0.1.0
+Authors@R: c(
+    person("Michael", "Stadler", , "michael.stadler@fmi.ch",
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2269-4934")),
+    person("Charlotte", "Soneson", , "charlotte.soneson@fmi.ch",
+           role = "aut", comment = c(ORCID = "0000-0003-3833-2169")),
+    person("Panagiotis", "Papasaikas", , "panagiotis.papasaikas@fmi.ch",
+           role = "aut", comment = c(ORCID = "0000-0002-1640-7636")),
+    person("Sebastien", "Smallwood", , "sebastien.smallwood@fmi.ch",
+           role = "aut", comment = c(ORCID = "0009-0006-8466-2459")),
+    person("Friedrich Miescher Institute for Biomedical Research", role = "cph")
+  )
+Description: Provides tools for reading of single-molecule genomics data
+    from different file formats in R. The package includes functions for reading
+    collapsed or read-level data from modBAM, bedMethyl and `modkit extract`
+    tabular files, as well as C-to-T conversion based BAM files, as
+    `SummarizedExperiment` objects.
+License: MIT + file LICENSE
+URL: https://github.com/fmicompbio/SingleMoleculeGenomicsIO,
+    https://fmicompbio.github.io/SingleMoleculeGenomicsIO
+BugReports: https://github.com/fmicompbio/SingleMoleculeGenomicsIO/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    BiocGenerics,
+    BiocParallel,
+    cli,
+    data.table,
+    dplyr,
+    GenomicRanges,
+    IRanges,
+    methods,
+    Rcpp,
+    rlang,
+    S4Vectors,
+    SparseArray,
+    SummarizedExperiment,
+    tibble,
+    tidyr,
+    utils
+Suggests:
+    BiocIO,
+    BiocManager,
+    knitr,
+    R.utils,
+    rmarkdown,
+    Rsamtools,
+    sessioninfo,
+    testthat (>= 3.0.0),
+    withr
+LinkingTo: 
+    cli,
+    Rcpp,
+    Rhtslib
+VignetteBuilder: 
+    knitr
+biocViews: Epigenetics, LongRead
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+SystemRequirements: GNU make

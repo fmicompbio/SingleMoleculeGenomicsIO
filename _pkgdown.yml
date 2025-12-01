@@ -1,0 +1,4 @@
+url: https://fmicompbio.github.io/SingleMoleculeGenomicsIO
+
+template:
+  bootstrap: 5
