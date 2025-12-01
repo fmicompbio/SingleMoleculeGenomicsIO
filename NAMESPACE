@@ -3,6 +3,7 @@
 export(addReadStats)
 export(addSeqContext)
 export(calcReadStats)
+export(countStatePairs)
 export(extractSeqContext)
 export(filterPositions)
 export(filterReads)
