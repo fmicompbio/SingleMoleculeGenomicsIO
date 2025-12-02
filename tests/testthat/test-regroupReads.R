@@ -11,6 +11,13 @@ test_that("read regrouping works", {
     expect_warning(expect_warning(
         se <- addReadStats(se, name = "QC", BPPARAM = BiocParallel::SerialParam()),
         "Too few points"), "Too few points")
+    segs <- list(s1 = IRanges::IRangesList(
+        "s1-233e48a7-f379-4dcf-9270-958231125563" = IRanges::IRanges(
+            start = 6925834, width = 140),
+        "s1-92e906ae-cddb-4347-a114-bf9137761a8d" = IRanges::IRanges(
+            start = c(6926000, 6926200), width = 140)),
+        s2 = IRanges::IRangesList())
+    se <- annotateReadSegments(se, segs, "nucl")
     # define read groups
     groups <- list(g1 = c("s1-233e48a7-f379-4dcf-9270-958231125563",
                           "s2-d03efe3b-a45b-430b-9cb6-7e5882e4faf8"),
@@ -59,6 +66,10 @@ test_that("read regrouping works", {
                  do.call(rbind, se$QC)[expectedOrder, ])
     expect_equal(colnames(sere), names(groups))
     expect_equal(rowRanges(se), rowRanges(sere))
+    tmp <- do.call(c, unname(se$nucl))[expectedOrder]
+    names(tmp) <- paste0("g", c(1, 1, 2, 3, 3), "-", names(tmp))
+    expect_equal(tmp, do.call(c, unname(sere$nucl)))
+    expect_equal(lengths(sere$nucl), c(g1 = 2, g2 = 1, g3 = 2))
 
     # ... identical results (with warning) if nonexistent reads are provided
     groups2 <- groups

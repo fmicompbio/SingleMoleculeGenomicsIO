@@ -112,7 +112,7 @@ Rcpp::NumericVector estimateSNR(double totalVar,
 
     // Apply eps to noise and ensure finite
     if (!R_finite(noiseV)) {
-        return out;
+        return out; // # nocov
     }
     if (noiseV < eps) {
         noiseV = eps;

@@ -311,24 +311,28 @@ test_that("addReadStats works", {
 
 
 test_that(".estimateSNRprobList works", {
-    probList <- list( round(seq(0.01, 0.9, length.out = 10)^1.3, 3) )
+    probList <- list(round(seq(0.01, 0.9, length.out = 10)^1.3, 3) )
     idxList <- list(c(1:10))
     suppressWarnings(
         res0 <- .estimateSNRprobList(probList, idxList, min_diffs = 5)
     )
-    expect_true(all(is.finite( c(res0$snr,res0$signal,res0$noise) ) ) )
+    expect_true(all(is.finite(c(res0$snr, res0$signal, res0$noise))))
 
     suppressWarnings(
-        res1 <- .estimateSNRprobList(probList, idxList, min_diffs = 5,floor_pars = c(0,0.2))
+        res1 <- .estimateSNRprobList(probList, idxList, min_diffs = 5,
+                                     floor_pars = c(0, 0.2))
     )
-    expect_true(all(is.finite( c(res0$snr,res0$signal,res0$noise) ) ) )
+    expect_true(all(is.finite(c(res0$snr, res0$signal, res0$noise))))
 
-    probList <- list( 0.1)
+    probList <- list(0.1)
     idxList <- list(1)
     suppressWarnings(
         res2 <- .estimateSNRprobList(probList, idxList, min_diffs = 5)
     )
-    expect_true(all(is.na( c(res2$snr,res2$signal,res2$noise) ) ) )
+    expect_true(all(is.na(c(res2$snr, res2$signal, res2$noise))))
 
+    res3 <- .estimateSNRprobList(probList, idxList, min_diffs = 5,
+                                 floor_pars = c(0, Inf))
+    expect_identical(res3$floor_pars, c(intercept = 0, slope = Inf))
 })
 

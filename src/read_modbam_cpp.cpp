@@ -73,12 +73,12 @@ std::vector<int> read_to_reference_pos(const bam1_t *aln,
             read_pos += op_len;
             break;
 
-        case BAM_CHARD_CLIP:  // hard clipping (H)
+        case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
         case BAM_CPAD:        // padding (P)
             // these do not consume any positions in the read or reference
             break;
 
-        default: // # nocov start
+        default:
             Rcpp::warning("Unknown CIGAR operation: %d", op);
         return ref_positions; // # nocov end
         }
@@ -184,8 +184,7 @@ std::string construct_read_label(const bam1_t *aln,
 
         // subset ref_positions and convert to read_positions
         uint8_t *seqdata = bam_get_seq(aln);
-        std::vector<int> ref_positions_overlapping(ref_positions.begin() + from,
-                                                   ref_positions.begin() + to);
+        std::vector<int> ref_positions_overlapping(ref_positions.begin() + from, ref_positions.begin() + to);
         std::vector<int> read_positions = reference_to_read_pos(
             aln, ref_positions_overlapping);
         for (size_t i = 0; i < read_positions.size(); i++) {
