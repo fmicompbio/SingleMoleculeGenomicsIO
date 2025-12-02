@@ -11,13 +11,15 @@ test_that("read regrouping works", {
     expect_warning(expect_warning(
         se <- addReadStats(se, name = "QC", BPPARAM = BiocParallel::SerialParam()),
         "Too few points"), "Too few points")
-    wgt <- rep(c(0.5, -0.5, 0.5) * c(140/170, 30/170, 140/170), c(15, 140, 15))
     # define read groups
     groups <- list(g1 = c("s1-233e48a7-f379-4dcf-9270-958231125563",
                           "s2-d03efe3b-a45b-430b-9cb6-7e5882e4faf8"),
                    g2 = "s1-92e906ae-cddb-4347-a114-bf9137761a8d",
                    g3 = c("s2-034b625e-6230-4f8d-a713-3a32cd96c298",
                           "s1-d52a5f6a-a60a-4f85-913e-eada84bfbfb9"))
+    expectedOrder <- match(
+        unlist(groups, use.names = FALSE),
+        unlist(lapply(assay(se, "mod_prob"), colnames), use.names = FALSE))
 
     # test that functions fail with wrong input
     expect_error(regroupReads(se = "1", readGroups = groups),
@@ -46,15 +48,15 @@ test_that("read regrouping works", {
                         unlist(groups)))
     expect_equal(assayNames(sere), "mod_prob")
     expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se, "mod_prob"))[, c(1, 5, 3, 4, 2)]))
+                 unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder]))
     tmp <- do.call(rbind, sere$readInfo)
     rownames(tmp) <- sub("^g[0-9]-", "", rownames(tmp))
     expect_equal(tmp,
-                 do.call(rbind, se$readInfo)[c(1, 5, 3, 4, 2), ])
+                 do.call(rbind, se$readInfo)[expectedOrder, ])
     tmp <- do.call(rbind, sere$QC)
     rownames(tmp) <- sub("^g[0-9]-", "", rownames(tmp))
     expect_equal(tmp,
-                 do.call(rbind, se$QC)[c(1, 5, 3, 4, 2), ])
+                 do.call(rbind, se$QC)[expectedOrder, ])
     expect_equal(colnames(sere), names(groups))
     expect_equal(rowRanges(se), rowRanges(sere))
 
@@ -94,6 +96,9 @@ test_that("read regrouping works", {
                                   withinSample = FALSE)
     groups2 <- split(x = rownames(do.call(rbind, se$readInfo)),
                      f = do.call(rbind, se$readInfo)$variant_label)
+    expectedOrder2 <- match(
+        unlist(groups2, use.names = FALSE),
+        unlist(lapply(assay(se, "mod_prob"), colnames), use.names = FALSE))
     expect_equal(lapply(assay(sere, "mod_prob"), ncol),
                  list(`G-` = 3, GT = 2))
     expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
@@ -101,7 +106,7 @@ test_that("read regrouping works", {
                         unlist(groups2)))
     expect_equal(assayNames(sere), "mod_prob")
     expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se, "mod_prob"))[, c(2, 4, 5, 1, 3)]))
+                 unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder2]))
     expect_equal(colnames(sere), names(groups2))
     expect_equal(rowRanges(se), rowRanges(sere))
 
@@ -111,6 +116,9 @@ test_that("read regrouping works", {
     groups2 <- split(x = rownames(do.call(rbind, se$readInfo)),
                      f = paste0(rep(colnames(se), se$n_reads), "-",
                                 do.call(rbind, se$readInfo)$variant_label))
+    expectedOrder2 <- match(
+        unlist(groups2, use.names = FALSE),
+        unlist(lapply(assay(se, "mod_prob"), colnames), use.names = FALSE))
     expect_equal(lapply(assay(sere, "mod_prob"), ncol),
                  list(`s1-G-` = 1, `s1-GT` = 2, `s2-G-` = 2))
     expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
@@ -118,7 +126,7 @@ test_that("read regrouping works", {
                         unlist(groups2)))
     expect_equal(assayNames(sere), "mod_prob")
     expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se, "mod_prob"))[, c(2, 1, 3, 4, 5)]))
+                 unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder2]))
     expect_equal(colnames(sere), names(groups2))
     expect_equal(rowRanges(se), rowRanges(sere))
 
@@ -134,6 +142,9 @@ test_that("read regrouping works", {
     groups2 <- split(x = rownames(do.call(rbind, se2$readInfo)),
                      f = paste0(do.call(rbind, se2$readInfo)$variant_label, "-",
                                 do.call(rbind, se2$readInfo)$label2))
+    expectedOrder2 <- match(
+        unlist(groups2, use.names = FALSE),
+        unlist(lapply(assay(se2, "mod_prob"), colnames), use.names = FALSE))
     expect_equal(lapply(assay(sere, "mod_prob"), ncol),
                  list(`G--G-` = 3, `GT-GT` = 2))
     expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
@@ -141,7 +152,7 @@ test_that("read regrouping works", {
                         unlist(groups2)))
     expect_equal(assayNames(sere), "mod_prob")
     expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se2, "mod_prob"))[, c(2, 4, 5, 1, 3)]))
+                 unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
     expect_equal(colnames(sere), names(groups2))
     expect_equal(rowRanges(se2), rowRanges(sere))
 
@@ -152,6 +163,9 @@ test_that("read regrouping works", {
                      f = paste0(rep(colnames(se), se2$n_reads), "-",
                                 do.call(rbind, se2$readInfo)$variant_label, "-",
                                 do.call(rbind, se2$readInfo)$label2))
+    expectedOrder2 <- match(
+        unlist(groups2, use.names = FALSE),
+        unlist(lapply(assay(se2, "mod_prob"), colnames), use.names = FALSE))
     expect_equal(lapply(assay(sere, "mod_prob"), ncol),
                  list(`s1-G--G-` = 1, `s1-GT-GT` = 2, `s2-G--G-` = 2))
     expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
@@ -159,7 +173,7 @@ test_that("read regrouping works", {
                         unlist(groups2)))
     expect_equal(assayNames(sere), "mod_prob")
     expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se2, "mod_prob"))[, c(2, 1, 3, 4, 5)]))
+                 unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
     expect_equal(colnames(sere), names(groups2))
     expect_equal(rowRanges(se2), rowRanges(sere))
 })
