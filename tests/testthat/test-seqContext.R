@@ -3,7 +3,6 @@ suppressPackageStartupMessages({
     library(GenomicRanges)
     library(Biostrings)
     library(BSgenome)
-    library(withr)
 })
 
 ## -------------------------------------------------------------------------- ##
@@ -24,8 +23,7 @@ test_that("extractSeqContext works", {
     bsgnmfile <- system.file("extdata", "BSgenome.Mmusculus.footprintR.reference_0.1.0.tar.gz", package = "SingleMoleculeGenomicsIO")
     rlibdir <- tempfile(pattern = "Rlib")
     dir.create(rlibdir)
-    local_libpaths(new = rlibdir, action = "prefix")
-    install.packages(bsgnmfile, lib.loc = rlibdir, repos = NULL,
+    install.packages(bsgnmfile, lib = rlibdir, repos = NULL,
                      quiet = TRUE, verbose = FALSE)
     suppressPackageStartupMessages(suppressWarnings(
         library(BSgenome.Mmusculus.footprintR.reference, lib.loc = rlibdir, quietly = TRUE)
