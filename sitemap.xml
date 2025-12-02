@@ -1,0 +1,27 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/404.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/LICENSE-text.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/LICENSE.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/articles/SingleMoleculeGenomicsIO.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/articles/index.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/authors.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/index.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/news/index.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/addSeqContext.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/calcReadStats.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countStatePairs.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractSeqContext.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterPositions.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReads.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReadsBam.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/flattenReadLevelAssay.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/index.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/plotReadStats.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readBedMethyl.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModkitExtract.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/sampleEntropy.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/subsetReads.html</loc></url>
+</urlset>
+

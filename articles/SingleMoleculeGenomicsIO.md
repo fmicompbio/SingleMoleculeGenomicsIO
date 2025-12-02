@@ -1,0 +1,5 @@
+# SingleMoleculeGenomicsIO
+
+``` r
+library(SingleMoleculeGenomicsIO)
+```
