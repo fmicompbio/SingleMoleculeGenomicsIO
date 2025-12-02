@@ -20,15 +20,14 @@ test_that("extractSeqContext works", {
     se <- SummarizedExperiment(assays = matrix(1:3, ncol = 1), rowRanges = regions)
 
     # temporarily install custom BSgenome package
-    bsgnmfile <- system.file("extdata", "BSgenome.Mmusculus.footprintR.reference_0.1.0.tar.gz", package = "SingleMoleculeGenomicsIO")
+    bsgnmfile <- system.file("extdata", "BSgenome.Mmusculus.SingleMoleculeGenomicsIO_0.1.0.tar.gz", package = "SingleMoleculeGenomicsIO")
     rlibdir <- tempfile(pattern = "Rlib")
     dir.create(rlibdir)
     install.packages(bsgnmfile, lib = rlibdir, repos = NULL,
-                     quiet = FALSE, verbose = TRUE)
-    # quiet = TRUE, verbose = FALSE)
-    expect_identical(list.files(rlibdir), "BSgenome.Mmusculus.footprintR.reference")
+                     quiet = TRUE, verbose = FALSE)
+    expect_identical(list.files(rlibdir), "BSgenome.Mmusculus.SingleMoleculeGenomicsIO")
     suppressPackageStartupMessages(suppressWarnings(
-        library(BSgenome.Mmusculus.footprintR.reference, lib.loc = rlibdir, quietly = TRUE)
+        library(BSgenome.Mmusculus.SingleMoleculeGenomicsIO, lib.loc = rlibdir, quietly = TRUE)
     ))
     gnm <- Biostrings::readDNAStringSet(ref)
 
@@ -42,7 +41,7 @@ test_that("extractSeqContext works", {
     # expected results
     expect_warning(s1 <- extractSeqContext(x = regions, sequenceContextWidth = 6, sequenceReference = ref))
     s2 <- extractSeqContext(x = regions, sequenceContextWidth = 7, sequenceReference = gnm)
-    s3 <- extractSeqContext(x = regions, sequenceContextWidth = 7, sequenceReference = BSgenome.Mmusculus.footprintR.reference)
+    s3 <- extractSeqContext(x = regions, sequenceContextWidth = 7, sequenceReference = BSgenome.Mmusculus.SingleMoleculeGenomicsIO)
     s4 <- extractSeqContext(x = unname(regions), sequenceContextWidth = 7, sequenceReference = gnm)
     s5 <- extractSeqContext(x = regions2, sequenceContextWidth = 7, sequenceReference = gnm)
     s6 <- extractSeqContext(x = resize(regions2, width = 1L, fix = "center"), sequenceContextWidth = 7, sequenceReference = gnm)
@@ -63,7 +62,7 @@ test_that("extractSeqContext works", {
     expect_identical(s7, s1)
 
     # clean up
-    detach("package:BSgenome.Mmusculus.footprintR.reference", unload = TRUE,
+    detach("package:BSgenome.Mmusculus.SingleMoleculeGenomicsIO", unload = TRUE,
            character.only = TRUE)
 })
 
