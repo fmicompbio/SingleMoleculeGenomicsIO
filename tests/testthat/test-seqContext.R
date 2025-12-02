@@ -24,7 +24,9 @@ test_that("extractSeqContext works", {
     rlibdir <- tempfile(pattern = "Rlib")
     dir.create(rlibdir)
     install.packages(bsgnmfile, lib = rlibdir, repos = NULL,
-                     quiet = TRUE, verbose = FALSE)
+                     quiet = FALSE, verbose = TRUE)
+    # quiet = TRUE, verbose = FALSE)
+    expect_identical(list.files(rlibdir), "BSgenome.Mmusculus.footprintR.reference")
     suppressPackageStartupMessages(suppressWarnings(
         library(BSgenome.Mmusculus.footprintR.reference, lib.loc = rlibdir, quietly = TRUE)
     ))
