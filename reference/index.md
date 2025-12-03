@@ -17,6 +17,12 @@
 - [`countStatePairs()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countStatePairs.md)
   : Count pairs of modified bases by distance and modification state
 
+- [`expandSEToBaseSpace()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/expandSEToBaseSpace.md)
+  :
+
+  Expand the rows of a `RangedSummarizedExperiment` to single base
+  resolution.
+
 - [`extractSeqContext()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractSeqContext.md)
   : Extract the sequence context around positions of interest
 

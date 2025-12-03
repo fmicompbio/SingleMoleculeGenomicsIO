@@ -148,11 +148,11 @@ se <- readModBam(bamfile = modbamfile, regions = "chr1:6920000-6995000",
 #> ℹ extracting base modifications from modBAM files
 #> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [58ms]
+#> ✔ finding unique genomic positions... [31ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 #> ℹ collapsed 29545 positions to 8439 unique ones
-#> ✔ collapsed 29545 positions to 8439 unique ones [292ms]
+#> ✔ collapsed 29545 positions to 8439 unique ones [287ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 se <- addReadStats(se, name = "QC",
