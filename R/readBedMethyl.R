@@ -50,7 +50,7 @@
 #' @author Michael Stadler, Charlotte Soneson
 #'
 #' @examples
-#' bmfile <- system.file("extdata", "modkit_pileup_1.bed.gz",
+#' bmfile <- system.file("extdata", "modkit_pileup_5mC_1.bed.gz",
 #'                       package = "SingleMoleculeGenomicsIO")
 #' readBedMethyl(bmfile, modbase = "m",
 #'               BPPARAM = BiocParallel::SerialParam())

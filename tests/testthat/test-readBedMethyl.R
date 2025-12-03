@@ -8,9 +8,9 @@ suppressPackageStartupMessages({
 ## -------------------------------------------------------------------------- ##
 test_that("readBedMethyl works", {
     # example data
-    fname1 <- system.file("extdata", "modkit_pileup_1.bed.gz",
+    fname1 <- system.file("extdata", "modkit_pileup_5mC_1.bed.gz",
                           package = "SingleMoleculeGenomicsIO")
-    fname2 <- system.file("extdata", "modkit_pileup_2.bed.gz",
+    fname2 <- system.file("extdata", "modkit_pileup_5mC_2.bed.gz",
                           package = "SingleMoleculeGenomicsIO")
     ref <- system.file("extdata", "reference.fa.gz",
                        package = "SingleMoleculeGenomicsIO")
