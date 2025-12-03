@@ -82,10 +82,10 @@ jobs:
           remotes::install_cran('rcmdcheck', Ncpu = 2L)
         shell: Rscript {0}
 
-      # - name: Install SparseArray and S4Arrays temporarily from GitHub
-      #   run: |
-      #     BiocManager::install(c("Bioconductor/S4Arrays", "Bioconductor/SparseArray"), force = TRUE)
-      #   shell: Rscript {0}
+      - name: Install SparseArray and S4Arrays temporarily from GitHub
+        run: |
+          BiocManager::install(c("Bioconductor/S4Arrays", "Bioconductor/SparseArray"), force = TRUE)
+        shell: Rscript {0}
 
       - name: Session info
         run: |
