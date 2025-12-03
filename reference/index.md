@@ -6,6 +6,9 @@
   : Add sequence context around positions of interest to a
   SummarizedExperiment
 
+- [`annotateReadSegments()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/annotateReadSegments.md)
+  : Add read segment annotation
+
 - [`calcReadStats()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/calcReadStats.md)
   [`addReadStats()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/calcReadStats.md)
   : Calculate or add summary statistics for read-level base modification

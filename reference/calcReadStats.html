@@ -276,10 +276,10 @@ for uniformity.</p>
 <span class="r-in"><span>           BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[53ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[48ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> collapsed 11300 positions to 4772 unique ones</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 11300 positions to 4772 unique ones <span style="color: #B2B2B2;">[261ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 11300 positions to 4772 unique ones <span style="color: #B2B2B2;">[373ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">readStats</span> <span class="op">&lt;-</span> <span class="fu">calcReadStats</span><span class="op">(</span><span class="va">se</span>, BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -352,7 +352,7 @@ for uniformity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> s1-233e48a7-f379-4dcf-9270-958231125563  0.698999 0.0605703 0.0373113</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> s1-d52a5f6a-a60a-4f85-913e-eada84bfbfb9  0.154130 0.0243781 0.0219079</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> s1-92e906ae-cddb-4347-a114-bf9137761a8d  0.307366 0.0148793 0.0120242</span>
-<span class="r-in"><span><span class="fu">metadata</span><span class="op">(</span><span class="va">se_withReadStats</span><span class="op">$</span><span class="va">QC</span><span class="op">$</span><span class="va">s1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">se_withReadStats</span><span class="op">$</span><span class="va">QC</span><span class="op">$</span><span class="va">s1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> list()</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
