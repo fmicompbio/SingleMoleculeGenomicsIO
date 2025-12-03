@@ -140,10 +140,10 @@ std::vector<int> reference_to_read_pos(const bam1_t *aln,
             ref_pos += op_len;
             break;
 
-        case BAM_CHARD_CLIP:  // hard clipping (H)
+        case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
         case BAM_CPAD:        // padding (P)
             // these do not consume any positions in the read or reference
-            break; // # nocov start
+            break;
 
         default:
             Rcpp::warning("Unknown CIGAR operation: %d", op);

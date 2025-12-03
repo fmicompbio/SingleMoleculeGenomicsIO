@@ -89,7 +89,7 @@ plotReadStats <- function(se, readInfoCol = "readInfo", qcCol = "QC",
         cli_abort("names of {.code se${readInfoCol}} and {.code se${qcCol}} are not identical")
     }
 
-    df <- do.call(cbind, lapply(dfL, \(x) x[, !colnames(x) %in% c("group", "group_name")]))
+    df <- do.call(cbind, lapply(dfL, \(x) x[, !colnames(x) %in% c("group", "group_name"), drop = FALSE]))
     df$sample <- dfL[[1]]$group_name
 
     # helper functions for automatic thresholds -----------------------------

@@ -93,8 +93,8 @@ IQRModProb <- function(probList, useReads, ...) {
 #' @noRd
 #' @keywords internal
 #' @importFrom stats var
-# remark: this is one of the few cases where working on the NAmatrix directly
-#         would spead up things (about 2-fold), thanks to the SparseArray::colSds
+# remark: this is one of the few cases where working on the NaMatrix directly
+#         would speed up things (about 2-fold), thanks to the SparseArray::colSds
 #         but for consistency we keep the list-of-mod_prob version
 sdModProb <- function(probList, useReads, ...) {
     statsRes <- rep(NA, length(probList))

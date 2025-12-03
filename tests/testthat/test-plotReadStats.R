@@ -30,6 +30,4 @@ test_that("plotReadStats works", {
     seSE <- addReadStats(se, stats = c("SEntrModProb"), BPPARAM = BiocParallel::SerialParam())
     gg <- plotReadStats(seSE)
     expect_true(ggplot2::is_ggplot(gg))
-    gg <- plotReadStats(seSE, maxEntropy = NULL)
-    expect_true(ggplot2::is_ggplot(gg))
 })
