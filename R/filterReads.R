@@ -290,7 +290,7 @@ filterReads <- function(se, assayName = "mod_prob",
 
     ## Subset
     readsToRemove <- lapply(readsToRemove, function(rr) {
-        rr[rowSums(rr, na.rm = TRUE) > 0, ]
+        rr[rowSums(rr, na.rm = TRUE) > 0, , drop = FALSE]
     })
     if (onlyStats) {
         return(readsToRemove)
