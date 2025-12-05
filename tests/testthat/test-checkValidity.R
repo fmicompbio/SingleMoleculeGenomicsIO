@@ -21,8 +21,8 @@ test_that("validity checks work", {
     rme_withoutreads <- flattenReadLevelAssay(rme, keepReads = FALSE)
 
     ## Test .getReadLevelAssayNames
-    expect_equal(.getReadLevelAssayNames(rme_withreads), "mod_prob")
-    expect_equal(.getReadLevelAssayNames(rme_withoutreads), character(0))
+    expect_identical(.getReadLevelAssayNames(rme_withreads), "mod_prob")
+    expect_identical(.getReadLevelAssayNames(rme_withoutreads), character(0))
 
     ## Test .checkSEValidity
     expect_no_error(.checkSEValidity(rme_withreads))
@@ -68,15 +68,15 @@ test_that("validity checks work", {
     rme1 <- rme_withreads
     SummarizedExperiment::assayNames(rme1) <- c("", "", "", "")
     expect_error(.checkSEValidity(rme1),
-                 '!is.null(assayNames(se)) && all(assayNames(se) != "") && !any(duplicated(assayNames(se))) is not TRUE', fixed = TRUE)
+                 '!is.null(assayNames(se)) && all(assayNames(se) != "") && anyDuplicated(assayNames(se)) ==  .... is not TRUE', fixed = TRUE)
 
     rme1 <- rme_withreads
-    expect_equal(length(assays(rme1)), 4)
+    expect_length(assays(rme1), 4L)
     assays(rme1) <- list(assays(rme1)[[1]], assays(rme1)[[2]], assays(rme1)[[3]],
                          assays(rme1)[[4]])
     expect_null(assayNames(rme1))
     expect_error(.checkSEValidity(rme1),
-                 '!is.null(assayNames(se)) && all(assayNames(se) != "") && !any(duplicated(assayNames(se))) is not TRUE', fixed = TRUE)
+                 '!is.null(assayNames(se)) && all(assayNames(se) != "") && anyDuplicated(assayNames(se)) ==  .... is not TRUE', fixed = TRUE)
 
     rme1 <- rme_withreads
     rme1$QC <- rme1$QC[c(3, 1, 2)]
@@ -126,7 +126,7 @@ test_that("validity checks work", {
     N <- ncol(SummarizedExperiment::assay(rme1, "mod_prob")[[1]])
     set.seed(123L)
     SummarizedExperiment::assay(rme1, "mod_prob")[[1]] <-
-        SummarizedExperiment::assay(rme1, "mod_prob")[[1]][, sample(seq_len(N), N)]
+        SummarizedExperiment::assay(rme1, "mod_prob")[[1]][, sample.int(N, N)]
     expect_error(.checkSEValidity(rme1),
                  "Mismatching reads for assays mod_prob and test, sample s1_5mC")
 })

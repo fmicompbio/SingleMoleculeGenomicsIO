@@ -40,9 +40,9 @@ test_that(".filterPositionsByCoverage works", {
                                       minNbrSamples = NULL)
     expect_identical(se1, se2)
     w <- which(cov_total >= 10)
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), names(w))
-    expect_equal(nrow(se1), 1783L)
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), names(w))
+    expect_identical(nrow(se1), 1783L)
 
     se1 <- .filterPositionsByCoverage(se, assayName = "Nvalid", minCov = 5,
                                       minNbrSamples = 1)
@@ -50,9 +50,9 @@ test_that(".filterPositionsByCoverage works", {
                                       minNbrSamples = 1)
     expect_identical(se1, se2)
     w <- which(cov_bysample[, 1] >= 5 | cov_bysample[, 2] >= 5)
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), rownames(se)[w])
-    expect_equal(nrow(se1), 4212L)
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), rownames(se)[w])
+    expect_identical(nrow(se1), 4212L)
 
     se1 <- .filterPositionsByCoverage(se, assayName = "Nvalid", minCov = 5,
                                       minNbrSamples = 2)
@@ -60,16 +60,16 @@ test_that(".filterPositionsByCoverage works", {
                                       minNbrSamples = 2)
     expect_identical(se1, se2)
     w <- which(cov_bysample[, 1] >= 5 & cov_bysample[, 2] >= 5)
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), rownames(se)[w])
-    expect_equal(nrow(se1), 1606L)
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), rownames(se)[w])
+    expect_identical(nrow(se1), 1606L)
 
     se1 <- .filterPositionsByCoverage(se, assayName = "Nvalid", minCov = 5,
                                       minNbrSamples = 3)
     se2 <- .filterPositionsByCoverage(se, assayName = "mod_prob", minCov = 5,
                                       minNbrSamples = 3)
     expect_identical(se1, se2)
-    expect_equal(nrow(se1), 0L)
+    expect_identical(nrow(se1), 0L)
 })
 
 test_that(".keepPositionsBySequenceContext works", {
@@ -100,8 +100,8 @@ test_that(".keepPositionsBySequenceContext works", {
 
     se1 <- .keepPositionsBySequenceContext(se = se, sequenceContext = "TAG")
     w <- which(as.character(rowData(se)$sequenceContext) == "TAG")
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), rownames(se)[w])
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), rownames(se)[w])
     ## Applying the same filter again doesn't do anything
     se2 <- .keepPositionsBySequenceContext(se = se1, sequenceContext = "TAG")
     expect_identical(se1, se2)
@@ -109,8 +109,8 @@ test_that(".keepPositionsBySequenceContext works", {
     ## Try with IUPAC
     se1 <- .keepPositionsBySequenceContext(se = se, sequenceContext = "WAG")
     w <- which(as.character(rowData(se)$sequenceContext) %in% c("TAG", "AAG"))
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), rownames(se)[w])
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), rownames(se)[w])
 
     se1 <- .keepPositionsBySequenceContext(se = se, sequenceContext = "NNN")
     expect_identical(rowData(se), rowData(se1))
@@ -120,8 +120,8 @@ test_that(".keepPositionsBySequenceContext works", {
     rowData(secopy)$sequenceContext[1:5] <- rep("NNN", 5)
     se1 <- .keepPositionsBySequenceContext(se = secopy, sequenceContext = "WAG")
     w <- which(as.character(rowData(secopy)$sequenceContext) %in% c("TAG", "AAG"))
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), rownames(secopy)[w])
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), rownames(secopy)[w])
 
     ## Padding
     sec5 <- addSeqContext(se, sequenceContextWidth = 5,
@@ -131,8 +131,8 @@ test_that(".keepPositionsBySequenceContext works", {
     se1 <- .keepPositionsBySequenceContext(se = sec5, sequenceContext = "NTAGN")
     se2 <- .keepPositionsBySequenceContext(se = sec3, sequenceContext = "TAG")
     se3 <- .keepPositionsBySequenceContext(se = sec5, sequenceContext = "TAG")
-    expect_equal(nrow(se1), nrow(se2))
-    expect_equal(rownames(se1), rownames(se2))
+    expect_identical(nrow(se1), nrow(se2))
+    expect_identical(rownames(se1), rownames(se2))
     expect_false(nrow(se1) == nrow(se3))
 })
 
@@ -164,10 +164,10 @@ test_that(".removeAllNAPositions works", {
     se1 <- .removeAllNAPositions(se, assayName = "mod_prob")
     namat <- as.matrix(assay(se1, "mod_prob"))
     expect_s4_class(namat, "NaArray")
-    expect_equal(ncol(namat), 4L)
+    expect_identical(ncol(namat), 4L)
     w <- which(rowSums(!is.na(as.matrix(as.matrix(assay(se, "mod_prob"))))) > 0)
-    expect_equal(nrow(se1), length(w))
-    expect_equal(rownames(se1), names(w))
+    expect_length(w, nrow(se1))
+    expect_identical(rownames(se1), names(w))
     ## Applying the same filter again doesn't do anything
     se2 <- .removeAllNAPositions(se1, assayName = "mod_prob")
     expect_identical(se1, se2)
@@ -202,20 +202,20 @@ test_that(".pruneAmbiguousStrandPositions works", {
                                                 verbose = c(TRUE, FALSE)),
                  ".verbose. must have length 1")
 
-    expect_equal(nrow(se), 9127L)
-    expect_equal(length(unique(paste0(seqnames(rowRanges(se)),
-                                      pos(rowRanges(se))))), 8955L)
+    expect_identical(nrow(se), 9127L)
+    expect_length(unique(paste0(seqnames(rowRanges(se)),
+                                pos(rowRanges(se)))), 8955L)
     sefilt <- .pruneAmbiguousStrandPositions(se, assayName = "Nvalid",
                                              verbose = FALSE)
-    expect_equal(nrow(sefilt), length(unique(paste0(seqnames(rowRanges(se)),
-                                                    pos(rowRanges(se))))))
+    expect_length(unique(paste0(seqnames(rowRanges(se)),
+                                pos(rowRanges(se)))), nrow(sefilt))
     expect_message(expect_message(expect_message({
         sefilt <- .pruneAmbiguousStrandPositions(se, assayName = "mod_prob",
                                                  verbose = TRUE)},
         "172 rows removed to ensure"), "172 rows removed to ensure")
     )
-    expect_equal(nrow(sefilt), length(unique(paste0(seqnames(rowRanges(se)),
-                                                    pos(rowRanges(se))))))
+    expect_length(unique(paste0(seqnames(rowRanges(se)),
+                                pos(rowRanges(se)))), nrow(sefilt))
     expect_identical(se[rownames(sefilt), ], sefilt)
     expect_message(expect_message(expect_message({
         sefilt <- .pruneAmbiguousStrandPositions(sefilt, assayName = "mod_prob",
@@ -280,10 +280,10 @@ test_that("filterPositions works", {
                                     "repeated.positions", "all.na"),
                               minCov = 5, sequenceContext = "TAG")
     expect_gte(min(rowSums(assay(sefilt, "Nvalid"))), 5L)
-    expect_equal(nrow(sefilt), 251L)
+    expect_identical(nrow(sefilt), 251L)
     expect_true(all(as.character(rowData(sefilt)$sequenceContext) %in% c("TAG")))
-    expect_false(any(duplicated(paste0(seqnames(rowRanges(sefilt)), ":",
-                                       pos(rowRanges(sefilt))))))
+    expect_identical(anyDuplicated(paste0(seqnames(rowRanges(sefilt)), ":",
+                                          pos(rowRanges(sefilt)))), 0L)
 
     # Add region filter
     sefilt <- filterPositions(se, c("sequenceContext", "coverage",
@@ -291,24 +291,24 @@ test_that("filterPositions works", {
                               minCov = 5, sequenceContext = "TAG",
                               regions = "chr1:6930000-6935000")
     expect_gte(min(rowSums(assay(sefilt, "Nvalid"))), 5L)
-    expect_equal(nrow(sefilt), 141L)
+    expect_identical(nrow(sefilt), 141L)
     expect_true(all(as.character(rowData(sefilt)$sequenceContext) %in% c("TAG")))
-    expect_false(any(duplicated(paste0(seqnames(rowRanges(sefilt)), ":",
-                                       pos(rowRanges(sefilt))))))
+    expect_identical(anyDuplicated(paste0(seqnames(rowRanges(sefilt)), ":",
+                                          pos(rowRanges(sefilt)))), 0L)
 
     ## Filter out reads that are NA in all positions
     sefilt <- filterPositions(se, c("sequenceContext"),
                               sequenceContext = "ATG")
-    expect_equal(nrow(sefilt), 8L)
+    expect_identical(nrow(sefilt), 8L)
     expect_true(all(as.character(rowData(sefilt)$sequenceContext) %in% c("ATG")))
-    expect_equal(ncol(assay(sefilt, "mod_prob")$s1), 7L)
-    expect_equal(colnames(assay(sefilt, "mod_prob")$s1),
-                 colnames(assay(se, "mod_prob")$s1)[c(1, 3, 5, 6, 7, 8, 9)])
+    expect_identical(ncol(assay(sefilt, "mod_prob")$s1), 7L)
+    expect_identical(colnames(assay(sefilt, "mod_prob")$s1),
+                     colnames(assay(se, "mod_prob")$s1)[c(1, 3, 5, 6, 7, 8, 9)])
     expect_equal(colSums(is_nonna(assay(sefilt, "mod_prob")$s1)), c(1, 1, 1, 1, 1, 1, 1),
                  ignore_attr = TRUE)
-    expect_equal(ncol(assay(sefilt, "mod_prob")$s2), 5L)
-    expect_equal(colnames(assay(sefilt, "mod_prob")$s2),
-                 colnames(assay(se, "mod_prob")$s2)[c(2, 4, 6, 7, 8)])
+    expect_identical(ncol(assay(sefilt, "mod_prob")$s2), 5L)
+    expect_identical(colnames(assay(sefilt, "mod_prob")$s2),
+                     colnames(assay(se, "mod_prob")$s2)[c(2, 4, 6, 7, 8)])
     expect_equal(colSums(is_nonna(assay(sefilt, "mod_prob")$s2)), c(1, 1, 1, 2, 3),
                  ignore_attr = TRUE)
 })

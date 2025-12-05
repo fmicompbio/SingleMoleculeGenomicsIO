@@ -79,6 +79,7 @@
 #' @importFrom BiocGenerics pos strand do.call cbind sort
 #' @importFrom Seqinfo seqnames
 #' @importFrom cli cli_abort
+#' @importFrom stats setNames
 #'
 #' @export
 readModkitExtract <- function(fnames,
@@ -94,12 +95,13 @@ readModkitExtract <- function(fnames,
 
     # digest arguments
     .assertVector(x = fnames, type = "character")
-    if (any(i <- !file.exists(fnames))) {
+    i <- !file.exists(fnames)
+    if (any(i)) {
         cli_abort("not all {.arg fnames} exist: {.file {fnames[i]}}")
     }
     if (is.null(names(fnames))) {
         names(fnames) <- paste0("s", seq_along(fnames))
-    } else if (any(duplicated(names(fnames)))) {
+    } else if (anyDuplicated(names(fnames)) > 0L) {
         cli_abort("{.code names(fnames)} are not unique")
     }
     .assertVector(x = sampleAnnot, type = "data.frame", allowNULL = TRUE)
@@ -133,7 +135,8 @@ readModkitExtract <- function(fnames,
             if (is.null(names(filter))) {
                 cli_abort("{.arg filter} must be a named vector")
             }
-            if (any(i <- !(unique(c("-", modbase))) %in% names(filter))) {
+            i <- !(unique(c("-", modbase))) %in% names(filter)
+            if (any(i)) {
                 cli_abort(paste0(
                     "a filter threshold needs to be supplied for all ",
                     "modified bases, not present for: {unique(c('-', modbase))[i]}"))
@@ -141,13 +144,12 @@ readModkitExtract <- function(fnames,
         }
     }
     .assertScalar(x = nrows, type = "numeric", rngIncl = c(1, Inf))
-    if (!is.null(seqinfo)) {
-        if (!is(seqinfo, "Seqinfo") &&
-            (!is.numeric(seqinfo) || is.null(names(seqinfo)))) {
-            cli_abort(paste0(
-                "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object ",
-                "or a named {.cls numeric} vector with genomic sequence lengths."))
-        }
+    if (!is.null(seqinfo) &&
+        (!is(seqinfo, "Seqinfo") &&
+         (!is.numeric(seqinfo) || is.null(names(seqinfo))))) {
+        cli_abort(paste0(
+            "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object ",
+            "or a named {.cls numeric} vector with genomic sequence lengths."))
     }
     .assertScalar(x = sequenceContextWidth, type = "numeric", rngIncl = c(0, 1000))
     .assertVector(x = BPPARAM, type = "BiocParallelParam")
@@ -182,12 +184,12 @@ readModkitExtract <- function(fnames,
         # record filter threshold implied by modkit
         mod_fail_idx <- which(tmp$fail & tmp$call_code == modbase[nm])
         unmod_fail_idx <- which(tmp$fail & tmp$call_code == "-")
-        modkit_threshold[[nm]] <- structure(
+        modkit_threshold[[nm]] <- setNames(
             c(ifelse(length(mod_fail_idx) > 0,
                      max(tmp$call_prob[mod_fail_idx]), -Inf),
               ifelse(length(unmod_fail_idx) > 0,
                      max(tmp$call_prob[unmod_fail_idx]), -Inf)),
-            names = c(modbase[nm], "-")
+            c(modbase[nm], "-")
         )
         # filter
         if (!is.null(filter)) {

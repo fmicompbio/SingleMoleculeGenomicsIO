@@ -16,7 +16,7 @@ test_that("annotateReadSegments works", {
                  "must be of class .RangedSummarizedExperiment.")
     expect_error(annotateReadSegments(se = se, irlList = "error"),
                  "must be of class .list.")
-    expect_error(annotateReadSegments(se = se, irlList = setNames(segs, "wrong")),
+    expect_error(annotateReadSegments(se = se, irlList = stats::setNames(segs, "wrong")),
                  "names of .irlList. must be identical to the column names of .se.")
     expect_error(annotateReadSegments(se = se, irlList = list(s1 = "error")),
                  ".irlList..i... must be of class .IRangesList.")
@@ -38,7 +38,7 @@ test_that("annotateReadSegments works", {
     expect_type(se3$nucl, "list")
     expect_named(se3$nucl, colnames(se))
     expect_s4_class(se3$nucl$s1, "IRangesList")
-    expect_identical(length(se3$nucl$s1), se3$n_reads)
+    expect_length(se3$nucl$s1, se3$n_reads)
     expect_identical(unname(lengths(se3$nucl$s1)),
                      c(0L, 1L, 0L, 0L, 2L, 0L, 0L, 0L, 0L, 0L))
     expect_identical(se3$nucl$s1[[2]], segs$s1[[1]])

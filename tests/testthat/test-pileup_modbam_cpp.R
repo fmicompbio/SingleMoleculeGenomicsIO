@@ -256,12 +256,12 @@ test_that("pileup_modbam_cpp works", {
     # ... ... check return values
     expect_true(all(aln6a[[1]]$qname == res6a$read_id))
     expect_true(aln6b[[1]]$qname %in% res6b$read_id)
-    expect_identical(length(res6a$read_id), sum(aln6b[[1]]$qname == res6b$read_id))
+    expect_length(res6a$read_id, sum(aln6b[[1]]$qname == res6b$read_id))
     expect_identical(res6a$ref_position[res6a$read_id == aln6a[[1]]$qname],
                      res6b$ref_position[res6b$read_id == aln6b[[1]]$qname])
     idx <- match(paste(res6a$chrom, res6a$ref_position, res6a$ref_mod_strand, res6a$read_id),
                  paste(res6b$chrom, res6b$ref_position, res6b$ref_mod_strand, res6b$read_id))
-    expect_true(all(!is.na(idx)))
+    expect_false(anyNA(idx))
     expect_identical(res6a$mod_prob, res6b$mod_prob[idx])
     expect_equal(res6a$read_df, res6b$read_df[2, , drop = FALSE],
                  ignore_attr = TRUE)

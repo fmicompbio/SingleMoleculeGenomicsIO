@@ -220,7 +220,7 @@ PACModProb <- function(probList, useReads, xrange = 12:64, ...) {
 
     # Per-read noise/signal/SNR in C++
     # Build betas/features for the chosen model (intercept + mean)
-    if (all(!is.na(floor_pars))) {
+    if (!anyNA(floor_pars)) {
         betas <- floor_pars
     } else {
         betas <- numeric(0L)  # raw mode
@@ -446,6 +446,7 @@ NoiseVar <- function(probList, idxList, useReads, ...) {
 #' @importFrom BiocGenerics colnames pos
 #' @importFrom BiocParallel bplapply MulticoreParam
 #' @importFrom utils modifyList
+#' @importFrom stats setNames
 #'
 #' @export
 calcReadStats <- function(se,
@@ -507,7 +508,7 @@ calcReadStats <- function(se,
 
     # Calculate statistics for each sample
     sample_out <- lapply(
-        structure(colnames(se), names = colnames(se)), function(nm) {
+        setNames(colnames(se), colnames(se)), function(nm) {
             sesub <- .filterPositionsByCoverage(
                 se[, nm], assayName = assayName, minCov = minNobsPpos,
                 minNbrSamples = NULL)

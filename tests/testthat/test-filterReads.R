@@ -121,20 +121,20 @@ test_that("filterReads works", {
                         minQscore = 13, maxEntropy = 0.2,
                         minAlignedFraction = 0.8)
     expect_s4_class(out1, "SummarizedExperiment")
-    expect_equal(dim(out1)[2], dim(se)[2])
-    expect_equal(dim(out1), c(6534L, 2L))
-    expect_equal(nrow(out1$qcc$s1), 2L)
-    expect_equal(rownames(out1$qcc$s1), rownames(se$qcc$s1)[c(2, 3)])
-    expect_equal(nrow(out1$qcc$s2), 3L)
-    expect_equal(rownames(out1$qcc$s2), rownames(se$qcc$s2)[c(3, 5, 7)])
+    expect_identical(dim(out1)[2], dim(se)[2])
+    expect_identical(dim(out1), c(6534L, 2L))
+    expect_identical(nrow(out1$qcc$s1), 2L)
+    expect_identical(rownames(out1$qcc$s1), rownames(se$qcc$s1)[c(2, 3)])
+    expect_identical(nrow(out1$qcc$s2), 3L)
+    expect_identical(rownames(out1$qcc$s2), rownames(se$qcc$s2)[c(3, 5, 7)])
     expect_s4_class(metadata(out1)$filteredOutReads$s1, "SparseMatrix")
     expect_s4_class(metadata(out1)$filteredOutReads$s2, "SparseMatrix")
-    expect_equal(dim(metadata(out1)$filteredOutReads$s1), c(8, 9))
-    expect_equal(dim(metadata(out1)$filteredOutReads$s2), c(7, 9))
-    expect_equal(colnames(metadata(out1)$filteredOutReads$s1),
-                 c("Qscore", "Entropy", "FracLowConf", "SNR", "ReadLength",
-                   "AlignedLength", "AlignedFraction", "CoveredFraction",
-                   "AllNA"))
+    expect_identical(dim(metadata(out1)$filteredOutReads$s1), c(8L, 9L))
+    expect_identical(dim(metadata(out1)$filteredOutReads$s2), c(7L, 9L))
+    expect_identical(colnames(metadata(out1)$filteredOutReads$s1),
+                     c("Qscore", "Entropy", "FracLowConf", "SNR", "ReadLength",
+                       "AlignedLength", "AlignedFraction", "CoveredFraction",
+                       "AllNA"))
 
     ## Only QC filtering
     out1 <- filterReads(se, qcCol = "qcc", readInfoCol = NULL,
@@ -143,12 +143,12 @@ test_that("filterReads works", {
                         minAlignedFraction = 0.8)
     expect_s4_class(out1, "SummarizedExperiment")
     ## calculate using length(which(rowSums(is_nonna(assay(se, "mod_prob")[["s1"]][, c(2, 3, 9)])) > 0 | rowSums(is_nonna(assay(se, "mod_prob")[["s2"]][, c(3, 5, 7, 10)])) > 0))
-    expect_equal(dim(out1), c(6534L, 2L))
+    expect_identical(dim(out1), c(6534L, 2L))
     ## calculate using se$qcc$s1$SEntrModProb < 0.2 & se$qcc$s1$FracLowConf < 0.1
-    expect_equal(nrow(out1$qcc$s1), 2L)
-    expect_equal(rownames(out1$qcc$s1), rownames(se$qcc$s1)[c(2, 3)])
-    expect_equal(nrow(out1$qcc$s2), 3L)
-    expect_equal(rownames(out1$qcc$s2), rownames(se$qcc$s2)[c(3, 5, 7)])
+    expect_identical(nrow(out1$qcc$s1), 2L)
+    expect_identical(rownames(out1$qcc$s1), rownames(se$qcc$s1)[c(2, 3)])
+    expect_identical(nrow(out1$qcc$s2), 3L)
+    expect_identical(rownames(out1$qcc$s2), rownames(se$qcc$s2)[c(3, 5, 7)])
 
     ## Only read info filtering
     out1 <- filterReads(se, qcCol = NULL, readInfoCol = "readInfo",
@@ -156,11 +156,11 @@ test_that("filterReads works", {
                         minReadLength = 8000, minAlignedLength = 5000,
                         minAlignedFraction = 0.8)
     expect_s4_class(out1, "SummarizedExperiment")
-    expect_equal(dim(out1), c(7691L, 2L))
-    expect_equal(nrow(out1$qcc$s1), 6L)
-    expect_equal(rownames(out1$qcc$s1), rownames(se$qcc$s1)[2:7])
-    expect_equal(nrow(out1$qcc$s2), 5L)
-    expect_equal(rownames(out1$qcc$s2), rownames(se$qcc$s2)[3:7])
+    expect_identical(dim(out1), c(7691L, 2L))
+    expect_identical(nrow(out1$qcc$s1), 6L)
+    expect_identical(rownames(out1$qcc$s1), rownames(se$qcc$s1)[2:7])
+    expect_identical(nrow(out1$qcc$s2), 5L)
+    expect_identical(rownames(out1$qcc$s2), rownames(se$qcc$s2)[3:7])
 
     ## Only region-coverage filtering
     # infer expected result from:
@@ -171,19 +171,19 @@ test_that("filterReads works", {
     out2 <- filterReads(se, qcCol = NULL, minCoveredFraction = 1.0,
                         region = "chr1:6930000-6938500")
     expect_s4_class(out2, "SummarizedExperiment")
-    expect_equal(dim(out2), c(8360L, 2L))
-    expect_equal(nrow(out2$qcc$s1), 4L)
-    expect_equal(rownames(out2$qcc$s1), rownames(se$qcc$s1)[c(1,2,4,5)])
-    expect_equal(nrow(out2$qcc$s2), 3L)
-    expect_equal(rownames(out2$qcc$s2), rownames(se$qcc$s2)[c(2,3,4)])
+    expect_identical(dim(out2), c(8360L, 2L))
+    expect_identical(nrow(out2$qcc$s1), 4L)
+    expect_identical(rownames(out2$qcc$s1), rownames(se$qcc$s1)[c(1,2,4,5)])
+    expect_identical(nrow(out2$qcc$s2), 3L)
+    expect_identical(rownames(out2$qcc$s2), rownames(se$qcc$s2)[c(2,3,4)])
     out3 <- filterReads(se, qcCol = NULL, minCoveredFraction = 0.1,
                         region = "chr2:6930000-6938500")
     expect_s4_class(out3, "SummarizedExperiment")
-    expect_equal(dim(out3), c(0L, 0L))
+    expect_identical(dim(out3), c(0L, 0L))
     out4 <- filterReads(se, qcCol = NULL, minCoveredFraction = 0.1,
                         region = "chr2:6930000-6938500", prune = FALSE)
     expect_s4_class(out4, "SummarizedExperiment")
-    expect_equal(dim(out4), c(0L, ncol(se)))
+    expect_identical(dim(out4), c(0L, ncol(se)))
 
     ## Return filter stats only (compare to previous output)
     stats1 <- filterReads(se, qcCol = NULL, readInfoCol = "readInfo",
@@ -191,8 +191,8 @@ test_that("filterReads works", {
                           minReadLength = 8000, minAlignedLength = 5000,
                           minAlignedFraction = 0.8, onlyStats = TRUE)
     expect_s4_class(stats1$s1, "SparseArray")
-    expect_equal(dim(stats1$s1), c(4L, 9L))
-    expect_equal(dim(stats1$s2), c(5L, 9L))
-    expect_equal(stats1, metadata(out1)$filteredOutReads)
+    expect_identical(dim(stats1$s1), c(4L, 9L))
+    expect_identical(dim(stats1$s2), c(5L, 9L))
+    expect_identical(stats1, metadata(out1)$filteredOutReads)
 })
 

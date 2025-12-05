@@ -138,6 +138,7 @@
 #' @importFrom IRanges IRanges width
 #' @importFrom Seqinfo seqnames
 #' @importFrom S4Vectors metadata metadata<-
+#' @importFrom stats setNames
 #'
 filterReads <- function(se, assayName = "mod_prob",
                         readInfoCol = "readInfo", qcCol = "QC",
@@ -179,7 +180,7 @@ filterReads <- function(se, assayName = "mod_prob",
                      "AlignedLength", "AlignedFraction", "CoveredFraction",
                      "AllNA")
     readsToRemove <- lapply(
-        structure(colnames(se), names = colnames(se)),
+        setNames(colnames(se), colnames(se)),
         function(nm) {
             SVT_SparseArray(
                 dim = c(ncol(assay(se, assayName)[[nm]]),

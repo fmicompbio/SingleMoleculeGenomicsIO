@@ -6,19 +6,19 @@ suppressPackageStartupMessages({
 ## Checks, helper functions
 ## -------------------------------------------------------------------------- ##
 test_that("complement works", {
-    expect_error(SingleMoleculeGenomicsIO:::complement(1))
-    expect_error(SingleMoleculeGenomicsIO:::complement(TRUE))
-    expect_identical(SingleMoleculeGenomicsIO:::complement("A"), "T")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("a"), "T")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("C"), "G")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("c"), "G")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("G"), "C")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("g"), "C")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("T"), "A")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("t"), "A")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("N"), "N")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("n"), "N")
-    expect_identical(SingleMoleculeGenomicsIO:::complement("X"), "N")
+    expect_error(complement(1))
+    expect_error(complement(TRUE))
+    expect_identical(complement("A"), "T")
+    expect_identical(complement("a"), "T")
+    expect_identical(complement("C"), "G")
+    expect_identical(complement("c"), "G")
+    expect_identical(complement("G"), "C")
+    expect_identical(complement("g"), "C")
+    expect_identical(complement("T"), "A")
+    expect_identical(complement("t"), "A")
+    expect_identical(complement("N"), "N")
+    expect_identical(complement("n"), "N")
+    expect_identical(complement("X"), "N")
 })
 
 test_that("get_unmodified_base works", {
@@ -426,12 +426,12 @@ test_that("read_modbam_cpp works", {
     # ... ... check return values
     expect_true(all(aln6a[[1]]$qname == res6a$read_id))
     expect_true(aln6b[[1]]$qname %in% res6b$read_id)
-    expect_identical(length(res6a$read_id), sum(aln6b[[1]]$qname == res6b$read_id))
+    expect_length(res6a$read_id, sum(aln6b[[1]]$qname == res6b$read_id))
     expect_identical(res6a$ref_position[res6a$read_id == aln6a[[1]]$qname],
                      res6b$ref_position[res6b$read_id == aln6b[[1]]$qname])
     idx <- match(paste(res6a$chrom, res6a$ref_position, res6a$ref_mod_strand, res6a$read_id),
                  paste(res6b$chrom, res6b$ref_position, res6b$ref_mod_strand, res6b$read_id))
-    expect_true(all(!is.na(idx)))
+    expect_false(anyNA(idx))
     expect_identical(res6a$mod_prob, res6b$mod_prob[idx])
     expect_equal(res6a$read_df, res6b$read_df[2, , drop = FALSE],
                  ignore_attr = TRUE)
@@ -441,8 +441,8 @@ test_that("read_modbam_cpp works", {
     expect_length(unique(res7a$read_id), 3L)
     expect_false(identical(res7a, res7c))
     expect_length(unique(res7c$read_id), 2L)
-    expect_identical(nrow(res7a$read_df), length(unique(res7a$read_id)))
-    expect_identical(nrow(res7c$read_df), length(unique(res7c$read_id)))
+    expect_length(unique(res7a$read_id), nrow(res7a$read_df))
+    expect_length(unique(res7c$read_id), nrow(res7c$read_df))
 
     # ... content of res9h and res9m
     expect_identical(res9h[!names(res9h) %in% c("call_code", "mod_prob")],

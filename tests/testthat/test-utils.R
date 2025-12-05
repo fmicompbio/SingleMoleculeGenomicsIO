@@ -66,7 +66,7 @@ test_that("concatenate_hts_files works", {
     expect_named(res[[1]], sam_fields)
     expect_identical(
         lengths(res[[1]]),
-        setNames(rep(20L, length(sam_fields)), sam_fields))
+        stats::setNames(rep(20L, length(sam_fields)), sam_fields))
     unlink(outbam)
 
     # in: bam, out: sam
@@ -88,7 +88,7 @@ test_that("concatenate_hts_files works", {
     expect_named(res[[1]], sam_fields)
     expect_identical(
         lengths(res[[1]]),
-        setNames(rep(20L, length(sam_fields)), sam_fields))
+        stats::setNames(rep(20L, length(sam_fields)), sam_fields))
     unlink(outbam)
 
     # in: sam, out: sam
@@ -315,7 +315,7 @@ test_that(".regionStringToGRanges works", {
         seqnames = c("chr1", "chr1", "chr1", "chr2", "chr2", "chr3", "chr4"),
         ranges = IRanges::IRanges(start = c(1, 1, 1, 10, 10, 1, 20),
                                   end = c(intmax, intmax, intmax, intmax, intmax, 100, 70)),
-        seqlengths = structure(rep(intmax, 4), names = paste0("chr", 1:4))
+        seqlengths = stats::setNames(rep(intmax, 4), paste0("chr", 1:4))
     ))
 
     grall <- .regionStringToGRanges(regions = ".", seqinfo = slens)

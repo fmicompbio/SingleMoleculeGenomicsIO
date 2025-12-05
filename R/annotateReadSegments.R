@@ -39,6 +39,7 @@
 #' @importFrom S4Vectors metadata metadata<-
 #' @importFrom cli cli_abort
 #' @importFrom IRanges IRanges IRangesList
+#' @importFrom stats setNames
 annotateReadSegments <- function(se, irlList, name) {
     # check arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")

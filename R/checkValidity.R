@@ -65,12 +65,12 @@
     .message("Checking assay names")
     stopifnot(!is.null(assayNames(se)) &&
                   all(assayNames(se) != "") &&
-                  !any(duplicated(assayNames(se))))
+                  anyDuplicated(assayNames(se)) == 0L)
 
     if (nrow(se) > 0) {
         .message("Checking row names")
         stopifnot(!is.null(rownames(se)) &&
-                      !any(duplicated(rownames(se))))
+                      anyDuplicated(rownames(se)) == 0L)
     }
 
     stopifnot(!is.null(metadata(se)$readLevelData) &&

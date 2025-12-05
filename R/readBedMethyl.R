@@ -85,7 +85,8 @@ readBedMethyl <- function(fnames,
                           verbose = FALSE) {
     # digest arguments
     .assertVector(x = fnames, type = "character")
-    if (any(i <- !file.exists(fnames))) {
+    i <- !file.exists(fnames)
+    if (any(i)) {
         cli_abort("not all {.arg fnames} exist: {fnames[i]}")
     }
     if (is.null(names(fnames))) {
@@ -118,13 +119,12 @@ readBedMethyl <- function(fnames,
         cli_abort("at least one sample was defined to have more than one {.arg modbase}")
     }
     .assertScalar(x = nrows, type = "numeric", rngIncl = c(1, Inf))
-    if (!is.null(seqinfo)) {
-        if (!is(seqinfo, "Seqinfo") &&
-            (!is.numeric(seqinfo) || is.null(names(seqinfo)))) {
-            cli_abort(paste0(
-                "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object or a named",
-                " {.cls numeric} vector with genomic sequence lengths."))
-        }
+    if (!is.null(seqinfo) &&
+        (!is(seqinfo, "Seqinfo") &&
+         (!is.numeric(seqinfo) || is.null(names(seqinfo))))) {
+        cli_abort(paste0(
+            "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object or a named",
+            " {.cls numeric} vector with genomic sequence lengths."))
     }
     .assertScalar(x = sequenceContextWidth, type = "numeric", rngIncl = c(0, 1000))
     .assertVector(x = BPPARAM, type = "BiocParallelParam")

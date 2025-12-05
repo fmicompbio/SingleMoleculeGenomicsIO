@@ -64,8 +64,9 @@ test_that("readBedMethyl works", {
                                BPPARAM = BiocParallel::SerialParam(),
                                verbose = "error"),
                  ".verbose. must be of class .logical.")
-    expect_error(readBedMethyl(fnames = c(a = fname1, a = fname2),
-                               modbase = c(a = 'm', a = 'a'),
+    expect_error(readBedMethyl(fnames = stats::setNames(c(fname1, fname2),
+                                                        c("a", "a")),
+                               modbase = stats::setNames(c('m', 'a'), c("a", "a")),
                                BPPARAM = BiocParallel::SerialParam()),
                  "at least one sample was defined to have more than")
     expect_error(readBedMethyl(fnames = fnames, modbase = "m",
@@ -105,7 +106,8 @@ test_that("readBedMethyl works", {
                            BPPARAM = BiocParallel::SerialParam())
     suppressMessages(
         expect_message(
-            se11 <- readBedMethyl(fnames = c(s1 = fname1, s1 = fname2),
+            se11 <- readBedMethyl(fnames = stats::setNames(c(fname1, fname2),
+                                                           c("s1", "s1")),
                                   modbase = 'm', verbose = TRUE,
                                   BPPARAM = BiocParallel::SerialParam())
         )
@@ -158,6 +160,6 @@ test_that("readBedMethyl works", {
     expect_identical(rowSums(assay(se12, "Nmod")), rowSums(assay(se11, "Nmod")))
     expect_identical(rowSums(assay(se12, "Nvalid")), rowSums(assay(se11, "Nvalid")))
     expect_true("sequenceContext" %in% colnames(rowData(se2)))
-    expect_equal(as.integer(table(as.character(rowData(se2)$sequenceContext))),
-                 c(844L, 7535L, 801L, 820L))
+    expect_identical(as.integer(table(as.character(rowData(se2)$sequenceContext))),
+                     c(844L, 7535L, 801L, 820L))
 })

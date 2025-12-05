@@ -65,6 +65,7 @@
 #'
 #' @importFrom SummarizedExperiment assay assay<- assayNames colnames
 #' @importFrom cli cli_abort cli_warn
+#' @importFrom stats setNames
 #'
 #' @export
 subsetReads <- function(se,
@@ -114,14 +115,13 @@ subsetReads <- function(se,
     ## (possibly zero-length) character elements with read identifiers
     if (is.character(reads)) {
         # map read identifiers to samples
-        read2sample <- structure(rep(names(rlAssayColnames),
-                                     lengths(rlAssayColnames)),
-                                 names = unlist(rlAssayColnames,
-                                                use.names = FALSE))
-        if (any(i <- !reads %in% names(read2sample))) {
+        read2sample <- setNames(rep(names(rlAssayColnames),
+                                    lengths(rlAssayColnames)),
+                                 unlist(rlAssayColnames, use.names = FALSE))
+        i <- !reads %in% names(read2sample)
+        if (any(i)) {
             cli_warn(paste0(
-                "'reads' contains unknown identifiers: ",
-                paste(reads[i], collapse = ", "),
+                "'reads' contains unknown identifiers: ", toString(reads[i]),
                 ". These will be ignored."))
             reads <- reads[!i]
         }
@@ -131,7 +131,7 @@ subsetReads <- function(se,
     }
 
     if (is.list(reads)) {
-        if (is.null(names(reads)) || any(!names(reads) %in% sampleNms)) {
+        if (is.null(names(reads)) || !all(names(reads) %in% sampleNms)) {
             cli_abort("{.arg reads} of type {.cls list} must have names in: {sampleNms}")
         }
         for (snm in sampleNms) {
@@ -140,7 +140,8 @@ subsetReads <- function(se,
             } else {
                 valid_nms <- rlAssayColnames[[snm]]
                 if (is.character(reads[[snm]])) {
-                    if (any(i <- !reads[[snm]] %in% valid_nms)) {
+                    i <- !reads[[snm]] %in% valid_nms
+                    if (any(i)) {
                         cli_warn(paste0(
                             "'reads' for sample '{snm}' contains unknown read ",
                             "names: {paste(reads[[snm]][i], collapse = ', ')}",
@@ -148,7 +149,8 @@ subsetReads <- function(se,
                         reads[[snm]] <- reads[[snm]][!i]
                     }
                 } else if (is.numeric(reads[[snm]])) {
-                    if (any(i <- reads[[snm]] < 1 | reads[[snm]] > length(valid_nms))) {
+                    i <- reads[[snm]] < 1 | reads[[snm]] > length(valid_nms)
+                    if (any(i)) {
                         cli_warn(paste0(
                             "'reads' for sample '{snm}' contains out-of-range ",
                             "indices: {paste(reads[[snm]][i], collapse = ', ')}",
@@ -174,7 +176,7 @@ subsetReads <- function(se,
 
     ## invert selection
     if (invert) {
-        reads <- lapply(structure(sampleNms, names = sampleNms),
+        reads <- lapply(setNames(sampleNms, sampleNms),
                         function(snm) setdiff(rlAssayColnames[[snm]],
                                               reads[[snm]]))
     }

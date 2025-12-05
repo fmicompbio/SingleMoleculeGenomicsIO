@@ -29,7 +29,7 @@ test_that("readModkitExtract works", {
         BPPARAM = BiocParallel::SerialParam()),
         "not all .fnames. exist")
     expect_error(readModkitExtract(
-        fnames = c(s1 = fnames[[1]], s1 = fnames[[2]]),
+        fnames = stats::setNames(c(fnames[[1]], fnames[[2]]), c("s1", "s1")),
         BPPARAM = BiocParallel::SerialParam()),
         ".names\\(fnames\\). are not unique")
     expect_error(readModkitExtract(
@@ -113,12 +113,12 @@ test_that("readModkitExtract works", {
                                      verbose = TRUE)
     ))
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(6432, 1)) ## number of unique positions
-    expect_equal(colnames(rme), "s1_5mC")
-    expect_length(SummarizedExperiment::assays(rme), 1)
+    expect_identical(dim(rme), c(6432L, 1L)) ## number of unique positions
+    expect_identical(colnames(rme), "s1_5mC")
+    expect_length(SummarizedExperiment::assays(rme), 1L)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(6432, 10))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(6432L, 10L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_false(is.null(colnames(rme)))
     expect_false(is.null(colnames(SummarizedExperiment::assay(rme)[[1]])))
@@ -133,7 +133,7 @@ test_that("readModkitExtract works", {
                  list(s1_5mC = NULL),
                  ignore_attr = TRUE)
     expect_equal(sum(SummarizedExperiment::assay(rme)[[1]], na.rm = TRUE), 2297.13868)
-    expect_equal(SparseArray::nnacount(SummarizedExperiment::assay(rme)[[1]]), 18531) ## number of rows in the original file
+    expect_identical(SparseArray::nnacount(SummarizedExperiment::assay(rme)[[1]]), 18531L) ## number of rows in the original file
     expect_equal(unclass(table(as.character(SummarizedExperiment::rowData(rme)$sequenceContext))),
                  c(A = 82L, C = 6159L, G = 107L, T = 84L), ignore_attr = TRUE)
 
@@ -143,12 +143,12 @@ test_that("readModkitExtract works", {
                              nrows = Inf, seqinfo = NULL,
                              BPPARAM = BiocParallel::MulticoreParam(2L), verbose = FALSE)
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(6415, 1)) ## number of unique positions
-    expect_equal(colnames(rme), "s1")
-    expect_length(SummarizedExperiment::assays(rme), 1)
+    expect_identical(dim(rme), c(6415L, 1L)) ## number of unique positions
+    expect_identical(colnames(rme), "s1")
+    expect_length(SummarizedExperiment::assays(rme), 1L)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(6415, 10))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(6415L, 10L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_false(is.null(colnames(rme)))
     expect_false(is.null(colnames(SummarizedExperiment::assay(rme)[[1]])))
@@ -163,7 +163,7 @@ test_that("readModkitExtract works", {
                  list(s1_5mC = c(`m` = 0.6, `-` = 0.5)),
                  ignore_attr = TRUE)
     expect_equal(sum(SummarizedExperiment::assay(rme)[[1]], na.rm = TRUE), 2243.82032)
-    expect_equal(SparseArray::nnacount(SummarizedExperiment::assay(rme)[[1]]), 18434) ## number of rows in the original file
+    expect_identical(SparseArray::nnacount(SummarizedExperiment::assay(rme)[[1]]), 18434L) ## number of rows in the original file
 
     # ... single file, automatic filtering
     rme <- readModkitExtract(fnames = fnames["s1_5mC"], modbase = "m",
@@ -172,12 +172,12 @@ test_that("readModkitExtract works", {
                              BPPARAM = BiocParallel::SerialParam(),
                              verbose = FALSE)
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(5893, 1)) ## number of unique positions
-    expect_equal(colnames(rme), "s1_5mC")
+    expect_identical(dim(rme), c(5893L, 1L)) ## number of unique positions
+    expect_identical(colnames(rme), "s1_5mC")
     expect_length(SummarizedExperiment::assays(rme), 1)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(5893, 10))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(5893L, 10L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_false(is.null(colnames(rme)))
     expect_false(is.null(colnames(SummarizedExperiment::assay(rme)[[1]])))
@@ -192,7 +192,7 @@ test_that("readModkitExtract works", {
                  list(s1_5mC = c(`m` = 0.7988281, `-` = 0.9082031)),
                  ignore_attr = TRUE)
     expect_equal(sum(SummarizedExperiment::assay(rme)[[1]], na.rm = TRUE), 1649.92774)
-    expect_equal(SparseArray::nnacount(SummarizedExperiment::assay(rme)[[1]]), 15325) ## number of rows in the original file
+    expect_identical(SparseArray::nnacount(SummarizedExperiment::assay(rme)[[1]]), 15325L) ## number of rows in the original file
 
     # ... multiple files, no filtering
     rme <- readModkitExtract(fnames = fnames[c("s1_5mC", "s2_5mC",
@@ -202,18 +202,18 @@ test_that("readModkitExtract works", {
                              BPPARAM = BiocParallel::SerialParam(),
                              verbose = FALSE)
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(18655, 3)) ## number of unique positions
-    expect_equal(colnames(rme), c("s1_5mC", "s2_5mC", "s1_6mA"))
-    expect_equal(colnames(SummarizedExperiment::colData(rme)),
-                 c("sample", "modbase", "readInfo"))
+    expect_identical(dim(rme), c(18655L, 3L)) ## number of unique positions
+    expect_identical(colnames(rme), c("s1_5mC", "s2_5mC", "s1_6mA"))
+    expect_identical(colnames(SummarizedExperiment::colData(rme)),
+                     c("sample", "modbase", "readInfo"))
     expect_equal(rme$modbase, c("m", "m", "a"), ignore_attr = TRUE)
-    expect_length(SummarizedExperiment::assays(rme), 1)
+    expect_length(SummarizedExperiment::assays(rme), 1L)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(18655, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(18655, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(18655, 10))
-    expect_equal(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(18655, 30))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(18655L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(18655L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(18655L, 10L))
+    expect_identical(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(18655L, 30L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[2]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[3]], "NaMatrix")
@@ -231,7 +231,7 @@ test_that("readModkitExtract works", {
                  list(s1_5mC = NULL, s2_5mC = NULL, s1_6mA = NULL),
                  ignore_attr = TRUE)
     expect_equal(sum(as.matrix(SummarizedExperiment::assay(rme)), na.rm = TRUE), 8236.457)
-    expect_equal(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 71750) ## total number of rows in the original files
+    expect_identical(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 71750L) ## total number of rows in the original files
 
     # ... multiple files, no filtering, with sample annotation
     rme <- readModkitExtract(fnames = fnames[c("s1_5mC", "s2_5mC",
@@ -242,19 +242,19 @@ test_that("readModkitExtract works", {
                              BPPARAM = BiocParallel::SerialParam(),
                              verbose = FALSE)
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(18655, 3)) ## number of unique positions
-    expect_equal(colnames(rme), c("s1_5mC", "s2_5mC", "s1_6mA"))
-    expect_equal(colnames(SummarizedExperiment::colData(rme)),
-                 c("sample", "modbase", "readInfo", "group"))
+    expect_identical(dim(rme), c(18655L, 3L)) ## number of unique positions
+    expect_identical(colnames(rme), c("s1_5mC", "s2_5mC", "s1_6mA"))
+    expect_identical(colnames(SummarizedExperiment::colData(rme)),
+                     c("sample", "modbase", "readInfo", "group"))
     expect_equal(rme$modbase, c("m", "m", "a"), ignore_attr = TRUE)
     expect_equal(rme$group, c("g1", "g1", "g2"), ignore_attr = TRUE)
     expect_length(SummarizedExperiment::assays(rme), 1)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(18655, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(18655, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(18655, 10))
-    expect_equal(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(18655, 30))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(18655L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(18655L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(18655L, 10L))
+    expect_identical(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(18655L, 30L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[2]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[3]], "NaMatrix")
@@ -272,7 +272,7 @@ test_that("readModkitExtract works", {
                  list(s1_5mC = NULL, s2_5mC = NULL, s1_6mA = NULL),
                  ignore_attr = TRUE)
     expect_equal(sum(as.matrix(SummarizedExperiment::assay(rme)), na.rm = TRUE), 8236.457)
-    expect_equal(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 71750) ## total number of rows in the original files
+    expect_identical(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 71750L) ## total number of rows in the original files
 
     # ... multiple files, manual filtering
     rme <- readModkitExtract(fnames = fnames[c("s1_5mC", "s2_5mC",
@@ -283,16 +283,16 @@ test_that("readModkitExtract works", {
                              BPPARAM = BiocParallel::SerialParam(),
                              verbose = FALSE)
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(18615, 3)) ## number of unique positions
-    expect_equal(colnames(rme), c("s1_5mC", "s2_5mC", "s1_6mA"))
-    expect_equal(rme$modbase, c("m", "m", "a"), ignore_attr = TRUE)
-    expect_length(SummarizedExperiment::assays(rme), 1)
+    expect_identical(dim(rme), c(18615L, 3L)) ## number of unique positions
+    expect_identical(colnames(rme), c("s1_5mC", "s2_5mC", "s1_6mA"))
+    expect_identical(rme$modbase, c("m", "m", "a"), ignore_attr = TRUE)
+    expect_length(SummarizedExperiment::assays(rme), 1L)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(18615, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(18615, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(18615, 10))
-    expect_equal(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(18615, 30))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(18615L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(18615L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(18615L, 10L))
+    expect_identical(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(18615L, 30L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[2]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[3]], "NaMatrix")
@@ -312,7 +312,7 @@ test_that("readModkitExtract works", {
                       s1_6mA = c(`m` = 0.6, `a` = 0.4, `-` = 0.3)),
                  ignore_attr = TRUE)
     expect_equal(sum(as.matrix(SummarizedExperiment::assay(rme)), na.rm = TRUE), 8081.2012)
-    expect_equal(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 71467) ## total number of rows in the original files
+    expect_identical(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 71467L) ## total number of rows in the original files
 
     # ... multiple files, automatic filtering
     rme <- readModkitExtract(fnames = fnames[c("s1_5mC", "s1_6mA", "s2_5mC")],
@@ -322,16 +322,16 @@ test_that("readModkitExtract works", {
                              BPPARAM = BiocParallel::SerialParam(),
                              verbose = FALSE)
     expect_s4_class(rme, "RangedSummarizedExperiment")
-    expect_equal(dim(rme), c(17459, 3)) ## number of unique positions
-    expect_equal(colnames(rme), c("s1_5mC", "s1_6mA", "s2_5mC"))
+    expect_identical(dim(rme), c(17459L, 3L)) ## number of unique positions
+    expect_identical(colnames(rme), c("s1_5mC", "s1_6mA", "s2_5mC"))
     expect_equal(rme$modbase, c("m", "a", "m"), ignore_attr = TRUE)
-    expect_length(SummarizedExperiment::assays(rme), 1)
+    expect_length(SummarizedExperiment::assays(rme), 1L)
     expect_named(SummarizedExperiment::assays(rme), "mod_prob")
     expect_s4_class(SummarizedExperiment::assay(rme, "mod_prob"), "DataFrame")
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(17459, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(17459, 10))
-    expect_equal(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(17459, 10))
-    expect_equal(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(17459, 30))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[1]]), c(17459L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[2]]), c(17459L, 10L))
+    expect_identical(dim(SummarizedExperiment::assay(rme, "mod_prob")[[3]]), c(17459L, 10L))
+    expect_identical(dim(as.matrix(SummarizedExperiment::assay(rme, "mod_prob"))), c(17459L, 30L))
     expect_s4_class(SummarizedExperiment::assay(rme)[[1]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[2]], "NaMatrix")
     expect_s4_class(SummarizedExperiment::assay(rme)[[3]], "NaMatrix")
@@ -351,5 +351,5 @@ test_that("readModkitExtract works", {
                       s2_5mC = c(`m` = 0.7988281, `-` = 0.9003906)),
                  ignore_attr = TRUE)
     expect_equal(sum(as.matrix(SummarizedExperiment::assay(rme)), na.rm = TRUE), 5854.98049)
-    expect_equal(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 61228) ## total number of rows in the original files
+    expect_identical(SparseArray::nnacount(as.matrix(SummarizedExperiment::assay(rme))), 61228L) ## total number of rows in the original files
 })

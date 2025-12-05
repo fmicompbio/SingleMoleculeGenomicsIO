@@ -46,7 +46,7 @@ test_that("filterReadsBam works", {
                              modbase = "a", region = ".",
                              includeHeader = FALSE,
                              verbose = FALSE)
-    expect_equal(res[["retained"]], length(readLines(tmpsam)))
+    expect_length(readLines(tmpsam), res[["retained"]])
     unlink(tmpsam)
 
     # miss-specified region
@@ -113,7 +113,7 @@ test_that("filterReadsBam works", {
                            BPPARAM = BiocParallel::MulticoreParam(workers = 2L),
                            verbose = FALSE)
     expect_true(all(file.exists(filtbamfiles)))
-    expect_true(all(!file.exists(paste0(filtbamfiles, ".bai"))))
+    expect_false(any(file.exists(paste0(filtbamfiles, ".bai"))))
     expect_s3_class(res2, "data.frame")
     expect_identical(dim(res2), c(2L, 15L))
     expect_identical(colnames(res2), colnames(res))
@@ -187,7 +187,7 @@ test_that("estimateNoise and estimateSNR work", {
     # Case 1: n < 2
     v1 <- estimateNoise(
         c(0.5),
-        as.integer(5),
+        5L,
         2L,
         -1L
     )
@@ -196,7 +196,7 @@ test_that("estimateNoise and estimateSNR work", {
     # Case 2: mismatched lengths
     v2 <- estimateNoise(
         c(0.2, 0.3, 0.4),
-        as.integer(c(10, 20)),
+        c(10L, 20L),
         2L, -1L
     )
     expect_true(all(is.na(v1)))
@@ -204,8 +204,8 @@ test_that("estimateNoise and estimateSNR work", {
     # valid small input (does not use floor)
     nest <- estimateNoise(
         c(0.1, 0.25, 0.3, 0.45, 0.5, 0.7, 0.7),
-        as.integer(c(1, 2, 3 ,4, 6, 8, 11)),
-        2L, 1 )
+        c(1L, 2L, 3L ,4L, 6L, 8L, 11L),
+        2L, 1)
     v_ok <- estimateSNR(nest[2], nest[3], 1e-3, 0, 0, "raw")
     expect_true(all(is.finite(v_ok[c("snr","signal","noise","raw")])))
     expect_true(is.na(v_ok["baseline"]))
@@ -213,10 +213,10 @@ test_that("estimateNoise and estimateSNR work", {
 
     # overruling negative k
     expect_identical(estimateNoise(probs = c(0.1, 0.25, 0.3, 0.45, 0.5, 0.7, 0.7),
-                                   read_pos = as.integer(c(1, 2, 3 ,4, 6, 8, 11)),
+                                   read_pos = c(1L, 2L, 3L, 4L, 6L, 8L, 11L),
                                    k = -2L, min_diffs = 1L),
                      estimateNoise(probs = c(0.1, 0.25, 0.3, 0.45, 0.5, 0.7, 0.7),
-                                   read_pos = as.integer(c(1, 2, 3 ,4, 6, 8, 11)),
+                                   read_pos = c(1L, 2L, 3L, 4L, 6L, 8L, 11L),
                                    k = 0L, min_diffs = 1L))
 
     # valid small input with b0 that forces floor
@@ -229,23 +229,23 @@ test_that("estimateNoise and estimateSNR work", {
     expect_identical(estimateSNR(totalVar = Inf, noiseRaw = 1.0, eps = 0.01,
                                  betas = 1.0, features = c(1, 0.2),
                                  noise_mode = "floor"),
-                     setNames(rep(NA_real_, 5),
+                     stats::setNames(rep(NA_real_, 5),
                               c("snr","signal","noise","baseline","raw")))
     expect_identical(estimateSNR(totalVar = 1.0, noiseRaw = Inf, eps = 0.01,
                                  betas = 1.0, features = c(1, 0.2),
                                  noise_mode = "raw"),
-                     setNames(rep(NA_real_, 5),
+                     stats::setNames(rep(NA_real_, 5),
                               c("snr","signal","noise","baseline","raw")))
     expect_identical(estimateSNR(totalVar = 1.0, noiseRaw = 1.0, eps = 0.01,
                                  betas = 2.0, features = .Machine$double.xmax,
                                  noise_mode = "floor"),
-                     setNames(rep(NA_real_, 5),
+                     stats::setNames(rep(NA_real_, 5),
                               c("snr","signal","noise","baseline","raw")))
     expect_identical(estimateSNR(totalVar = -.Machine$double.xmax,
                                  noiseRaw = .Machine$double.xmax, eps = 0.01,
                                  betas = 2.0, features = .Machine$double.xmax,
                                  noise_mode = "raw"),
-                     setNames(rep(NA_real_, 5),
+                     stats::setNames(rep(NA_real_, 5),
                               c("snr","signal","noise","baseline","raw")))
 
     # betas, features length mismatch
@@ -281,13 +281,13 @@ test_that("estimateNoise and estimateSNR work", {
     expect_identical(estimateSNR(totalVar = 1.0, noiseRaw = 1.0, eps = 0.01,
                                  betas = c(0.5, 2.0), features = c(2.0, 4.5),
                                  noise_mode = "model")[c("noise", "baseline")],
-                     setNames(c(10.0, 10.0), c("noise","baseline")))
+                     stats::setNames(c(10.0, 10.0), c("noise","baseline")))
 
     # expected result for noise_mode = "floor"
     expect_identical(estimateSNR(totalVar = 1.0, noiseRaw = Inf, eps = 0.01,
                                  betas = c(0.5, 4.0), features = c(2.0, 4.5),
                                  noise_mode = "floor")[c("noise", "baseline")],
-                     setNames(c(19.0, 19.0), c("noise","baseline")))
+                     stats::setNames(c(19.0, 19.0), c("noise","baseline")))
 
     #Invalid noise mode
     expect_error(

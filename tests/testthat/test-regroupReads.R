@@ -48,28 +48,28 @@ test_that("read regrouping works", {
 
     # regroup reads based on predefined grouping
     sere <- regroupReads(se, readGroups = groups)
-    expect_equal(lapply(assay(sere, "mod_prob"), ncol),
-                 list(g1 = 2, g2 = 1, g3 = 2))
-    expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
-                 paste0(rep(names(groups), lengths(groups)), "-",
-                        unlist(groups)))
-    expect_equal(assayNames(sere), "mod_prob")
-    expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder]))
+    expect_identical(lapply(assay(sere, "mod_prob"), ncol),
+                     list(g1 = 2L, g2 = 1L, g3 = 2L))
+    expect_identical(colnames(as.matrix(assay(sere, "mod_prob"))),
+                     paste0(rep(names(groups), lengths(groups)), "-",
+                            unlist(groups)))
+    expect_identical(assayNames(sere), "mod_prob")
+    expect_identical(unname(as.matrix(assay(sere, "mod_prob"))),
+                     unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder]))
     tmp <- do.call(rbind, sere$readInfo)
     rownames(tmp) <- sub("^g[0-9]-", "", rownames(tmp))
-    expect_equal(tmp,
-                 do.call(rbind, se$readInfo)[expectedOrder, ])
+    expect_identical(tmp,
+                     do.call(rbind, se$readInfo)[expectedOrder, ])
     tmp <- do.call(rbind, sere$QC)
     rownames(tmp) <- sub("^g[0-9]-", "", rownames(tmp))
-    expect_equal(tmp,
-                 do.call(rbind, se$QC)[expectedOrder, ])
-    expect_equal(colnames(sere), names(groups))
-    expect_equal(rowRanges(se), rowRanges(sere))
+    expect_identical(tmp,
+                     do.call(rbind, se$QC)[expectedOrder, ])
+    expect_identical(colnames(sere), names(groups))
+    expect_identical(rowRanges(se), rowRanges(sere))
     tmp <- do.call(c, unname(se$nucl))[expectedOrder]
     names(tmp) <- paste0("g", c(1, 1, 2, 3, 3), "-", names(tmp))
-    expect_equal(tmp, do.call(c, unname(sere$nucl)))
-    expect_equal(lengths(sere$nucl), c(g1 = 2, g2 = 1, g3 = 2))
+    expect_identical(tmp, do.call(c, unname(sere$nucl)))
+    expect_identical(lengths(sere$nucl), c(g1 = 2L, g2 = 1L, g3 = 2L))
 
     # ... identical results (with warning) if nonexistent reads are provided
     groups2 <- groups
@@ -110,16 +110,16 @@ test_that("read regrouping works", {
     expectedOrder2 <- match(
         unlist(groups2, use.names = FALSE),
         unlist(lapply(assay(se, "mod_prob"), colnames), use.names = FALSE))
-    expect_equal(lapply(assay(sere, "mod_prob"), ncol),
-                 list(`G-` = 3, GT = 2))
-    expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
-                 paste0(rep(names(groups2), lengths(groups2)), "-",
-                        unlist(groups2)))
-    expect_equal(assayNames(sere), "mod_prob")
-    expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder2]))
-    expect_equal(colnames(sere), names(groups2))
-    expect_equal(rowRanges(se), rowRanges(sere))
+    expect_identical(lapply(assay(sere, "mod_prob"), ncol),
+                     list(`G-` = 3L, GT = 2L))
+    expect_identical(colnames(as.matrix(assay(sere, "mod_prob"))),
+                     paste0(rep(names(groups2), lengths(groups2)), "-",
+                            unlist(groups2)))
+    expect_identical(assayNames(sere), "mod_prob")
+    expect_identical(unname(as.matrix(assay(sere, "mod_prob"))),
+                     unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder2]))
+    expect_identical(colnames(sere), names(groups2))
+    expect_identical(rowRanges(se), rowRanges(sere))
 
     # ... within sample
     sere <- regroupReadsByColData(se, colNames = "variant_label",
@@ -130,16 +130,16 @@ test_that("read regrouping works", {
     expectedOrder2 <- match(
         unlist(groups2, use.names = FALSE),
         unlist(lapply(assay(se, "mod_prob"), colnames), use.names = FALSE))
-    expect_equal(lapply(assay(sere, "mod_prob"), ncol),
-                 list(`s1-G-` = 1, `s1-GT` = 2, `s2-G-` = 2))
-    expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
-                 paste0(rep(names(groups2), lengths(groups2)), "-",
-                        unlist(groups2)))
-    expect_equal(assayNames(sere), "mod_prob")
-    expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder2]))
-    expect_equal(colnames(sere), names(groups2))
-    expect_equal(rowRanges(se), rowRanges(sere))
+    expect_identical(lapply(assay(sere, "mod_prob"), ncol),
+                     list(`s1-G-` = 1L, `s1-GT` = 2L, `s2-G-` = 2L))
+    expect_identical(colnames(as.matrix(assay(sere, "mod_prob"))),
+                     paste0(rep(names(groups2), lengths(groups2)), "-",
+                            unlist(groups2)))
+    expect_identical(assayNames(sere), "mod_prob")
+    expect_identical(unname(as.matrix(assay(sere, "mod_prob"))),
+                     unname(as.matrix(assay(se, "mod_prob"))[, expectedOrder2]))
+    expect_identical(colnames(sere), names(groups2))
+    expect_identical(rowRanges(se), rowRanges(sere))
 
     # multiple annotation columns
     se2 <- se
@@ -156,16 +156,16 @@ test_that("read regrouping works", {
     expectedOrder2 <- match(
         unlist(groups2, use.names = FALSE),
         unlist(lapply(assay(se2, "mod_prob"), colnames), use.names = FALSE))
-    expect_equal(lapply(assay(sere, "mod_prob"), ncol),
-                 list(`G--G-` = 3, `GT-GT` = 2))
-    expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
-                 paste0(rep(names(groups2), lengths(groups2)), "-",
-                        unlist(groups2)))
-    expect_equal(assayNames(sere), "mod_prob")
-    expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
-    expect_equal(colnames(sere), names(groups2))
-    expect_equal(rowRanges(se2), rowRanges(sere))
+    expect_identical(lapply(assay(sere, "mod_prob"), ncol),
+                     list(`G--G-` = 3L, `GT-GT` = 2L))
+    expect_identical(colnames(as.matrix(assay(sere, "mod_prob"))),
+                     paste0(rep(names(groups2), lengths(groups2)), "-",
+                            unlist(groups2)))
+    expect_identical(assayNames(sere), "mod_prob")
+    expect_identical(unname(as.matrix(assay(sere, "mod_prob"))),
+                     unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
+    expect_identical(colnames(sere), names(groups2))
+    expect_identical(rowRanges(se2), rowRanges(sere))
 
     # ... within sample
     sere <- regroupReadsByColData(se2, colNames = c("variant_label", "label2"),
@@ -177,14 +177,14 @@ test_that("read regrouping works", {
     expectedOrder2 <- match(
         unlist(groups2, use.names = FALSE),
         unlist(lapply(assay(se2, "mod_prob"), colnames), use.names = FALSE))
-    expect_equal(lapply(assay(sere, "mod_prob"), ncol),
-                 list(`s1-G--G-` = 1, `s1-GT-GT` = 2, `s2-G--G-` = 2))
-    expect_equal(colnames(as.matrix(assay(sere, "mod_prob"))),
-                 paste0(rep(names(groups2), lengths(groups2)), "-",
-                        unlist(groups2)))
-    expect_equal(assayNames(sere), "mod_prob")
-    expect_equal(unname(as.matrix(assay(sere, "mod_prob"))),
-                 unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
-    expect_equal(colnames(sere), names(groups2))
-    expect_equal(rowRanges(se2), rowRanges(sere))
+    expect_identical(lapply(assay(sere, "mod_prob"), ncol),
+                     list(`s1-G--G-` = 1L, `s1-GT-GT` = 2L, `s2-G--G-` = 2L))
+    expect_identical(colnames(as.matrix(assay(sere, "mod_prob"))),
+                     paste0(rep(names(groups2), lengths(groups2)), "-",
+                            unlist(groups2)))
+    expect_identical(assayNames(sere), "mod_prob")
+    expect_identical(unname(as.matrix(assay(sere, "mod_prob"))),
+                     unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
+    expect_identical(colnames(sere), names(groups2))
+    expect_identical(rowRanges(se2), rowRanges(sere))
 })

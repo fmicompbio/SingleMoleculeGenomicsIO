@@ -59,6 +59,7 @@
 #' @importFrom SparseArray pmax nnavals nnavals<- rowSums is_nonna
 #' @importFrom methods is
 #' @importFrom cli cli_warn
+#' @importFrom stats setNames
 #'
 #' @export
 flattenReadLevelAssay <- function(se,
@@ -117,7 +118,7 @@ flattenReadLevelAssay <- function(se,
     #   SparseArray objects, as the result wouldn't be sparse)
     .message("Summarizing reads")
     dfReads <- assay(se, assayName)
-    assL <- lapply(structure(statistics_use, names = statistics_use),
+    assL <- lapply(setNames(statistics_use, statistics_use),
                    function(statistic) {
         switch(statistic,
             Nmod = as.matrix(endoapply(

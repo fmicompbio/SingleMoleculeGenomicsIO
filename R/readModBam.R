@@ -124,6 +124,7 @@
 #'     bpoptions
 #' @importFrom methods is
 #' @importFrom cli cli_abort cli_warn
+#' @importFrom stats setNames
 #'
 #' @export
 readModBam <- function(bamfiles,
@@ -144,12 +145,13 @@ readModBam <- function(bamfiles,
                        verbose = FALSE) {
     # digest arguments
     .assertVector(x = bamfiles, type = "character", rngLen = c(1, Inf))
-    if (any(i <- !file.exists(bamfiles))) {
+    i <- !file.exists(bamfiles)
+    if (any(i)) {
         cli_abort("not all {.arg bamfiles} exist: {.file {bamfiles[i]}}")
     }
     if (is.null(names(bamfiles))) {
         names(bamfiles) <- paste0("s", seq_along(bamfiles))
-    } else if (any(duplicated(names(bamfiles)))) {
+    } else if (anyDuplicated(names(bamfiles)) > 0L) {
         cli_abort("{.code names(bamfiles)} are not unique")
     }
     .assertScalar(x = level, type = "character",
@@ -203,13 +205,12 @@ readModBam <- function(bamfiles,
     }
     .assertScalar(x = modProbThreshold, type = "numeric", rngIncl = c(0, 1))
     .assertVector(x = seqnamesToSampleFrom, type = "character")
-    if (!is.null(seqinfo)) {
-        if (!is(seqinfo, "Seqinfo") &&
-            (!is.numeric(seqinfo) || is.null(names(seqinfo)))) {
-            cli_abort(paste0(
-                "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object ",
-                "or a named {.cls numeric} vector with genomic sequence lengths."))
-        }
+    if (!is.null(seqinfo) &&
+        (!is(seqinfo, "Seqinfo") &&
+         (!is.numeric(seqinfo) || is.null(names(seqinfo))))) {
+        cli_abort(paste0(
+            "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object ",
+            "or a named {.cls numeric} vector with genomic sequence lengths."))
     }
     .assertScalar(x = sequenceContextWidth, type = "numeric", rngIncl = c(0, 1000))
     .assertVector(x = variantPositions, type = "GPos", allowNULL = TRUE)
@@ -254,7 +255,7 @@ readModBam <- function(bamfiles,
     #         interpreted by htslib as: "read all alignments overlapping chr1:35000-END_OF_chr1"
     regions_str <- paste0(seqnames(regions), ":", start(regions), "-", end(regions))
     resLL <- bplapply(
-        structure(names(bamfiles), names = names(bamfiles)),
+        setNames(names(bamfiles), names(bamfiles)),
         function(nm,
                  mylevel = level,
                  bamf = bamfiles[nm],

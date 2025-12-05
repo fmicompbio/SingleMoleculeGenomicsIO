@@ -38,8 +38,8 @@ test_that("readModBam works", {
                             regions = NULL, modbase = "a", nAlnsToSample = 0,
                             BPPARAM = BiocParallel::SerialParam()),
                  ".regions. must contain at least one genomic range if not in sampling mode")
-    expect_error(readModBam(bamfiles = structure(unname(modbamfiles),
-                                                 names = c("s1", "s1")),
+    expect_error(readModBam(bamfiles = stats::setNames(unname(modbamfiles),
+                                                       c("s1", "s1")),
                             regions = "chr1:6940000-6955000", modbase = "a",
                             nAlnsToSample = 0,
                             BPPARAM = BiocParallel::SerialParam()),
@@ -406,7 +406,7 @@ test_that("readModBam works", {
                          sample2 = c(9656L, 11234L, 9579L, 9967L, 8915L, 9898L)
                      ))
     expect_identical(lapply(se1$readInfo, "[[", "variant_label"),
-                     lapply(structure(se1$n_reads, names = colnames(se1)), function(n) rep(NA_character_, n)))
+                     lapply(setNames(se1$n_reads, colnames(se1)), function(n) rep(NA_character_, n)))
     expect_equal(unclass(table(as.character(SummarizedExperiment::rowData(se1)$sequenceContext))),
                  c(A = 8108L, C = 128L, G = 393L, T = 62L), ignore_attr = TRUE)
     # ... compare to se1sum

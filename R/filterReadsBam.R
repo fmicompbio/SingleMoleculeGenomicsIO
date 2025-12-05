@@ -96,11 +96,13 @@ filterReadsBam <- function(infiles,
                            verbose = FALSE) {
     # validate arguments
     .assertVector(x = infiles, type = "character")
-    if (any(i <- !file.exists(infiles))) {
+    i <- !file.exists(infiles)
+    if (any(i)) {
         cli_abort("not all {.arg infiles} exist: {infiles[i]}")
     }
     .assertVector(x = outfiles, type = "character", len = length(infiles))
-    if (!overwriteOutfiles && any(i <- file.exists(outfiles))) {
+    i <- file.exists(outfiles)
+    if (!overwriteOutfiles && any(i)) {
         cli_abort("existing {.arg outfiles} would be overwritten: {outfiles[i]}")
     }
     .assertScalar(x = keepUnmapped, type = "logical")

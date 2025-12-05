@@ -83,11 +83,9 @@
 
     ## If there are too many valid values, print only the first 15
     if (length(validValues) > 15) {
-        vvPrint <- paste(c(validValues[seq_len(15)],
-                           "...(truncated)"),
-                         collapse = ", ")
+        vvPrint <- toString(c(validValues[seq_len(15)], "...(truncated)"))
     } else {
-        vvPrint <- paste(validValues, collapse = ", ")
+        vvPrint <- toString(validValues)
     }
 
     if (is.null(x)) {
@@ -186,7 +184,7 @@
                                requireNamespace(pkg, quietly = TRUE)
                            }))
 
-    if (any(!avail)) {
+    if (!all(avail)) {
         caller <- deparse(sys.calls()[[sys.nframe() - 1]])
         callerfunc <- sub("\\(.+$", "", caller)
         haveBioc <- requireNamespace("BiocManager", quietly = TRUE)
@@ -223,8 +221,9 @@
 .assertValidModbase <- function(modbase) {
     # for valid values of `modbase`, see
     # https://samtools.github.io/hts-specs/SAMtags.pdf (section 1.7)
-    if (any(i <- !modbase %in% c("m", "h", "f", "c", "C", "g", "e", "b", "T",
-                                 "U", "a", "A", "o", "G", "n", "N"))) {
+    i <- !modbase %in% c("m", "h", "f", "c", "C", "g", "e", "b", "T",
+                         "U", "a", "A", "o", "G", "n", "N")
+    if (any(i)) {
         cli_abort("invalid {.arg modbase} values: {unique(modbase[i])}")
     }
 
@@ -310,6 +309,7 @@
 #' @importFrom GenomicRanges GRanges trim
 #' @importFrom IRanges IRanges start end
 #' @importFrom utils strcapture
+#' @importFrom stats setNames
 #'
 #' @noRd
 #' @keywords internal
@@ -363,7 +363,8 @@
         # - "REF:-END"
         # - "REF:START-END"
         pat <- "^([^:]+)(:|(:([0-9]+)?-?([0-9]+)?))?$"
-        if (any(i <- which(!grepl(pattern = pat, x = regions)))) {
+        i <- grep(pattern = pat, x = regions, invert = TRUE)
+        if (length(i) > 0L) {
             cli_abort("unrecognized format in {length(i)} region{?s}: {regions[i]}")
         } else {
             df <- strcapture(
@@ -383,11 +384,12 @@
                 gr <- GRanges(seqnames = df$seqnames, ranges = ir)
                 missingchrs <- setdiff(df$seqnames, names(reflens))
                 seqlengths(gr) <- c(reflens,
-                                    structure(rep(maxend, length(missingchrs)),
-                                              names = missingchrs))[seqlevels(gr)]
+                                    setNames(rep(maxend, length(missingchrs)),
+                                             missingchrs))[seqlevels(gr)]
                 gr <- trim(gr)
             })
-            if (any(neq <- start(ir) != start(gr) | end(ir) != end(gr))) {
+            neq <- start(ir) != start(gr) | end(ir) != end(gr)
+            if (any(neq)) {
                 cli_warn(
                     paste0("'regions' contained {sum(neq)} out-of-bound ",
                            "range{?s} that were trimmed to the sequence bounds"))

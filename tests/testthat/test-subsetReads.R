@@ -105,12 +105,12 @@ test_that("subsetReads works", {
     # ... only non-existing read names
     expect_warning(seSub4 <- subsetReads(se, c("missing", "error")),
                    "These will be ignored")
-    expect_equal(dim(seSub4), c(7967L, 0L))
+    expect_identical(dim(seSub4), c(7967L, 0L))
 
     expect_warning(expect_warning(
         seSub4 <- subsetReads(se, list(s1 = "error", s2 = "missing")),
         "These will be ignored"), "These will be ignored")
-    expect_equal(dim(seSub4), c(7967L, 0L))
+    expect_identical(dim(seSub4), c(7967L, 0L))
 
     # ... invert
     seSub <- subsetReads(se, list(s1 = 2, s2 = 2))
@@ -128,23 +128,23 @@ test_that("subsetReads works", {
     seSub2 <- subsetReads(se, list(s1 = 2, s2 = 2), removeAllNApos = TRUE,
                           assayNameNA = "mod_prob")
     expect_lt(nrow(seSub2), nrow(seSub))
-    expect_equal(nrow(seSub2), 6364L)
-    expect_equal(nrow(seSub2),
-                 sum(rowSums(is_nonna(as.matrix(assay(seSub, "mod_prob")))) > 0))
+    expect_identical(nrow(seSub2), 6364L)
+    expect_identical(nrow(seSub2),
+                     sum(rowSums(is_nonna(as.matrix(assay(seSub, "mod_prob")))) > 0))
 
     # ... select random subset
     set.seed(42L)
     seSub5 <- subsetReads(se, randomSubset = 1)
-    expect_equal(lapply(assay(seSub5, "mod_prob"), ncol),
-                 list(s1 = 1L, s2 = 1L))
+    expect_identical(lapply(assay(seSub5, "mod_prob"), ncol),
+                     list(s1 = 1L, s2 = 1L))
     set.seed(42L)
     seSub6 <- subsetReads(se, randomSubset = 1)
     expect_identical(seSub5, seSub6)
 
     seSub7 <- subsetReads(se, randomSubset = 100)
-    expect_equal(lapply(assay(seSub7, "mod_prob"), ncol),
-                 list(s1 = 3L, s2 = 2L))
+    expect_identical(lapply(assay(seSub7, "mod_prob"), ncol),
+                     list(s1 = 3L, s2 = 2L))
     seSub8 <- subsetReads(se, randomSubset = 0.49)
-    expect_equal(lapply(assay(seSub8, "mod_prob"), ncol),
-                 list(s1 = 1L, s2 = 1L))
+    expect_identical(lapply(assay(seSub8, "mod_prob"), ncol),
+                     list(s1 = 1L, s2 = 1L))
 })

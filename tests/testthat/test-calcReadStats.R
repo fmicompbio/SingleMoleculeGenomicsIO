@@ -9,13 +9,12 @@ test_that("read statistic functions work", {
                                    paste0("r", seq.int(nreads))),
                    type = "double")
     set.seed(123L)
-    rlens <- structure(sample(30:200, size = nreads),
-                       names = colnames(mat))
-    rstarts <- sort(sample(1:800, size = nreads))
+    rlens <- stats::setNames(sample(30:200, size = nreads), colnames(mat))
+    rstarts <- sort(sample.int(800L, size = nreads))
     mat[cbind(unlist(lapply(seq.int(nreads), function(i) {
         rstarts[i] + seq.int(rlens[i]) - 1
     })), rep(1:30, rlens))] <- runif(sum(rlens), min = 0, max = 1)
-    expect_equal(colSums(is_nonna(mat)), rlens)
+    expect_equal(colSums(is_nonna(mat)), rlens, tolerance = 1e-9)
     # ... list of non-NA values per read
     ind <- nnawhich(mat, arr.ind = TRUE)
     probList <- split(nnavals(mat), colnames(mat)[ind[, 2]])[colnames(mat)]
@@ -46,7 +45,7 @@ test_that("read statistic functions work", {
         if (param %in% c("ACModProb", "PACModProb")) {
             expect_type(res, "list")
             expect_identical(unname(lengths(res)), rep(length(lagvals), nreads))
-            expect_equal(
+            expect_identical(
                 unname(res[useReads]),
                 switch(param,
                        "ACModProb" = lapply(useReads, \(i) {
@@ -142,11 +141,11 @@ test_that("calcReadStats works", {
     expect_named(S4Vectors::metadata(rs),
                  c("regions", "sequenceContext", "minNobsPpos",
                    "minNobsPread", "Lags", 'snr_noise_coef', 'snr_config'))
-    expect_equal(S4Vectors::metadata(rs)$minNobsPpos, 1L)
+    expect_identical(S4Vectors::metadata(rs)$minNobsPpos, 1)
     qc <- rs[["s1"]]
     expect_s4_class(qc, "DFrame")
-    expect_equal(nrow(qc), 10L)
-    expect_equal(ncol(qc), 14L)
+    expect_identical(nrow(qc), 10L)
+    expect_identical(ncol(qc), 14L)
     expect_true(all(c("MeanModProb", "FracMod", "MeanConf", "MeanConfUnm",
                       "MeanConfMod", "FracLowConf", "IQRModProb", "sdModProb",
                       "SEntrModProb", "ACModProb", "PACModProb",
@@ -179,11 +178,11 @@ test_that("calcReadStats works", {
     expect_named(S4Vectors::metadata(rs),
                  c("regions", "sequenceContext", "minNobsPpos",
                    "minNobsPread", "Lags", 'snr_noise_coef', 'snr_config'))
-    expect_equal(S4Vectors::metadata(rs)$minNobsPpos, thr)
+    expect_identical(S4Vectors::metadata(rs)$minNobsPpos, thr)
     qc <- rs[["s1"]]
     expect_s4_class(qc, "DFrame")
-    expect_equal(nrow(qc), 10L)
-    expect_equal(ncol(qc), 14L)
+    expect_identical(nrow(qc), 10L)
+    expect_identical(ncol(qc), 14L)
     expect_true(all(c("MeanModProb", "FracMod", "MeanConf", "MeanConfUnm",
                       "MeanConfMod", "FracLowConf", "IQRModProb", "sdModProb",
                       "SEntrModProb", "ACModProb", "PACModProb",
@@ -252,7 +251,7 @@ test_that("calcReadStats works", {
     expect_identical(dim(rs1$s1), c(10L, 2L))
     expect_true(all(is.na(rs1$s1$MeanModProb[2:3])))
     expect_equal(sum(rs1$s1$MeanModProb[-(2:3)]), 0.909023830485028)
-    expect_true(is.list(rs1$s1$ACModProb))
+    expect_type(rs1$s1$ACModProb, "list")
     expect_identical(lengths(rs1$s1$ACModProb, use.names = FALSE),
                      rep(c(53L, 1L, 53L), c(1, 2, 7)))
 })
@@ -284,16 +283,16 @@ test_that("addReadStats works", {
 
     # expected results
     expect_s4_class(se2, "SummarizedExperiment")
-    expect_equal(dim(se), dim(se2))
-    expect_equal(assay(se), assay(se2))
+    expect_identical(dim(se), dim(se2))
+    expect_identical(assay(se), assay(se2))
     expect_null(se2[["QC"]])
     expect_s4_class(se2$qc2, "SimpleList")
     expect_length(se2$qc2, 2L)
     expect_named(se2$qc2, c("s1", "s2"))
     qc <- se2$qc2[["s1"]]
     expect_s4_class(qc, "DFrame")
-    expect_equal(nrow(qc), 10L)
-    expect_equal(ncol(qc), 14L)
+    expect_identical(nrow(qc), 10L)
+    expect_identical(ncol(qc), 14L)
     expect_true(all(c("MeanModProb", "FracMod", "MeanConf", "MeanConfUnm",
                       "MeanConfMod", "FracLowConf", "IQRModProb", "sdModProb",
                       "SEntrModProb", "ACModProb", "PACModProb",

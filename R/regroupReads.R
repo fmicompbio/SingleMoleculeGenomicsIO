@@ -55,6 +55,7 @@
 #' @importFrom S4Vectors metadata make_zero_col_DFrame
 #' @importFrom SummarizedExperiment assayNames assay colData
 #' @importFrom cli cli_abort cli_warn
+#' @importFrom stats setNames
 #'
 regroupReads <- function(se, readGroups) {
     .assertVector(x = se, type = "RangedSummarizedExperiment")
@@ -82,9 +83,9 @@ regroupReads <- function(se, readGroups) {
     readGroups <- readGroups[lengths(readGroups) > 0]
 
     # check that the modbase is consistent for each read group
-    mbmap <- structure(
+    mbmap <- setNames(
         rep(se$modbase, vapply(assay(se, rlAssays[1]), ncol, 0L)),
-        names = unlist(lapply(assay(se, rlAssays[1]), colnames))
+        unlist(lapply(assay(se, rlAssays[1]), colnames))
     )
     modbase <- lapply(readGroups, function(rg) unique(mbmap[rg]))
     if (any(lengths(modbase) > 1)) {
@@ -92,7 +93,7 @@ regroupReads <- function(se, readGroups) {
     }
 
     # generate regrouped assays
-    aList <- lapply(structure(rlAssays, names = rlAssays), function(rla) {
+    aList <- lapply(setNames(rlAssays, rlAssays), function(rla) {
         mat <- as.matrix(assay(se, rla))
         mat <- lapply(readGroups, function(rg) mat[, rg, drop = FALSE])
         df <- make_zero_col_DFrame(nrow = nrow(se))
@@ -112,7 +113,7 @@ regroupReads <- function(se, readGroups) {
         if (is(colData(se)[[rlc]][[1]], "data.frame") ||
             is(colData(se)[[rlc]][[1]], "DataFrame")) {
             tmp <- do.call(rbind, colData(se)[[rlc]])
-            cdata[[rlc]] <- S4Vectors::SimpleList(lapply(structure(names(readGroups), names = names(readGroups)),
+            cdata[[rlc]] <- S4Vectors::SimpleList(lapply(setNames(names(readGroups), names(readGroups)),
                                    function(nm) {
                                        tmp2 <- tmp[readGroups[[nm]], , drop = FALSE]
                                        rownames(tmp2) <- paste0(nm, "-", rownames(tmp2))
@@ -120,7 +121,7 @@ regroupReads <- function(se, readGroups) {
                                    }))
         } else if (is(colData(se)[[rlc]][[1]], "IRangesList")) {
             irl <- do.call(c, unname(colData(se)[[rlc]]))
-            cdata[[rlc]] <- lapply(structure(names(readGroups), names = names(readGroups)),
+            cdata[[rlc]] <- lapply(setNames(names(readGroups), names(readGroups)),
                                    function(nm) {
                                        tmp2 <- irl[readGroups[[nm]]]
                                        names(tmp2) <- paste0(nm, "-", names(tmp2))
