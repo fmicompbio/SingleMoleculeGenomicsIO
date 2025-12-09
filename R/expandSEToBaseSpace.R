@@ -7,7 +7,7 @@
 #'     region can be specified as a character scalar (e.g. "chr1:1200-1300")
 #'     that can be coerced into a \code{GRanges} object. If \code{NULL} (the
 #'     default), \code{region} is set to the range of the data in \code{se}.
-#' @param seqinfo \code{NULL} or a \code{\link[GenomeInfoDb]{Seqinfo}} object
+#' @param seqinfo \code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 #'     containing information about the set of genomic sequences (chromosomes).
 #'     Alternatively, a named numeric vector with genomic sequence names and
 #'     lengths. Used to convert a character \code{region} to a \code{GRanges}
