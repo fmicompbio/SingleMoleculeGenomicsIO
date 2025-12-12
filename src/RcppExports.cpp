@@ -98,6 +98,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// read_mismatchbam_cpp
+Rcpp::List read_mismatchbam_cpp(std::string inname_str, std::vector<std::string> regions, Rcpp::List pos_plus_list, Rcpp::List pos_minus_list, int unmod_integer, int mod_integer, std::string level, int n_alns_to_sample, std::vector<std::string> tnames_for_sampling, std::vector<std::string> variantRefNames, std::vector<int> variantRefPositions, int windowSize, int minMapQ, int minAlignedLength, int n_threads, bool verbose);
+RcppExport SEXP _SingleMoleculeGenomicsIO_read_mismatchbam_cpp(SEXP inname_strSEXP, SEXP regionsSEXP, SEXP pos_plus_listSEXP, SEXP pos_minus_listSEXP, SEXP unmod_integerSEXP, SEXP mod_integerSEXP, SEXP levelSEXP, SEXP n_alns_to_sampleSEXP, SEXP tnames_for_samplingSEXP, SEXP variantRefNamesSEXP, SEXP variantRefPositionsSEXP, SEXP windowSizeSEXP, SEXP minMapQSEXP, SEXP minAlignedLengthSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type inname_str(inname_strSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type regions(regionsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type pos_plus_list(pos_plus_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type pos_minus_list(pos_minus_listSEXP);
+    Rcpp::traits::input_parameter< int >::type unmod_integer(unmod_integerSEXP);
+    Rcpp::traits::input_parameter< int >::type mod_integer(mod_integerSEXP);
+    Rcpp::traits::input_parameter< std::string >::type level(levelSEXP);
+    Rcpp::traits::input_parameter< int >::type n_alns_to_sample(n_alns_to_sampleSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type tnames_for_sampling(tnames_for_samplingSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type variantRefNames(variantRefNamesSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type variantRefPositions(variantRefPositionsSEXP);
+    Rcpp::traits::input_parameter< int >::type windowSize(windowSizeSEXP);
+    Rcpp::traits::input_parameter< int >::type minMapQ(minMapQSEXP);
+    Rcpp::traits::input_parameter< int >::type minAlignedLength(minAlignedLengthSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(read_mismatchbam_cpp(inname_str, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // read_modbam_cpp
 Rcpp::List read_modbam_cpp(std::string inname_str, std::vector<std::string> regions, char modbase, int n_alns_to_sample, std::vector<std::string> tnames_for_sampling, std::vector<std::string> variantRefNames, std::vector<int> variantRefPositions, double threshUnmod, double threshMod, int windowSize, int minMapQ, int minAlignedLength, int n_threads, bool verbose);
 RcppExport SEXP _SingleMoleculeGenomicsIO_read_modbam_cpp(SEXP inname_strSEXP, SEXP regionsSEXP, SEXP modbaseSEXP, SEXP n_alns_to_sampleSEXP, SEXP tnames_for_samplingSEXP, SEXP variantRefNamesSEXP, SEXP variantRefPositionsSEXP, SEXP threshUnmodSEXP, SEXP threshModSEXP, SEXP windowSizeSEXP, SEXP minMapQSEXP, SEXP minAlignedLengthSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
@@ -202,6 +228,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SingleMoleculeGenomicsIO_filter_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_filter_modbam_cpp, 20},
     {"_SingleMoleculeGenomicsIO_index_bam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_index_bam_cpp, 1},
     {"_SingleMoleculeGenomicsIO_pileup_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_pileup_modbam_cpp, 7},
+    {"_SingleMoleculeGenomicsIO_read_mismatchbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_read_mismatchbam_cpp, 16},
     {"_SingleMoleculeGenomicsIO_read_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_read_modbam_cpp, 14},
     {"_SingleMoleculeGenomicsIO_sampleEntropy", (DL_FUNC) &_SingleMoleculeGenomicsIO_sampleEntropy, 5},
     {"_SingleMoleculeGenomicsIO_concatenate_files", (DL_FUNC) &_SingleMoleculeGenomicsIO_concatenate_files, 2},

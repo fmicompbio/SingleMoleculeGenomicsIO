@@ -581,7 +581,7 @@ int count_pairs_bam_record(
 //' @param minAlignedLength Numeric scalar giving the minimal alignment length
 //'     to include alignments in pair-counting mode.
 //' @param n_threads Integer scalar defining the number of threads to
-//'     use for decompressing a sam record. Especially using in sampling mode
+//'     use for decompressing a sam record. Especially useful in sampling mode
 //'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
 //'     decompressing bam records than processing them.
 //' @param verbose Logical scalar. If \code{TRUE}, report on progress.
