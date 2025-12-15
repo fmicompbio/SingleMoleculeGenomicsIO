@@ -503,9 +503,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         if (bamdata) {
             bam_destroy1(bamdata);
         }
-        if (ms) {
-            hts_base_mod_state_free(ms);
-        }
         if (iter) {
             sam_itr_destroy(iter);
         }
@@ -550,7 +547,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     Rcpp::_["ref_position"] = ref_position,
                     Rcpp::_["chrom"] = chrom,
                     Rcpp::_["ref_strand"] = ref_strand,
-                    Rcpp::_["call_code"] = call_code,
                     Rcpp::_["mod_prob"] = mod_prob,
                     Rcpp::_["read_df"] = df);
             }
