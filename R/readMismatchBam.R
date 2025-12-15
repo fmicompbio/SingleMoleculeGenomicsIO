@@ -72,7 +72,7 @@
 #' @importFrom BiocGenerics do.call cbind pos strand sort
 #' @importFrom BiocParallel bplapply MulticoreParam bpnworkers bpworkers<-
 #'     bpoptions
-#' @importFrom Biostrings readDNAStringSet DNAStringSet DNAString DNA_BASES
+#' @importFrom Biostrings DNAString DNA_BASES
 #'     DNA_ALPHABET IUPAC_CODE_MAP vmatchPattern reverseComplement
 #' @importFrom BSgenome getSeq
 #' @importFrom methods is
@@ -174,13 +174,7 @@ readMismatchBam <- function(bamfiles,
             "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object ",
             "or a named {.cls numeric} vector with genomic sequence lengths."))
     }
-    if (!is(sequenceReference, "BSgenome") &&
-        !is(sequenceReference, "DNAStringSet") &&
-        !(is.character(sequenceReference) && file.exists(sequenceReference))) {
-        cli_abort(paste0(
-            "{.arg sequenceReference} must be either a {.cls BSgenome} object, ",
-            "a {.cls DNAStringSet} object, or a path to a fasta file."))
-    }
+    ref <- .refargToDNAStringSet(sequenceReference)
     .assertVector(x = variantPositions, type = "GPos", allowNULL = TRUE)
     .assertScalar(x = trim, type = "logical")
     .assertVector(x = BPPARAM, type = "BiocParallelParam")
@@ -219,17 +213,8 @@ readMismatchBam <- function(bamfiles,
     # TODO: lift out as a helper function?
 
     # obtain reference sequences
-    .message("getting reference sequence and finding positions with {sequenceContext}")
-    if (is.character(sequenceReference)) {
-        ref <- readDNAStringSet(sequenceReference)
-        names(ref) <- sub(" .*$", "", names(ref))
-    } else if (is(sequenceReference, "BSgenome")) {
-        ref <- DNAStringSet(as.list(sequenceReference))
-    } else {
-        ref <- sequenceReference
-    }
+    .message("finding positions with {sequenceContext}")
     # TODO: search hits using Biostrings and convert to int/bool array in R?
-    # TODO: lift out as a helper function?
     seqLevelsUsed <- intersect(seqLevelsUsed, names(ref))
     ref <- ref[seqLevelsUsed]
 
@@ -275,8 +260,6 @@ readMismatchBam <- function(bamfiles,
                  mymodInteger = modInteger,
                  mynAlnsToSample = nAlnsToSample,
                  myseqnamesToSampleFrom = seqnamesToSampleFrom,
-                 mysequenceContextWidth = sequenceContextWidth,
-                 mysequenceReference = ref,
                  myvariantRefNames = variantRefNames,
                  myvariantRefPositions = variantRefPositions,
                  myncpuDecompression = ncpuDecompression,
@@ -305,7 +288,6 @@ readMismatchBam <- function(bamfiles,
     gposL <- bplapply(resLL, function(resL, myseqinfo = seqinfo) {
         GenomicRanges::GPos(seqnames = resL$chrom, pos = resL$ref_position,
                             strand = resL$ref_strand,
-                            sequenceContext = resL$sequence_context,
                             seqinfo = myseqinfo)
     }, BPPARAM = BPPARAM)
 
@@ -318,6 +300,13 @@ readMismatchBam <- function(bamfiles,
     if (trim) {
         gpos <- subsetByOverlaps(gpos, regions, ignore.strand = TRUE)
     }
+
+    # add sequence context
+    .message("extracting sequence contexts")
+    mcols(gpos)$sequenceContext <- extractSeqContext(
+        x = as(gpos, "GRanges"),
+        sequenceContextWidth = nchar(sequenceContext),
+        sequenceReference = ref)
 
     if (level %in% c("read")) {
         # extract unique read names

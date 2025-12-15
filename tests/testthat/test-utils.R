@@ -337,3 +337,40 @@ test_that(".regionStringToGRanges works", {
         seqlengths = c(chr1 = 100, chr3 = intmax, chr4 = 400))
     )
 })
+
+## -------------------------------------------------------------------------- ##
+## Checks, .refargToDNAStringSet
+## -------------------------------------------------------------------------- ##
+test_that(".refargToDNAStringSet works", {
+    # temporarily install BSgenome package
+    fagnmfile <- system.file("extdata", "reference.fa.gz",
+                             package = "SingleMoleculeGenomicsIO")
+    bsgnmfile <- system.file("extdata", "BSgenome.Mmusculus.SingleMoleculeGenomicsIO_0.1.0.tar.gz",
+                             package = "SingleMoleculeGenomicsIO")
+    rlibdir <- tempfile(pattern = "Rlib")
+    dir.create(rlibdir)
+    install.packages(bsgnmfile, lib = rlibdir, repos = NULL,
+                     quiet = TRUE, verbose = FALSE)
+    expect_identical(list.files(rlibdir), "BSgenome.Mmusculus.SingleMoleculeGenomicsIO")
+    suppressPackageStartupMessages(suppressWarnings(
+        library(BSgenome.Mmusculus.SingleMoleculeGenomicsIO, lib.loc = rlibdir, quietly = TRUE)
+    ))
+    seqs <- Biostrings::DNAStringSet(as.list(BSgenome.Mmusculus.SingleMoleculeGenomicsIO))
+
+    # expected failures
+    expect_error(.refargToDNAStringSet(TRUE),
+                 "must be either a .BSgenome.")
+    expect_error(.refargToDNAStringSet("non-existent"),
+                 "must be either a .BSgenome.")
+
+    # correct results
+    expect_identical(.refargToDNAStringSet(seqs), seqs)
+    expect_identical(.refargToDNAStringSet(fagnmfile), seqs)
+    expect_identical(.refargToDNAStringSet(BSgenome.Mmusculus.SingleMoleculeGenomicsIO), seqs)
+
+    # clean up
+    detach("package:BSgenome.Mmusculus.SingleMoleculeGenomicsIO", unload = TRUE,
+           character.only = TRUE)
+    unlink(rlibdir)
+})
+
