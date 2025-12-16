@@ -174,7 +174,7 @@ readMismatchBam <- function(bamfiles,
             "{.arg seqinfo} must be {.code NULL}, a {.cls Seqinfo} object ",
             "or a named {.cls numeric} vector with genomic sequence lengths."))
     }
-    ref <- .refargToDNAStringSet(sequenceReference)
+    ref <- refargToDNAStringSet(sequenceReference)
     .assertVector(x = variantPositions, type = "GPos", allowNULL = TRUE)
     .assertScalar(x = trim, type = "logical")
     .assertVector(x = BPPARAM, type = "BiocParallelParam")

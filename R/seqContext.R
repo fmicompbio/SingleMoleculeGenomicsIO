@@ -74,7 +74,7 @@ extractSeqContext <- function(x,
     }
 
     # obtain reference sequences
-    ref <- .refargToDNAStringSet(sequenceReference)
+    ref <- refargToDNAStringSet(sequenceReference)
 
     # resize x
     xcontext <- resize(x, width = sequenceContextWidth, fix = "center")

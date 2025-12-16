@@ -412,16 +412,15 @@
 #'      \item{"character"}{: A path to a fasta file}
 #' }
 #'
-#' @param sequenceRefernce A supported value defining the reference sequence.
+#' @param sequenceReference A supported value defining the reference sequence.
 #'
 #' @author Michael Stadler, Charlotte Soneson
 #'
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom cli cli_abort
 #'
-#' @noRd
-#' @keywords internal
-.refargToDNAStringSet <- function(sequenceReference) {
+#' @export
+refargToDNAStringSet <- function(sequenceReference) {
     if (!is(sequenceReference, "BSgenome") &&
         !is(sequenceReference, "DNAStringSet") &&
         !(is.character(sequenceReference) && file.exists(sequenceReference))) {
