@@ -19,6 +19,10 @@
 #'     as sample names and prefixes for read names. Otherwise, the prefixes will
 #'     be \code{s1}, ..., \code{sN}, where \code{N} is the length of
 #'     \code{bamfiles}. All \code{bamfiles} must have an index.
+#' @param bamFormat A character scalar giving the format of \code{BAM} files.
+#'     Currently supported ar \code{BAM} files that have been created with
+#'     \code{"QuasR"} (using \code{\link[QuasR]{qAlign}} in bisulfite mode) or
+#'     \code{"Bismark"}.
 #' @param level Character scalar specifying the level of returned modification
 #'     data. Supported values are:
 #'     \describe{
@@ -81,6 +85,7 @@
 #'
 #' @export
 readMismatchBam <- function(bamfiles,
+                            bamFormat = "QuasR",
                             regions = NULL,
                             sequenceContext = "GCH",
                             readBaseUnmod = "C",
@@ -101,6 +106,7 @@ readMismatchBam <- function(bamfiles,
     if (any(i)) {
         cli_abort("not all {.arg bamfiles} exist: {.file {bamfiles[i]}}")
     }
+    .assertScalar(x = bamFormat, type = "character", validValues = c("QuasR", "Bismark"))
     if (is.null(names(bamfiles))) {
         names(bamfiles) <- paste0("s", seq_along(bamfiles))
     } else if (anyDuplicated(names(bamfiles)) > 0L) {
@@ -214,7 +220,6 @@ readMismatchBam <- function(bamfiles,
 
     # obtain reference sequences
     .message("finding positions with {sequenceContext}")
-    # TODO: search hits using Biostrings and convert to int/bool array in R?
     seqLevelsUsed <- intersect(seqLevelsUsed, names(ref))
     ref <- ref[seqLevelsUsed]
 
@@ -234,7 +239,7 @@ readMismatchBam <- function(bamfiles,
         fixed = "subject",
         algorithm = "auto")
 
-    # convert to zero-based indices for use in C++
+    # convert to list of zero-based indices for each chromosome to use in C++
     posPlusList <- lapply(posPlus, function(x) {
         start(resize(x = x, width = 1, fix = "center")) - 1L
     })
@@ -253,6 +258,7 @@ readMismatchBam <- function(bamfiles,
         function(nm,
                  mylevel = level,
                  bamf = bamfiles[nm],
+                 mybamFormat = bamFormat,
                  myregions_str = regions_str,
                  myposPlusList = posPlusList,
                  myposMinusList = posMinusList,
@@ -268,6 +274,7 @@ readMismatchBam <- function(bamfiles,
             # extract base mismatches
             read_mismatchbam_cpp(
                 inname_str = bamf,
+                bam_format = mybamFormat,
                 regions = myregions_str,
                 pos_plus_list = myposPlusList,
                 pos_minus_list = myposMinusList,

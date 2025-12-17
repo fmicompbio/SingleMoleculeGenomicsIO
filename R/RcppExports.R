@@ -340,19 +340,35 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'     \code{seq_context}, \code{"Nvalid"} and \code{"Nmod"}.
 #'
 #' @examples
+#' library(Biostrings)
 #' bamfile <- system.file("extdata", "BisSeq_single.bam", package = "SingleMoleculeGenomicsIO")
-#' ref <- Biostrings::readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
+#' ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
+#' posPlus <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
+#'                          with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posMinus <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
+#'                           with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posPlusList <- lapply(posPlus, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' posMinusList <- lapply(posMinus, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
 #' res1 <- read_mismatchbam_cpp(inname_str = bamfile,
-#'                         regions = "chr1:6940000-6955000",
-#'                         mismatches_are_unmod = TRUE,
-#'                         level = "summary",
-#'                         n_alns_to_sample = 0,
-#'                         tnames_for_sampling = "",
-#'                         variantRefNames = "",
-#'                         variantRefPositions = 0,
-#'                         n_threads = 1,
-#'                         verbose = TRUE)
+#'                              regions = "chr1:6940000-6955000",
+#'                              pos_plus_list = posPlusList,
+#'                              pos_minus_list = posMinusList,
+#'                              unmod_integer = 2,
+#'                              mod_integer = 8,
+#'                              level = "summary",
+#'                              n_alns_to_sample = 0,
+#'                              tnames_for_sampling = "",
+#'                              variantRefNames = "",
+#'                              variantRefPositions = 0,
+#'                              n_threads = 1,
+#'                              verbose = TRUE)
 #' str(res1)
+NULL
+
 #'
 #' @author Charlotte Soneson, Michael Stadler
 #'
@@ -360,8 +376,8 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'
 #' @noRd
 #' @keywords internal
-read_mismatchbam_cpp <- function(inname_str, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
-    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
+read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
 }
 
 #' Read base modifications from a bam file.
