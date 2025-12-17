@@ -145,8 +145,10 @@ int process_mismatch_bam_record(
 
 
     // ### WAS HERE (plan A: copy logic of read_to_reference_pos loop and analyze mismatches?)
+    // adapt mod/unmod_integer based on useRC?
     // variables
     cigar = bam_get_cigar(bamdata);  // cigar array
+    hitseq = bam_get_seq(bamdata);   // query sequence
     ref_pos = bamdata->core.pos;     // reference position (0-based)
     read_pos = 0;                    // read position (0-based)
 
@@ -162,7 +164,14 @@ int process_mismatch_bam_record(
             for (j = 0; j < op_len; j++) {
                 if (pos_set.count(ref_pos) > 0) {
                     // we need to analyze this position
-                    ;
+                    // ... check that the read base is either unmod_integer
+                    //     or mod_integer (otherwise do nothing)
+                    uint8_t fwdbase = bam1_seqi(hitseq, read_pos);
+                    read_id.push_back(bam_get_qname(bamdata));
+                    ref_strand.push_back(useRC ? '-' : '+');
+                    chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
+                    ref_position.push_back(ref_pos);
+                    mod_prob.push_back(); // TODO
                 }
                 ref_pos++;
                 read_pos++;
@@ -170,34 +179,15 @@ int process_mismatch_bam_record(
             break;
 
         case BAM_CINS:  // insertion (I)
-            if (read_pos + op_len > read_positions[read_positions_index]) {
-                // the current read position is within an insertion -->
-                //     no corresponding reference position
-                while (read_positions_index < read_positions.size() &&
-                       read_pos + op_len > read_positions[read_positions_index]) {
-                    ref_positions[read_positions_index] = -1;
-                    read_positions_index++;
-                }
-            }
+        case BAM_CSOFT_CLIP:  // soft clipping (S)
+            // the current read position is within an insertion or soft-clipped region -->
+            //     no corresponding reference position
             read_pos += op_len;
             break;
 
         case BAM_CDEL:       // deletion (D)
         case BAM_CREF_SKIP:  // reference skip (N)
             ref_pos += op_len;
-            break;
-
-        case BAM_CSOFT_CLIP:  // soft clipping (S)
-            if (read_pos + op_len > read_positions[read_positions_index]) {
-                // the current read position is within a soft-clipped region -->
-                //     no corresponding reference position
-                while (read_positions_index < read_positions.size() &&
-                       read_pos + op_len > read_positions[read_positions_index]) {
-                    ref_positions[read_positions_index] = -1;
-                    read_positions_index++;
-                }
-            }
-            read_pos += op_len;
             break;
 
         case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
@@ -207,8 +197,7 @@ int process_mismatch_bam_record(
 
         default:
             Rcpp::warning("Unknown CIGAR operation: %d", op);
-        return ref_positions; // # nocov end
-        }
+        } // # nocov end
     }
 /*
     // get aligned sequence of the read

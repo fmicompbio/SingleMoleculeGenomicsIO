@@ -395,10 +395,10 @@
  //' @param qseq A \code{char**} (pointer to a character array) to which the
  //'     extracted sequence will be written.
  //' @param qseq_len A \code{int*} (pointer to int) in which the number of
- //'     allocated characters at \code{qseq} are stored (escluding the
+ //'     allocated characters at \code{qseq} are stored (excluding the
  //'     terminating null character).
  //'
- //' @returns 0 if sucessful, -1 if memory allocation failed
+ //' @returns 0 if successful, -1 if memory allocation failed
  //'
  //' @author Michael Stadler
  //'
