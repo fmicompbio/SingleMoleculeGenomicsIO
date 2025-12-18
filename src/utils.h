@@ -23,5 +23,11 @@ int extract_mod_probs(bam1_t*,
                       hts_base_mod_state* ms = NULL,
                       char* buffer = NULL,
                       int buffer_len = 0);
-
-          
+std::vector<int> read_to_reference_pos(const bam1_t *aln,
+                                       const std::vector<int> &read_positions);
+std::vector<int> reference_to_read_pos(const bam1_t *aln,
+                                       const std::vector<int> &ref_positions);
+std::string construct_read_label(const bam1_t *aln,
+                                 const std::vector<std::string> &ref_names,
+                                 const std::vector<int> &ref_positions,
+                                 const sam_hdr_t *hdr);
