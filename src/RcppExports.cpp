@@ -99,16 +99,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // read_mismatchbam_cpp
-Rcpp::List read_mismatchbam_cpp(std::string inname_str, std::string bam_format, std::vector<std::string> regions, Rcpp::List pos_plus_list, Rcpp::List pos_minus_list, uint8_t unmod_integer, uint8_t unmod_integer_rev, uint8_t mod_integer, uint8_t mod_integer_rev, std::string level, int n_alns_to_sample, std::vector<std::string> tnames_for_sampling, std::vector<std::string> variantRefNames, std::vector<int> variantRefPositions, int windowSize, int minMapQ, int minAlignedLength, int n_threads, bool verbose);
-RcppExport SEXP _SingleMoleculeGenomicsIO_read_mismatchbam_cpp(SEXP inname_strSEXP, SEXP bam_formatSEXP, SEXP regionsSEXP, SEXP pos_plus_listSEXP, SEXP pos_minus_listSEXP, SEXP unmod_integerSEXP, SEXP unmod_integer_revSEXP, SEXP mod_integerSEXP, SEXP mod_integer_revSEXP, SEXP levelSEXP, SEXP n_alns_to_sampleSEXP, SEXP tnames_for_samplingSEXP, SEXP variantRefNamesSEXP, SEXP variantRefPositionsSEXP, SEXP windowSizeSEXP, SEXP minMapQSEXP, SEXP minAlignedLengthSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
+Rcpp::List read_mismatchbam_cpp(std::string inname_str, std::string bam_format, std::vector<std::string> regions, Rcpp::List pos_context_list, Rcpp::List pos_context_rev_list, uint8_t unmod_integer, uint8_t unmod_integer_rev, uint8_t mod_integer, uint8_t mod_integer_rev, std::string level, int n_alns_to_sample, std::vector<std::string> tnames_for_sampling, std::vector<std::string> variantRefNames, std::vector<int> variantRefPositions, int windowSize, int minMapQ, int minAlignedLength, int n_threads, bool verbose);
+RcppExport SEXP _SingleMoleculeGenomicsIO_read_mismatchbam_cpp(SEXP inname_strSEXP, SEXP bam_formatSEXP, SEXP regionsSEXP, SEXP pos_context_listSEXP, SEXP pos_context_rev_listSEXP, SEXP unmod_integerSEXP, SEXP unmod_integer_revSEXP, SEXP mod_integerSEXP, SEXP mod_integer_revSEXP, SEXP levelSEXP, SEXP n_alns_to_sampleSEXP, SEXP tnames_for_samplingSEXP, SEXP variantRefNamesSEXP, SEXP variantRefPositionsSEXP, SEXP windowSizeSEXP, SEXP minMapQSEXP, SEXP minAlignedLengthSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type inname_str(inname_strSEXP);
     Rcpp::traits::input_parameter< std::string >::type bam_format(bam_formatSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string> >::type regions(regionsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type pos_plus_list(pos_plus_listSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type pos_minus_list(pos_minus_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type pos_context_list(pos_context_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type pos_context_rev_list(pos_context_rev_listSEXP);
     Rcpp::traits::input_parameter< uint8_t >::type unmod_integer(unmod_integerSEXP);
     Rcpp::traits::input_parameter< uint8_t >::type unmod_integer_rev(unmod_integer_revSEXP);
     Rcpp::traits::input_parameter< uint8_t >::type mod_integer(mod_integerSEXP);
@@ -123,7 +123,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type minAlignedLength(minAlignedLengthSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(read_mismatchbam_cpp(inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose));
+    rcpp_result_gen = Rcpp::wrap(read_mismatchbam_cpp(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -93,8 +93,8 @@ int process_mismatch_bam_record(
         bool &had_error,        // error flag
         char *buffer,           // buffer for message
         int &buffer_len,        // allocated length of message buffer
-        std::vector<std::set<int>> &pos_plus_sets, // which positions to analyse (plus strand)
-        std::vector<std::set<int>> &pos_minus_sets,// which positions to analyse (minus strand)
+        std::vector<std::set<int>> &pos_context_sets, // which positions to analyse (plus strand)
+        std::vector<std::set<int>> &pos_context_rev_sets,// which positions to analyse (minus strand)
         uint8_t unmod_integer,      // what to count as unmodified
         uint8_t unmod_integer_rev,  // what to count as unmodified, opposite strand
         uint8_t mod_integer,        // what to count as modified
@@ -132,20 +132,20 @@ int process_mismatch_bam_record(
     // process alignment
     alncnt++;
 
-    // determine whether to look at pos_plus_sets (ref_strand = "+", e.g. C-T) or
-    //     pos_minus_sets (ref_strand = "-", e.g. A-G) mismatches
+    // determine whether to look at pos_context_sets (ref_strand = "+", e.g. C-T) or
+    //     pos_context_rev_sets (ref_strand = "-", e.g. A-G) mismatches
     // for bam_format = "QuasR":
-    //     pos_plus_sets for plus strand alignments
-    //     pos_minus_sets for minus strand alignments
+    //     pos_context_sets for plus strand alignments
+    //     pos_context_rev_sets for minus strand alignments
     // for bam_format = "Bismark":
-    //     pos_plus_sets for original top strand alignments (XG="CT")
-    //     pos_minus_sets for original bottom strand alignments (XG="GA")
+    //     pos_context_sets for original top strand alignments (XG="CT")
+    //     pos_context_rev_sets for original bottom strand alignments (XG="GA")
     if (bam_format == "QuasR") {
         useRC = bamdata->core.flag & BAM_FREVERSE;
     } else if (bam_format == "Bismark") {
         useRC = (strcmp(bam_aux2Z(bam_aux_get(bamdata, "XG")), "GA") == 0) ? true : false;
     }
-    pos_set = useRC ? &(pos_minus_sets[bamdata->core.tid]) : &(pos_plus_sets[bamdata->core.tid]);
+    pos_set = useRC ? &(pos_context_rev_sets[bamdata->core.tid]) : &(pos_context_sets[bamdata->core.tid]);
     unmod_int = useRC ? unmod_integer_rev : unmod_integer;
     mod_int = useRC ? mod_integer_rev : mod_integer;
 
@@ -249,9 +249,9 @@ int process_mismatch_bam_record(
 //' @param inname_str Character scalar with name of the input bam file.
 //' @param regions Character vector specifying the region(s) for which
 //'     to extract overlapping reads, in the form \code{"chr:start-end"}
-//' @param pos_plus_list,pos_minus_list Named Rcpp::List of positions on each
-//'     chromosome to be evaluated regarding mismatches to reads, seperately
-//'     for the plus and the minus strand.
+//' @param pos_context_list,pos_context_rev_list Named Rcpp::List of positions
+//'     on each chromosome to be evaluated regarding mismatches to reads,
+//'     seperately for the plus and the minus strand.
 //' @param unmod_integer,mod_integer Integers encoding the read bases to be
 //'     interpreted as unmodified or modified, respectively. The encoding
 //'     scheme corresponds to the one in bam1_seqi from htslib.
@@ -304,20 +304,20 @@ int process_mismatch_bam_record(
 //' library(Biostrings)
 //' bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
 //' ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
-//' posPlus <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
-//'                          with.indels = FALSE, fixed = "subject", algorithm = "auto")
-//' posMinus <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
-//'                           with.indels = FALSE, fixed = "subject", algorithm = "auto")
-//' posPlusList <- lapply(posPlus, function(x) {
+//' posContext <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
+//'                             with.indels = FALSE, fixed = "subject", algorithm = "auto")
+//' posContextRev <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
+//'                                with.indels = FALSE, fixed = "subject", algorithm = "auto")
+//' posContextList <- lapply(posContext, function(x) {
 //'     start(resize(x = x, width = 1, fix = "center")) - 1L
 //' })
-//' posMinusList <- lapply(posMinus, function(x) {
+//' posContextRevList <- lapply(posContextRev, function(x) {
 //'     start(resize(x = x, width = 1, fix = "center")) - 1L
 //' })
 //' res1 <- read_mismatchbam_cpp(inname_str = bamfile,
 //'                              regions = "chr1:6940000-6955000",
-//'                              pos_plus_list = posPlusList,
-//'                              pos_minus_list = posMinusList,
+//'                              pos_context_list = posContextList,
+//'                              pos_context_rev_list = posContextRevList,
 //'                              unmod_integer = 8,
 //'                              unmod_integer_rev = 1,
 //'                              mod_integer = 2,
@@ -333,21 +333,21 @@ int process_mismatch_bam_record(
 /*
  bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
  ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
- posPlus <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
+ posContext <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
                          with.indels = FALSE, fixed = "subject", algorithm = "auto")
- posMinus <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
+ posContextRev <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
                            with.indels = FALSE, fixed = "subject", algorithm = "auto")
- posPlusList <- lapply(posPlus, function(x) {
+ posContextList <- lapply(posContext, function(x) {
      start(resize(x = x, width = 1, fix = "center")) - 1L
  })
- posMinusList <- lapply(posMinus, function(x) {
+ posContextRevList <- lapply(posContextRev, function(x) {
      start(resize(x = x, width = 1, fix = "center")) - 1L
  })
  res1 <- read_mismatchbam_cpp(inname_str = bamfile,
                                bam_format = "QuasR",
                                regions = "chr1:6940000-6955000",
-                               pos_plus_list = posPlusList,
-                               pos_minus_list = posMinusList,
+                               pos_context_list = posContextList,
+                               pos_context_rev_list = posContextRevList,
                                unmod_integer = 8,
                                unmod_integer_rev = 1,
                                mod_integer = 2,
@@ -372,8 +372,8 @@ int process_mismatch_bam_record(
 Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                                 std::string bam_format,
                                 std::vector<std::string> regions,
-                                Rcpp::List pos_plus_list,
-                                Rcpp::List pos_minus_list,
+                                Rcpp::List pos_context_list,
+                                Rcpp::List pos_context_rev_list,
                                 uint8_t unmod_integer,
                                 uint8_t unmod_integer_rev,
                                 uint8_t mod_integer,
@@ -413,7 +413,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     int buffer_len = 2000;
     char buffer[2000];
     const char* inname = inname_str.c_str();
-    std::vector<std::set<int>> pos_plus_sets, pos_minus_sets;
+    std::vector<std::set<int>> pos_context_sets, pos_context_rev_sets;
     Rcpp::List res;
 
     // ... return values for mode 1 or 2
@@ -486,13 +486,13 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
 
     // store positions to be analyzed for each chromosome in a vector of sets
     // ... for the plus strand
-    success = intlist_to_setvector(in_samhdr, pos_plus_list, pos_plus_sets,
+    success = intlist_to_setvector(in_samhdr, pos_context_list, pos_context_sets,
                                    buffer, buffer_len, had_error);
     if (success != 0) {
         goto end;
     }
     // ... and the minus strand
-    success = intlist_to_setvector(in_samhdr, pos_minus_list, pos_minus_sets,
+    success = intlist_to_setvector(in_samhdr, pos_context_rev_list, pos_context_rev_sets,
                                    buffer, buffer_len, had_error);
     if (success != 0) {
         goto end;
@@ -707,8 +707,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         had_error,        // error flag
                         buffer,           // buffer for message
                         buffer_len,       // allocated length of message buffer
-                        pos_plus_sets,    // which positions to analyse (plus strand)
-                        pos_minus_sets,   // which positions to analyse (minus strand)
+                        pos_context_sets, // which positions to analyse (plus strand)
+                        pos_context_rev_sets, // which positions to analyse (minus strand)
                         unmod_integer,    // what to count as unmodified
                         unmod_integer_rev, // what to count as unmodified, opposite strand
                         mod_integer,      // what to count as modified

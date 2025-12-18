@@ -224,14 +224,14 @@ readMismatchBam <- function(bamfiles,
     ref <- ref[seqLevelsUsed]
 
     # identify positions with `sequenceContext`
-    posPlus <- vmatchPattern(
+    posContext <- vmatchPattern(
         pattern = sequenceContext,
         subject = ref,
         max.mismatch = 0,
         with.indels = FALSE,
         fixed = "subject",
         algorithm = "auto")
-    posMinus <- vmatchPattern(
+    posContextRev <- vmatchPattern(
         pattern = as.character(reverseComplement(DNAString(sequenceContext))),
         subject = ref,
         max.mismatch = 0,
@@ -240,10 +240,10 @@ readMismatchBam <- function(bamfiles,
         algorithm = "auto")
 
     # convert to list of zero-based indices for each chromosome to use in C++
-    posPlusList <- lapply(posPlus, function(x) {
+    posContextList <- lapply(posContext, function(x) {
         start(resize(x = x, width = 1, fix = "center")) - 1L
     })
-    posMinusList <- lapply(posMinus, function(x) {
+    posContextRevList <- lapply(posContextRev, function(x) {
         start(resize(x = x, width = 1, fix = "center")) - 1L
     })
 
@@ -260,8 +260,8 @@ readMismatchBam <- function(bamfiles,
                  bamf = bamfiles[nm],
                  mybamFormat = bamFormat,
                  myregions_str = regions_str,
-                 myposPlusList = posPlusList,
-                 myposMinusList = posMinusList,
+                 myposContextList = posContextList,
+                 myposContextRevList = posContextRevList,
                  myunmodInteger = unmodInteger,
                  myunmodIntegerRev = unmodIntegerRev,
                  mymodInteger = modInteger,
@@ -278,8 +278,8 @@ readMismatchBam <- function(bamfiles,
                 inname_str = bamf,
                 bam_format = mybamFormat,
                 regions = myregions_str,
-                pos_plus_list = myposPlusList,
-                pos_minus_list = myposMinusList,
+                pos_context_list = myposContextList,
+                pos_context_rev_list = myposContextRevList,
                 unmod_integer = myunmodInteger,
                 unmod_integer_rev = myunmodIntegerRev,
                 mod_integer = mymodInteger,
