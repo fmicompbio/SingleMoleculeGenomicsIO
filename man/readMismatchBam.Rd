@@ -148,7 +148,7 @@ C-to-T mismatches represent modified (accessible) bases
 alignments are ignored.
 }
 \examples{
-bamfile <- system.file("extdata", "BisSeq_single.bam",
+bamfile <- system.file("extdata", "BisSeq_quasr_single.bam",
                        package = "SingleMoleculeGenomicsIO")
 reffile <- system.file("extdata", "reference.fa.gz",
                        package = "SingleMoleculeGenomicsIO")

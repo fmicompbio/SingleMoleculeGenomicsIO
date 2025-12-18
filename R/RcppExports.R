@@ -341,7 +341,7 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'
 #' @examples
 #' library(Biostrings)
-#' bamfile <- system.file("extdata", "BisSeq_single.bam", package = "SingleMoleculeGenomicsIO")
+#' bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
 #' ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
 #' posPlus <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
 #'                          with.indels = FALSE, fixed = "subject", algorithm = "auto")
