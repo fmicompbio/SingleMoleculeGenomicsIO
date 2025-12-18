@@ -357,13 +357,15 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'                              regions = "chr1:6940000-6955000",
 #'                              pos_plus_list = posPlusList,
 #'                              pos_minus_list = posMinusList,
-#'                              unmod_integer = 2,
-#'                              mod_integer = 8,
+#'                              unmod_integer = 8,
+#'                              unmod_integer_rev = 1,
+#'                              mod_integer = 2,
+#'                              mod_integer_rev = 4,
 #'                              level = "summary",
 #'                              n_alns_to_sample = 0,
-#'                              tnames_for_sampling = "",
-#'                              variantRefNames = "",
-#'                              variantRefPositions = 0,
+#'                              tnames_for_sampling = character(0),
+#'                              variantRefNames = character(0),
+#'                              variantRefPositions = integer(0),
 #'                              n_threads = 1,
 #'                              verbose = TRUE)
 #' str(res1)
@@ -376,8 +378,8 @@ NULL
 #'
 #' @noRd
 #' @keywords internal
-read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
-    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, mod_integer, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
+read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, bam_format, regions, pos_plus_list, pos_minus_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
 }
 
 #' Read base modifications from a bam file.

@@ -95,8 +95,10 @@ int process_mismatch_bam_record(
         int &buffer_len,        // allocated length of message buffer
         std::vector<std::set<int>> &pos_plus_sets, // which positions to analyse (plus strand)
         std::vector<std::set<int>> &pos_minus_sets,// which positions to analyse (minus strand)
-        int unmod_integer,      // what to count as unmodified
-        int mod_integer,        // what to count as modified
+        uint8_t unmod_integer,      // what to count as unmodified
+        uint8_t unmod_integer_rev,  // what to count as unmodified, opposite strand
+        uint8_t mod_integer,        // what to count as modified
+        uint8_t mod_integer_rev,    // what to count as modified, opposite strand
         sam_hdr_t *in_samhdr,   // sam file header
         unsigned long long &n_unaligned, // number of unaligned modified bases
         unsigned long long &n_total,     // total number of modified bases
@@ -118,10 +120,12 @@ int process_mismatch_bam_record(
 
     // allocate variable only used inside process_mismatch_bam_record()
     int i = 0, j = 0, strand = 0, impl = 0, pos = 0, r = 0;
-    int useRC = 0, ref_pos = 0, read_pos = 0, op = 0, op_len = 0;
+    int ref_pos = 0, read_pos = 0, op = 0, op_len = 0;
+    int unmod_int = 0, mod_int = 0;
     int this_read_len = bamdata->core.l_qseq;
     size_t size_before_this_read = read_id.size();
-    static uint8_t *hitseq = NULL;
+    bool useRC = false;
+    static uint8_t *hitseq = NULL, fwdbase = 0;
     const uint32_t *cigar;
     std::set<int> *pos_set = NULL;
 
@@ -137,15 +141,14 @@ int process_mismatch_bam_record(
     //     pos_plus_sets for original top strand alignments (XG="CT")
     //     pos_minus_sets for original bottom strand alignments (XG="GA")
     if (bam_format == "QuasR") {
-        useRC = BAM_FREVERSE;
+        useRC = bamdata->core.flag & BAM_FREVERSE;
     } else if (bam_format == "Bismark") {
-        useRC = (strcmp(bam_aux2Z(bam_aux_get(bamdata, "XG")), "GA") == 0) ? !BAM_FUNMAP : BAM_FUNMAP;
+        useRC = (strcmp(bam_aux2Z(bam_aux_get(bamdata, "XG")), "GA") == 0) ? true : false;
     }
     pos_set = useRC ? &(pos_minus_sets[bamdata->core.tid]) : &(pos_plus_sets[bamdata->core.tid]);
+    unmod_int = useRC ? unmod_integer_rev : unmod_integer;
+    mod_int = useRC ? mod_integer_rev : mod_integer;
 
-
-    // ### WAS HERE (plan A: copy logic of read_to_reference_pos loop and analyze mismatches?)
-    // adapt mod/unmod_integer based on useRC?
     // variables
     cigar = bam_get_cigar(bamdata);  // cigar array
     hitseq = bam_get_seq(bamdata);   // query sequence
@@ -162,16 +165,18 @@ int process_mismatch_bam_record(
         case BAM_CEQUAL:  // match (=)
         case BAM_CDIFF:   // mismatch (X)
             for (j = 0; j < op_len; j++) {
-                if (pos_set.count(ref_pos) > 0) {
+                if (pos_set->count(ref_pos) > 0) {
                     // we need to analyze this position
                     // ... check that the read base is either unmod_integer
                     //     or mod_integer (otherwise do nothing)
-                    uint8_t fwdbase = bam1_seqi(hitseq, read_pos);
-                    read_id.push_back(bam_get_qname(bamdata));
-                    ref_strand.push_back(useRC ? '-' : '+');
-                    chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
-                    ref_position.push_back(ref_pos);
-                    mod_prob.push_back(); // TODO
+                    fwdbase = bam_seqi(hitseq, read_pos);
+                    if (fwdbase & (unmod_int | mod_int)) {
+                        read_id.push_back(bam_get_qname(bamdata));
+                        ref_strand.push_back(useRC ? '-' : '+');
+                        chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
+                        ref_position.push_back(ref_pos);
+                        mod_prob.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
+                    }
                 }
                 ref_pos++;
                 read_pos++;
@@ -199,132 +204,6 @@ int process_mismatch_bam_record(
             Rcpp::warning("Unknown CIGAR operation: %d", op);
         } // # nocov end
     }
-/*
-    // get aligned sequence of the read
-    hitseq = bam_get_seq(bamdata);
-    iend = bam_calend(&(bamdata->core), bam1_cigar(bamdata)) - cnt->offset;
-
-    // this part was copied from quantify_methylation (QuasR)
-    if ((hit->core.flag & BAM_FPROPER_PAIR) && (hit->core.isize > 0) && (iend > (const uint32_t)(hit->core.mpos) - cnt->offset))
-        // left fragment of a paired alignment --> make sure iend does not overlap alignment of right fragment
-        iend = (uint32_t)(hit->core.mpos) - cnt->offset;
-
-    if (hit->core.flag & BAM_FREVERSE) {       // alignment on minus strand (reads are reverse complemented, look for G-A mismatches)
-        //Rprintf("\nminus strand alignment %d-%d (offset %d), id=%s\n", hit->core.pos+1, bam_calend(&(hit->core), bam1_cigar(hit)), cnt->offset, bam1_qname(hit));
-        for(i=(uint32_t)(hit->core.pos)-cnt->offset, j=0; i<iend; i++, j++)
-            if(cnt->om[i]) {                   //  target base is 'G'
-                //char Twobit2base[] = {'X', 'A', 'C', 'X', 'G', 'X', 'X', 'X', 'T', 'X', 'X', 'X', 'X', 'X', 'X', 'N'};
-                //Rprintf("  adding to genomic position %d (read pos %d has %c)\n", i+cnt->offset+1, j+1, Twobit2base[bam1_seqi(hitseq, j)]);
-                if(bam1_seqi(hitseq, j)==4) {        //  query base is 'G'
-                    cnt->Tm[i]++;
-                    cnt->Mm[i]++;
-                } else if(bam1_seqi(hitseq, j)==1) { //  query base is 'A'
-                    cnt->Tm[i]++;
-                }
-            }
-
-    } else {                                   // alignment on plus strand (look for C-T mismatches)
-        //Rprintf("\nplus strand alignment %d-%d (offset %d), id=%s\n", hit->core.pos+1, bam_calend(&(hit->core), bam1_cigar(hit)), cnt->offset, bam1_qname(hit));
-        for(i=(uint32_t)(hit->core.pos)-cnt->offset, j=0; i<iend; i++, j++)
-            if(cnt->op[i]) {                    //  target base is 'C'
-                //char Twobit2base[] = {'X', 'A', 'C', 'X', 'G', 'X', 'X', 'X', 'T', 'X', 'X', 'X', 'X', 'X', 'X', 'N'};
-                //Rprintf("  adding to genomic position %d (read pos %d has %c)\n", i+cnt->offset+1, j+1, Twobit2base[bam1_seqi(hitseq, j)]);
-                if(bam1_seqi(hitseq, j)==2) {        //  query base is 'C'
-                    cnt->Tp[i]++;
-                    cnt->Mp[i]++;
-                } else if(bam1_seqi(hitseq, j)==8) { //  query base is 'T'
-                    cnt->Tp[i]++;
-                }
-            }
-    }
-
-        // this part is copied from process_bam_record()
-        for (i = 0; i < this_read_len; i++) {
-            // i is the position in the aligned read (possibly reverse-complemented)
-            // pos is the position in the original read (qseq)
-            if (bam_is_rev(bamdata)) {
-                pos = this_read_len - 1 - i;
-            } else{
-                pos = i;
-            }
-
-            // r: number of found modifications (>=1, 0 or -1 if failed)
-            r = bam_mods_at_next_pos(bamdata, ms, mod, sizeof(mod)/sizeof(mod[0]));
-            if (r <= -1) {
-                had_error = true; // # nocov start
-                snprintf(buffer, buffer_len,
-                         "Failed to get modifications (read %s)\n",
-                         bam_get_qname(bamdata));
-                return -2; // # nocov end
-
-            } else if (r > (int)(sizeof(mod) / sizeof(mod[0]))) {
-                had_error = true;
-                snprintf(buffer, buffer_len,
-                         "More modifications than SingleMoleculeGenomicsIO:::read_modbam_cpp can handle (read %s)\n",
-                         bam_get_qname(bamdata));
-                return -3;
-
-            } else if (!r && impl) {
-                // implied base without modification at position i
-                if (qseq[pos] == unmodbase) {
-                    // base of the right type -> add to results
-                    read_id.push_back(bam_get_qname(bamdata));
-                    aligned_read_position.push_back(i);
-                    forward_read_position.push_back(pos);
-                    chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
-                    call_code.push_back('-');
-                    canonical_base.push_back(canonical);
-                    ref_strand.push_back(bam_is_rev(bamdata) ? '-' : '+');
-                    mod_prob.push_back(-1.0); // special value of -1.0 indicates inferred unmodified base
-                }
-            }
-            // modifications
-            for (j = 0; j < r; j++) {
-                if (mod[j].modified_base == modbase) {
-                    // found modified base of the right type -> add to results
-                    read_id.push_back(bam_get_qname(bamdata));
-                    aligned_read_position.push_back(i);
-                    forward_read_position.push_back(pos);
-                    chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
-                    call_code.push_back((char) mod[j].modified_base);
-                    canonical_base.push_back((char) mod[j].canonical_base);
-                    ref_strand.push_back(bam_is_rev(bamdata) == mod[j].strand ? '+' : '-');
-                    // `qual` of N corresponds to call probability
-                    //     in [N/256, (N+1)/256] -> store midpoint
-                    mod_prob.push_back(((double) mod[j].qual + 0.5) / 256.0);
-                }
-            }
-        }
-    }
-
-    // ... convert 0-based read positions to 0-based reference coordinates
-    //     (a coordinate of -1 means unaligned, e.g. soft-masked)
-    std::vector<int> aligned_read_position_converted =
-        read_to_reference_pos(bamdata, aligned_read_position);
-    ref_position.reserve(ref_position.size() +
-        aligned_read_position_converted.size());
-    ref_position.insert(ref_position.end(),
-                        aligned_read_position_converted.begin(),
-                        aligned_read_position_converted.end());
-    aligned_read_position.clear();
-
-    // ... remove unaligned (e.g. soft-masked) read-bases
-    //     (iterate backwards to avoid messing up indices
-    //      when removing elements)
-    n_total += ref_position.size();
-    for (size_t e = ref_position.size(); e-- > 0;) {
-        if (ref_position[e] == -1) {
-            n_unaligned++;
-            read_id.erase(read_id.begin() + e);
-            chrom.erase(chrom.begin() + e);
-            forward_read_position.erase(forward_read_position.begin() + e);
-            ref_position.erase(ref_position.begin() + e);
-            call_code.erase(call_code.begin() + e);
-            canonical_base.erase(canonical_base.begin() + e);
-            ref_strand.erase(ref_strand.begin() + e);
-            mod_prob.erase(mod_prob.begin() + e);
-        }
-    }
 
     // ... extract read-level information if the read had modified bases
     if (size_before_this_read < read_id.size()) {
@@ -333,7 +212,7 @@ int process_mismatch_bam_record(
         df_qscore.push_back(extract_qscore(bamdata));
         df_read_length.push_back(this_read_len);
         df_aligned_length.push_back(calculate_aligned_bases(bamdata));
-        df_ref_strand.push_back((bamdata->core.flag & BAM_FREVERSE) ? "-" : "+");
+        df_ref_strand.push_back(useRC ? '-' : '+');
 
         // ... ... variant_label
         if (variantRefNames.size() > 0) {
@@ -344,7 +223,7 @@ int process_mismatch_bam_record(
             df_variant_label.push_back(NA_STRING);
         }
     }
-*/
+
     return 0;
 }
 
@@ -439,13 +318,15 @@ int process_mismatch_bam_record(
 //'                              regions = "chr1:6940000-6955000",
 //'                              pos_plus_list = posPlusList,
 //'                              pos_minus_list = posMinusList,
-//'                              unmod_integer = 2,
-//'                              mod_integer = 8,
+//'                              unmod_integer = 8,
+//'                              unmod_integer_rev = 1,
+//'                              mod_integer = 2,
+//'                              mod_integer_rev = 4,
 //'                              level = "summary",
 //'                              n_alns_to_sample = 0,
-//'                              tnames_for_sampling = "",
-//'                              variantRefNames = "",
-//'                              variantRefPositions = 0,
+//'                              tnames_for_sampling = character(0),
+//'                              variantRefNames = character(0),
+//'                              variantRefPositions = integer(0),
 //'                              n_threads = 1,
 //'                              verbose = TRUE)
 //' str(res1)
@@ -467,13 +348,15 @@ int process_mismatch_bam_record(
                                regions = "chr1:6940000-6955000",
                                pos_plus_list = posPlusList,
                                pos_minus_list = posMinusList,
-                               unmod_integer = 2,
-                               mod_integer = 8,
+                               unmod_integer = 8,
+                               unmod_integer_rev = 1,
+                               mod_integer = 2,
+                               mod_integer_rev = 4,
                                level = "summary",
                                n_alns_to_sample = 0,
-                               tnames_for_sampling = "",
-                               variantRefNames = "",
-                               variantRefPositions = 0,
+                               tnames_for_sampling = character(0),
+                               variantRefNames = character(0),
+                               variantRefPositions = integer(0),
                                n_threads = 1,
                                verbose = TRUE)
 
@@ -491,8 +374,10 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                                 std::vector<std::string> regions,
                                 Rcpp::List pos_plus_list,
                                 Rcpp::List pos_minus_list,
-                                int unmod_integer,
-                                int mod_integer,
+                                uint8_t unmod_integer,
+                                uint8_t unmod_integer_rev,
+                                uint8_t mod_integer,
+                                uint8_t mod_integer_rev,
                                 std::string level,
                                 int n_alns_to_sample,
                                 std::vector<std::string> tnames_for_sampling,
@@ -825,7 +710,9 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         pos_plus_sets,    // which positions to analyse (plus strand)
                         pos_minus_sets,   // which positions to analyse (minus strand)
                         unmod_integer,    // what to count as unmodified
+                        unmod_integer_rev, // what to count as unmodified, opposite strand
                         mod_integer,      // what to count as modified
+                        mod_integer_rev,  // what to count as modified, opposite strand
                         in_samhdr,        // sam file header
                         n_unaligned,      // number of unaligned positions
                         n_total,          // total number of positions

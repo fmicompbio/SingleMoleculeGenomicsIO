@@ -46,9 +46,8 @@
 #'     \code{readBaseUnmod} and \code{readBaseMod}. The genomic sequence context
 #'     will be returned in \code{rowData(x)$sequenceContext}.
 #' @param readBaseUnmod,readBaseMod Character scalars defining the read bases
-#'     (possibly using an IUPAC ambiguity code) that are interpreted as
-#'     unmodified or modified, respectively, when aligned to the middle base of
-#'     \code{sequenceContext}.
+#'     that are interpreted as unmodified or modified, respectively, when
+#'     aligned to the middle base of \code{sequenceContext}.
 #'
 #' @return A \code{\link[SummarizedExperiment]{SummarizedExperiment}} object
 #'     with genomic positions in rows and samples in columns. The assays
@@ -60,10 +59,10 @@
 #'                        package = "SingleMoleculeGenomicsIO")
 #' reffile <- system.file("extdata", "reference.fa.gz",
 #'                        package = "SingleMoleculeGenomicsIO")
-#' readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
-#'                 sequenceReference = reffile, sequenceContext = "NCG",
-#'                 readBaseUnmod = "T", readBaseMod = "C",
-#'                 verbose = TRUE, BPPARAM = BiocParallel::SerialParam())
+#' se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
+#'                       sequenceReference = reffile, sequenceContext = "NCG",
+#'                       readBaseUnmod = "T", readBaseMod = "C",
+#'                       verbose = TRUE, BPPARAM = BiocParallel::SerialParam())
 #'
 #' @author Michael Stadler, Charlotte Soneson
 #'
@@ -82,14 +81,15 @@
 #' @importFrom methods is
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom stats setNames
+#' @importFrom dplyr group_by summarize mutate
 #'
 #' @export
 readMismatchBam <- function(bamfiles,
                             bamFormat = "QuasR",
                             regions = NULL,
                             sequenceContext = "GCH",
-                            readBaseUnmod = "C",
-                            readBaseMod = "T",
+                            readBaseUnmod = "T",
+                            readBaseMod = "C",
                             level = "read",
                             sampleAnnot = NULL,
                             nAlnsToSample = 0,
@@ -122,17 +122,17 @@ readMismatchBam <- function(bamfiles,
                 ceiling(nchar(sequenceContext))) %in% DNA_BASES) {
         cli_abort("The central base of {.arg sequenceContext} must be A, C, G or T")
     }
-    .assertScalar(x = readBaseUnmod, type = "character",
-                  validValues = setdiff(DNA_ALPHABET, c("N", "-", "+", ".")))
-    .assertScalar(x = readBaseMod, type = "character",
-                  validValues = setdiff(DNA_ALPHABET, c("N", "-", "+", ".")))
+    .assertScalar(x = readBaseUnmod, type = "character", validValues = DNA_BASES)
+    .assertScalar(x = readBaseMod, type = "character", validValues = DNA_BASES)
     unmodBases <- strsplit(IUPAC_CODE_MAP[readBaseUnmod], "")[[1]]
     modBases <- strsplit(IUPAC_CODE_MAP[readBaseMod], "")[[1]]
     if (length(intersect(unmodBases, modBases)) > 0L) {
         cli_abort("{.arg readBaseUnmod} and {.arg readBaseMod} must not include common bases")
     }
     unmodInteger <- as.integer(sum(c(A = 1L, C = 2L, G = 4L, T = 8L)[unmodBases]))
+    unmodIntegerRev <- as.integer(sum(c(A = 8L, C = 4L, G = 2L, T = 1L)[unmodBases]))
     modInteger <- as.integer(sum(c(A = 1L, C = 2L, G = 4L, T = 8L)[modBases]))
+    modIntegerRev <- as.integer(sum(c(A = 8L, C = 4L, G = 2L, T = 1L)[modBases]))
     .assertScalar(x = level, type = "character",
                   validValues = c("read", "summary", "quickread"))
     .assertVector(x = sampleAnnot, type = "data.frame", allowNULL = TRUE)
@@ -263,7 +263,9 @@ readMismatchBam <- function(bamfiles,
                  myposPlusList = posPlusList,
                  myposMinusList = posMinusList,
                  myunmodInteger = unmodInteger,
+                 myunmodIntegerRev = unmodIntegerRev,
                  mymodInteger = modInteger,
+                 mymodIntegerRev = modIntegerRev,
                  mynAlnsToSample = nAlnsToSample,
                  myseqnamesToSampleFrom = seqnamesToSampleFrom,
                  myvariantRefNames = variantRefNames,
@@ -279,7 +281,9 @@ readMismatchBam <- function(bamfiles,
                 pos_plus_list = myposPlusList,
                 pos_minus_list = myposMinusList,
                 unmod_integer = myunmodInteger,
+                unmod_integer_rev = myunmodIntegerRev,
                 mod_integer = mymodInteger,
+                mod_integer_rev = mymodIntegerRev,
                 level = mylevel,
                 n_alns_to_sample = as.integer(mynAlnsToSample),
                 tnames_for_sampling = myseqnamesToSampleFrom,
@@ -316,6 +320,24 @@ readMismatchBam <- function(bamfiles,
         sequenceReference = ref)
 
     if (level %in% c("read")) {
+        # combine information from R1 and R2
+        resLL <- lapply(resLL, function(resL) {
+            resL$read_df <- resL$read_df |>
+                mutate(read_id = factor(read_id, levels = unique(read_id))) |>
+                group_by(read_id) |>
+                summarize(qscore = mean(qscore),
+                          read_length = sum(read_length),
+                          aligned_length = sum(aligned_length),
+                          variant_label = ifelse(any(is.na(variant_label)), NA_character_,
+                                                 paste(variant_label, collapse = "")),
+                          ref_strand = paste(unique(ref_strand, collapse = "/")),
+                          .groups = "drop") |>
+                mutate(read_id = as.character(read_id)) |>
+                as.data.frame()
+            rownames(resL$read_df) <- seq_len(nrow(resL$read_df))
+            resL
+        })
+
         # extract unique read names
         readL <- lapply(resLL, function(resL) resL$read_df$read_id)
 
@@ -389,7 +411,8 @@ readMismatchBam <- function(bamfiles,
             metadata = list(readLevelData = list(assayNames = "mod_prob",
                                                  colDataColumns = "readInfo"),
                             variantPositions = variantPositions,
-                            mismatchesAreUnmod = mismatchesAreUnmod)
+                            readBaseMod = readBaseMod,
+                            readBaseUnmod = readBaseUnmod)
         )
     } else {
         stopifnot(colnames(Nmod) == cdata$sample,
@@ -403,7 +426,8 @@ readMismatchBam <- function(bamfiles,
             colData = cdata,
             metadata = list(readLevelData = list(assayNames = character(0),
                                                  colDataColumns = character(0)),
-                            mismatchesAreUnmod = mismatchesAreUnmod)
+                            readBaseMod = readBaseMod,
+                            readBaseUnmod = readBaseUnmod)
         )
     }
     if (nrow(se) > 0) {

@@ -6,10 +6,11 @@
 \usage{
 readMismatchBam(
   bamfiles,
+  bamFormat = "QuasR",
   regions = NULL,
   sequenceContext = "GCH",
-  readBaseUnmod = "C",
-  readBaseMod = "T",
+  readBaseUnmod = "T",
+  readBaseMod = "C",
   level = "read",
   sampleAnnot = NULL,
   nAlnsToSample = 0,
@@ -29,6 +30,11 @@ If \code{bamfiles} is a named vector, the names are used
 as sample names and prefixes for read names. Otherwise, the prefixes will
 be \code{s1}, ..., \code{sN}, where \code{N} is the length of
 \code{bamfiles}. All \code{bamfiles} must have an index.}
+
+\item{bamFormat}{A character scalar giving the format of \code{BAM} files.
+Currently supported ar \code{BAM} files that have been created with
+\code{"QuasR"} (using \code{\link[QuasR]{qAlign}} in bisulfite mode) or
+\code{"Bismark"}.}
 
 \item{regions}{A \code{\link[GenomicRanges]{GRanges}} object specifying which
 genomic regions to extract the reads from. Alternatively, regions can be
@@ -53,9 +59,8 @@ the aligned base in the read and interpreted according to
 will be returned in \code{rowData(x)$sequenceContext}.}
 
 \item{readBaseUnmod, readBaseMod}{Character scalars defining the read bases
-(possibly using an IUPAC ambiguity code) that are interpreted as
-unmodified or modified, respectively, when aligned to the middle base of
-\code{sequenceContext}.}
+that are interpreted as unmodified or modified, respectively, when
+aligned to the middle base of \code{sequenceContext}.}
 
 \item{level}{Character scalar specifying the level of returned modification
 data. Supported values are:
@@ -147,10 +152,10 @@ bamfile <- system.file("extdata", "BisSeq_single.bam",
                        package = "SingleMoleculeGenomicsIO")
 reffile <- system.file("extdata", "reference.fa.gz",
                        package = "SingleMoleculeGenomicsIO")
-readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
-                sequenceReference = reffile, sequenceContext = "NCG",
-                readBaseUnmod = "T", readBaseMod = "C",
-                verbose = TRUE, BPPARAM = BiocParallel::SerialParam())
+se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
+                      sequenceReference = reffile, sequenceContext = "NCG",
+                      readBaseUnmod = "T", readBaseMod = "C",
+                      verbose = TRUE, BPPARAM = BiocParallel::SerialParam())
 
 }
 \author{
