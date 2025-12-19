@@ -47,6 +47,20 @@ test_that("read_mismatchbam_cpp works", {
     posContextL <- list(chr1 = true_meth$pos[true_meth$strand == "+"] - 1L)
     posContextRevL <- list(chr1 = true_meth$pos[true_meth$strand == "-"] - 1L)
     bisseqIntegers <- c(8L, 1L, 2L, 4L)
+    ref <- Biostrings::readDNAStringSet(system.file("extdata", "reference.fa.gz",
+                                                    package = "SingleMoleculeGenomicsIO"))
+    posCpG <- Biostrings::vmatchPattern(pattern = "NCG", subject = ref,
+                                        max.mismatch = 0, with.indels = FALSE,
+                                        fixed = "subject", algorithm = "auto")
+    posCpGRev <- Biostrings::vmatchPattern(pattern = "CGN", subject = ref,
+                                           max.mismatch = 0, with.indels = FALSE,
+                                           fixed = "subject", algorithm = "auto")
+    posCpGL <- lapply(posCpG, function(x) {
+        IRanges::start(IRanges::resize(x = x, width = 1, fix = "center")) - 1L
+    })
+    posCpGRevL <- lapply(posCpGRev, function(x) {
+        IRanges::start(IRanges::resize(x = x, width = 1, fix = "center")) - 1L
+    })
 
 
     ## invalid arguments -------------------------------------------------------
@@ -112,7 +126,7 @@ test_that("read_mismatchbam_cpp works", {
                  "Invalid QuasR bam format")
 
     ## expected results --------------------------------------------------------
-    # ... run read_mismatchbam_cpp
+    # ... read level
     suppressMessages(expect_message(
         res1 <- read_mismatchbam_cpp(
             inname_str = quasr_paired_bamfile, bam_format = "QuasR",
@@ -142,9 +156,45 @@ test_that("read_mismatchbam_cpp works", {
         level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
+    # ... read level (sampling)
+    set.seed(1L)
+    expect_warning(
+        res4a <- read_mismatchbam_cpp(
+            inname_str = quasr_single_bamfile, bam_format = "QuasR",
+            regions = "chr1:6925411-6925964", pos_context_list = posCpGL,
+            pos_context_rev_list = posCpGRevL,
+            unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
+            mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
+            level = "read", n_alns_to_sample = 30, tnames_for_sampling = c("chr1", "error"),
+            variantRefNames = character(0), variantRefPositions = integer(0),
+            n_threads = 2, verbose = FALSE),
+        "Ignoring unknown target name"
+    )
+    set.seed(1L)
+    res4b <- read_mismatchbam_cpp(
+        inname_str = quasr_single_bamfile, bam_format = "QuasR",
+        regions = "chr1:6925411-6925964", pos_context_list = posCpGL,
+        pos_context_rev_list = posCpGRevL,
+        unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
+        mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
+        level = "read", n_alns_to_sample = 30, tnames_for_sampling = "chr1",
+        variantRefNames = character(0), variantRefPositions = integer(0),
+        n_threads = 2, verbose = FALSE)
+    suppressMessages(expect_message(
+        res4c <- read_mismatchbam_cpp(
+            inname_str = quasr_single_bamfile, bam_format = "QuasR",
+            regions = "chr1:6925411-6925964", pos_context_list = posCpGL,
+            pos_context_rev_list = posCpGRevL,
+            unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
+            mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
+            level = "read", n_alns_to_sample = 30, tnames_for_sampling = "chr1",
+            variantRefNames = character(0), variantRefPositions = integer(0),
+            n_threads = 2, verbose = TRUE)
+    ))
+
 
     # ... collect all mode 1 and mode 2 results in list
-    resL <- list(res1, res2, res3)
+    resL <- list(res1, res2, res3, res4a, res4b, res4c)
 
     # ... results structure
     invisible(lapply(resL, function(r) expect_type(r, "list")))
@@ -224,4 +274,12 @@ test_that("read_mismatchbam_cpp works", {
     expect_true(!any(is.na(res3reads$mod_prob.x)))
     expect_true(!any(is.na(res3reads$mod_prob.y)))
     expect_identical(res3reads$mod_prob.x, res3reads$mod_prob.y)
+
+    # ... content of res4a, res4b and res4c
+    expect_identical(res4a, res4b)
+    expect_length(unique(res4a$read_id), 5L)
+    expect_false(identical(res4a, res4c))
+    expect_length(unique(res4c$read_id), 9L)
+    expect_length(unique(res4a$read_id), nrow(res4a$read_df))
+    expect_length(unique(res4c$read_id), nrow(res4c$read_df))
 })

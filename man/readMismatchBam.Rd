@@ -90,7 +90,11 @@ In order to make the results reproducible, make sure to set the
 below). Please note that secondary and supplementary alignments in
 \code{bamfiles} contribute to the total number of alignments but will not
 be sampled, thus the number of returned alignments may be lower than
-\code{nAlnsToSample}.}
+\code{nAlnsToSample}. Also, sampled reads that do not overlap
+a site with the indicated sequence context will not be returned, which
+may further reduce the number of returned alignments. Note that for
+paired-end bam files, individual reads are sampled and pairs will not be
+complete.}
 
 \item{seqnamesToSampleFrom}{A character vector with one or several sequence
 names (chromosomes) from which to sample alignments from (only used if

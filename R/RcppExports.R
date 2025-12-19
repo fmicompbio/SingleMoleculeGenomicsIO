@@ -297,7 +297,8 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #' @param level Character scalar selecting the level of the returned data
 #'     (\code{"read"} or \code{"summary"}).
 #' @param n_alns_to_sample Integer defining the number of alignments
-#'     to randomly sample.
+#'     to randomly sample. Note that for paired-end bam files, individual
+#'     reads are sampled and pairs will not be complete.
 #' @param tnames_for_sampling String vector with target names (chromosomes)
 #'     from which to sample \code{n_alns_to_sample} alignments. Ignored if
 #'     \code{n_alns_to_sample = 0}.

@@ -48,6 +48,19 @@
 #' @param readBaseUnmod,readBaseMod Character scalars defining the read bases
 #'     that are interpreted as unmodified or modified, respectively, when
 #'     aligned to the middle base of \code{sequenceContext}.
+#' @param nAlnsToSample A numeric scalar. If non-zero, \code{regions} is ignored
+#'     and approximately \code{nAlnsToSample} randomly selected alignments on
+#'     \code{seqnamesToSampleFrom} are read from each of the \code{bamfiles}.
+#'     In order to make the results reproducible, make sure to set the
+#'     \code{RNGseed} argument in the provided \code{BPPARAM} object (see
+#'     below). Please note that secondary and supplementary alignments in
+#'     \code{bamfiles} contribute to the total number of alignments but will not
+#'     be sampled, thus the number of returned alignments may be lower than
+#'     \code{nAlnsToSample}. Also, sampled reads that do not overlap
+#'     a site with the indicated sequence context will not be returned, which
+#'     may further reduce the number of returned alignments. Note that for
+#'     paired-end bam files, individual reads are sampled and pairs will not be
+#'     complete.
 #'
 #' @return A \code{\link[SummarizedExperiment]{SummarizedExperiment}} object
 #'     with genomic positions in rows and samples in columns. The assays
