@@ -11,6 +11,10 @@
 #include <cli/progress.h>
 #include "utils.h"
 
+#define MISMATCHBAM_MODE_READ      1
+#define MISMATCHBAM_MODE_PAIR      3
+#define MISMATCHBAM_MODE_SUMMARY   4
+
 // convert a named Rcpp::List with IntegerVector elements
 // to a std::vector<std::set<int>>, where the index in the
 // vector corresponds to the target name index as defined in in_samhdr
@@ -87,6 +91,7 @@ int check_bam_format(samFile *infile,
 // - extract information from record (qscore, modification information, etc.)
 // - add information to vectors (passed by reference) for later returning to R
 int process_mismatch_bam_record(
+        int mode,               // run mode
         bam1_t *bamdata,        // bam record
         std::string bam_format, // format of bam file
         unsigned int &alncnt,   // alignment counter
@@ -105,12 +110,16 @@ int process_mismatch_bam_record(
         std::vector<std::string> &variantRefNames, // seqnames of SNV sites
         std::vector<int> &variantRefPositions,     // coordinates of SNV sites
         // vectors for return values (per modification)
+        // ... mode == MISMATCHBAM_MODE_READ
         std::vector<std::string> &read_id,
         std::vector<char> &ref_strand,
         std::vector<double> &qscore,
         std::vector<std::string> &chrom,
         std::vector<int> &ref_position,
         std::vector<double> &mod_prob,
+        // ... mode == MISMATCHBAM_MODE_PAIR
+        Rcpp::NumericMatrix &pair_counts,
+        // ... mode == MISMATCHBAM_MODE_SUMMARY
         // vectors for return values (per alignment)
         std::vector<std::string> &df_read_id,
         std::vector<double> &df_qscore,
@@ -129,6 +138,9 @@ int process_mismatch_bam_record(
     static uint8_t *hitseq = NULL, fwdbase = 0;
     const uint32_t *cigar;
     std::set<int> *pos_set = NULL;
+    // ... mode == MISMATCHBAM_MODE_PAIR
+    std::vector<int> modposref; // refernce position of modified bases
+    std::vector<int> modstate;  // modification states of the bases (0: unmod, 1: mod)
 
     // process alignment
     alncnt++;
@@ -172,12 +184,22 @@ int process_mismatch_bam_record(
                     //     or mod_integer (otherwise do nothing)
                     fwdbase = bam_seqi(hitseq, read_pos);
                     if (fwdbase & (unmod_int | mod_int)) {
-                        read_id.push_back(bam_get_qname(bamdata));
-                        ref_strand.push_back(useRC ? '-' : '+');
-                        qscore.push_back(bam_get_qual(bamdata)[read_pos]);
-                        chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
-                        ref_position.push_back(ref_pos);
-                        mod_prob.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
+
+                        if (mode == MISMATCHBAM_MODE_READ) {
+                            read_id.push_back(bam_get_qname(bamdata));
+                            ref_strand.push_back(useRC ? '-' : '+');
+                            qscore.push_back(bam_get_qual(bamdata)[read_pos]);
+                            chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
+                            ref_position.push_back(ref_pos);
+                            mod_prob.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
+
+                        } else if (mode == MISMATCHBAM_MODE_PAIR) {
+                            modposref.push_back(ref_pos);
+                            modstate.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
+
+                        } else if (mode == MISMATCHBAM_MODE_SUMMARY) {
+                            ;
+                        }
                     }
                 }
                 ref_pos++;
@@ -208,7 +230,7 @@ int process_mismatch_bam_record(
     }
 
     // ... extract read-level information if the read had modified bases
-    if (size_before_this_read < read_id.size()) {
+    if (mode == MISMATCHBAM_MODE_READ && size_before_this_read < read_id.size()) {
         // ... add to read-level results
         df_read_id.push_back(bam_get_qname(bamdata));
         df_qscore.push_back(extract_qscore(bamdata));
@@ -223,6 +245,18 @@ int process_mismatch_bam_record(
                                      variantRefPositions, in_samhdr));
         } else {
             df_variant_label.push_back(NA_STRING);
+        }
+
+    } else if (mode == MISMATCHBAM_MODE_PAIR) {
+        // process modposref and modstate to update counter in pair_counts
+        int maxdist = pair_counts.nrow() - 1, currdist = 0;
+        for (i = 0; i < (int)modposref.size(); i++) {
+            for (j = i; j < (int)modposref.size(); j++) {
+                currdist = modposref[j] - modposref[i];
+                if (currdist > maxdist)
+                    break;
+                pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+            }
         }
     }
 
@@ -474,7 +508,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
 
     // start reading according to analysis mode
     if (windowSize > 0) {
-    /*
         // Mode 3: counting of pairs of bases by distance and modification state
         // ---------------------------------------------------------------------
         pair_counts = Rcpp::NumericMatrix(windowSize, 4);
@@ -503,30 +536,51 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                 (bamdata->core.qual >= minMapQ) &&
                 (calculate_aligned_bases(bamdata) >= minAlignedLength)) {
 
-                success = count_pairs_bam_record(
-                    bamdata,            // bam record
-                    alncnt,             // alignment counter
-                    ms,                 // modification state struct
-                    had_error,          // error flag
-                    buffer,             // buffer for message
-                    buffer_len,         // allocated length of message buffer
-                    modbase,            // modified base to analyze
-                    threshUnmod,        // mod_prob <  threshUnmod: unmodified
-                    threshMod,          // mod_prob >= thresh_unmod: modified
-                    pair_counts);       // count matrix for return value
-
-                if (verbose && CLI_SHOULD_TICK) {
-                    cli_progress_set(bar, (double)alncnt); // # nocov
-                }
-                if (alncnt % 100 == 0) { // # nocov start
-                    R_CheckUserInterrupt();
+                success = process_mismatch_bam_record(
+                    MISMATCHBAM_MODE_PAIR, // run mode
+                    bamdata,          // bam record
+                    bam_format,       // format of bam file
+                    alncnt,           // alignment counter
+                    had_error,        // error flag
+                    buffer,           // buffer for message
+                    buffer_len,       // allocated length of message buffer
+                    pos_context_sets, // which positions to analyse (plus strand)
+                    pos_context_rev_sets, // which positions to analyse (minus strand)
+                    unmod_integer,    // what to count as unmodified
+                    unmod_integer_rev, // what to count as unmodified, opposite strand
+                    mod_integer,      // what to count as modified
+                    mod_integer_rev,  // what to count as modified, opposite strand
+                    in_samhdr,        // sam file header
+                    n_unaligned,      // number of unaligned positions
+                    n_total,          // total number of positions
+                    variantRefNames,  // seqnames of SNV sites
+                    variantRefPositions, // coordinates of SNV sites
+                    // vectors for return values (per modification)
+                    read_id,
+                    ref_strand,
+                    qscore,
+                    chrom,
+                    ref_position,
+                    mod_prob,
+                    pair_counts,
+                    // vectors for return values (per alignment)
+                    df_read_id,
+                    df_qscore,
+                    df_read_length,
+                    df_aligned_length,
+                    df_variant_label,
+                    df_ref_strand);
+                if (verbose && CLI_SHOULD_TICK) { // # nocov start
+                    cli_progress_set(bar, (double)alncnt);
                 } // # nocov end
-                if (success != 0) {
-                    goto end;
-                }
+                if (alncnt % 100 == 0) { // # nocov start
+                    Rcpp::checkUserInterrupt();
+                } // # nocov end
+                if (success != 0) { // # nocov start
+                    goto end;       // currently there are no failure points in process_mismatch_bam_record
+                } // # nocov end
             }
         }
-    */
     } else {
         if (n_alns_to_sample > 0) {
             // Mode 2: random-sampling-based alignment reading
@@ -564,6 +618,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                 if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) &&
                     rand_val < keep_aln_fraction) {
                     success = process_mismatch_bam_record(
+                        MISMATCHBAM_MODE_READ, // run mode
                         bamdata,          // bam record
                         bam_format,       // format of bam file
                         alncnt,           // alignment counter
@@ -588,6 +643,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         chrom,
                         ref_position,
                         mod_prob,
+                        pair_counts,
                         // vectors for return values (per alignment)
                         df_read_id,
                         df_qscore,
@@ -595,9 +651,9 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         df_aligned_length,
                         df_variant_label,
                         df_ref_strand);
-                    if (verbose && CLI_SHOULD_TICK) {
+                    if (verbose && CLI_SHOULD_TICK) { // # nocov start
                         cli_progress_set(bar, (double)alncnt);
-                    }
+                    } // # nocov end
                     if (alncnt % 100 == 0) { // # nocov start
                         R_CheckUserInterrupt();
                     } // # nocov end
@@ -631,6 +687,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             while ((c = sam_itr_next(infile, iter, bamdata)) >= 0) {
                 if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY))) {
                     success = process_mismatch_bam_record(
+                        MISMATCHBAM_MODE_READ, // run mode
                         bamdata,          // bam record
                         bam_format,       // format of bam file
                         alncnt,           // alignment counter
@@ -655,6 +712,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         chrom,
                         ref_position,
                         mod_prob,
+                        pair_counts,
                         // vectors for return values (per alignment)
                         df_read_id,
                         df_qscore,

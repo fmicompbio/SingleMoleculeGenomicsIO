@@ -97,6 +97,33 @@ test_that("read_mismatchbam_cpp works", {
                                       variantRefPositions = integer(0),
                                       n_threads = 1L, verbose = FALSE),
                  "Failed to load the index")
+    expect_error(read_mismatchbam_cpp(inname_str = tmpbam, bam_format = "QuasR",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE,
+                                      windowSize = 40),
+                 "Failed to load the index")
+    expect_error(read_mismatchbam_cpp(inname_str = tmpbam, bam_format = "QuasR",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 30,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Failed to load the index")
     unlink(tmpbam)
 
     # ... wrong bam_format
@@ -127,7 +154,51 @@ test_that("read_mismatchbam_cpp works", {
                                       n_threads = 1L, verbose = FALSE),
                  "Invalid QuasR bam format")
 
-    # ... chromosome not existing in bam header
+    # ... context chromosome not existing in bam header
+    expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile, bam_format = "QuasR",
+                                      regions = "chr2", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Failed to get bam iterator")
+    expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile, bam_format = "QuasR",
+                                      regions = "chr2", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE,
+                                      windowSize = 100),
+                 "Failed to get bam iterator")
+
+    # ... asking for more alignments than present in bam file
+    expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile, bam_format = "QuasR",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 3000,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Cannot sample 3000 alignments from a total of")
+
+    # ... region chromosome not existing in bam header
     expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile, bam_format = "QuasR",
                                       regions = "chr1", pos_context_list = setNames(posContextL, "chr2"),
                                       pos_context_rev_list = posContextRevL,
@@ -141,6 +212,45 @@ test_that("read_mismatchbam_cpp works", {
                                       variantRefPositions = integer(0),
                                       n_threads = 1L, verbose = FALSE),
                  "Could not find chromosome")
+    expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile, bam_format = "QuasR",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = setNames(posContextRevL, "chr2"),
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Could not find chromosome")
+
+    # ... corrupted bam file
+    tmpbam <- tempfile(fileext = ".bam")
+    tmpbai <- paste0(tmpbam, ".bai")
+    # ... ... copy only part of `quasr_paired_bamfile`
+    con_in <- file(quasr_paired_bamfile, "rb")
+    data <- readBin(con_in, what = "raw", n = 1e6)
+    close(con_in)
+    con_out <- file(tmpbam, "wb")
+    writeBin(data[seq.int(length(data) - 77)], con_out)
+    close(con_out)
+    expect_true(file.copy(from = paste0(quasr_paired_bamfile, ".bai"), to = tmpbai))
+    expect_error(read_mismatchbam_cpp(inname_str = tmpbam, bam_format = "QuasR",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Error while reading from")
+    unlink(c(tmpbam, tmpbai))
 
     ## expected results --------------------------------------------------------
     # ... read level
@@ -217,6 +327,17 @@ test_that("read_mismatchbam_cpp works", {
         level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = rep("chr1", 3L), variantRefPositions = c(6925369L, 6925370L, 6925372L), # GAT
         n_threads = 2, verbose = FALSE)
+    suppressMessages(expect_message(
+        res6 <- read_mismatchbam_cpp(
+            inname_str = quasr_paired_bamfile, bam_format = "QuasR",
+            regions = "chr1:6925411-6925964", pos_context_list = posContextL,
+            pos_context_rev_list = posContextRevL, windowSize = 30,
+            unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
+            mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
+            level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+            variantRefNames = character(0), variantRefPositions = integer(0),
+            n_threads = 2, verbose = TRUE)
+    ))
 
 
     # ... collect all mode 1 and mode 2 results in list
@@ -325,4 +446,10 @@ test_that("read_mismatchbam_cpp works", {
     expect_identical(res5$read_df$read_length[idx], c(121L, 126L, 117L))
     expect_identical(res5$read_df$aligned_length[idx], c(121L, 121L, 117L))
     expect_identical(res5$read_df$variant_label[idx], c("GAT", "GAT", "GAT"))
+
+    # ... content of res6
+    expect_type(res6, "list")
+    expect_named(res6, "pair_counts")
+    expect_type(res6$pair_counts, "double")
+    expect_identical(dim(res6$pair_counts), c(30L, 4L))
 })
