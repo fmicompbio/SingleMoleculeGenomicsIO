@@ -568,8 +568,9 @@ std::vector<int> read_to_reference_pos(const bam1_t *aln,
             break;
 
         case BAM_CINS:  // insertion (I)
+        case BAM_CSOFT_CLIP:  // soft clipping (S)
             if (read_pos + op_len > read_positions[read_positions_index]) {
-                // the current read position is within an insertion -->
+                // the current read position is within an insertion or soft-clipped region -->
                 //     no corresponding reference position
                 while (read_positions_index < read_positions.size() &&
                        read_pos + op_len > read_positions[read_positions_index]) {
@@ -583,19 +584,6 @@ std::vector<int> read_to_reference_pos(const bam1_t *aln,
         case BAM_CDEL:       // deletion (D)
         case BAM_CREF_SKIP:  // reference skip (N)
             ref_pos += op_len;
-            break;
-
-        case BAM_CSOFT_CLIP:  // soft clipping (S)
-            if (read_pos + op_len > read_positions[read_positions_index]) {
-                // the current read position is within a soft-clipped region -->
-                //     no corresponding reference position
-                while (read_positions_index < read_positions.size() &&
-                       read_pos + op_len > read_positions[read_positions_index]) {
-                    ref_positions[read_positions_index] = -1;
-                    read_positions_index++;
-                }
-            }
-            read_pos += op_len;
             break;
 
         case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
