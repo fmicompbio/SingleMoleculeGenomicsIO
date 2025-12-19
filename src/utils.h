@@ -49,3 +49,16 @@ int create_multi_region_iterator(std::vector<std::string> &regions,
                                  bool &had_error,
                                  int buffer_len,
                                  char *buffer);
+int create_multi_region_iterator_for_sampling(
+        unsigned int &regcnt,
+        char **&regions_c,
+        int &n_alns_to_sample,
+        std::vector<std::string> &tnames_for_sampling,
+        double &keep_aln_fraction,
+        hts_itr_t *&iter,
+        hts_idx_t *idx,
+        sam_hdr_t *in_samhdr,
+        bool &had_error,
+        int buffer_len,
+        char *buffer);
+

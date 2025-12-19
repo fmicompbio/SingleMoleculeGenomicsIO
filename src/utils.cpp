@@ -821,3 +821,80 @@ int create_multi_region_iterator(std::vector<std::string> &regions,
 
     return 0;
 }
+
+// Create a multi-region iterator for sampling
+//
+// This is a convenicence function that bundles multiple steps required to
+// randomly sample records from specified target sequences. Specifically it
+//   - set `regcnt` (intersection of )
+//   - allocate an array of char* in `regions_c`
+//   - copy target names from `in_samhdr` to `regions_c` if they exist in `tnames_for_sampling`
+//     (warn bout elements in `tnames_for_sampling` that were ignored)
+//   - calculate `keep_aln_fraction` (warn if there are not enough alignments)
+//   - create multi-region htslib iterator in `iter` (uses also  `idx` and `in_samhdr`)
+//
+// The function returns 0 on success, and a non-zero error code on failure
+// (with an error message written to `buffer` and `had_error` set to true).
+int create_multi_region_iterator_for_sampling(
+        unsigned int &regcnt,
+        char **&regions_c,
+        int &n_alns_to_sample,
+        std::vector<std::string> &tnames_for_sampling,
+        double &keep_aln_fraction,
+        hts_itr_t *&iter,
+        hts_idx_t *idx,
+        sam_hdr_t *in_samhdr,
+        bool &had_error,
+        int buffer_len,
+        char *buffer) {
+    // declare variables
+    int i = 0;
+    uint64_t mapped = 0, unmapped = 0, total_for_sampling = 0;
+    std::set<std::string> tnames_for_sampling_set(tnames_for_sampling.begin(), tnames_for_sampling.end());
+    std::set<std::string> tnames_existing;
+
+    regcnt = 0;
+    regions_c = (char**) calloc((unsigned int) tnames_for_sampling.size(),
+                 sizeof(char*));
+    for (i = 0; i < in_samhdr->n_targets; i++) {
+        tnames_existing.insert(in_samhdr->target_name[i]);
+
+        // for each target i that is in tnames_for_sampling_set,
+        // get the number of mapped and unmapped records
+        // and add it to regions_c
+        if (tnames_for_sampling_set.find(in_samhdr->target_name[i]) !=
+            tnames_for_sampling_set.end() &&
+            hts_idx_get_stat(idx, i, &mapped, &unmapped) == 0) {
+            total_for_sampling += mapped;
+            regions_c[regcnt] = in_samhdr->target_name[i];
+            regcnt++;
+        }
+    }
+    for (i = 0; i < (int)tnames_for_sampling.size(); i++) {
+        if (tnames_existing.find(tnames_for_sampling[i]) == tnames_existing.end()) {
+            Rcpp::warning("Ignoring unknown target name: %s",
+                          tnames_for_sampling[i].c_str());
+        }
+    }
+
+    // check if we have enough alignments to sample from
+    if (total_for_sampling < (uint64_t)n_alns_to_sample) {
+        had_error = true;
+        snprintf(buffer, buffer_len,
+                 "Cannot sample %d alignments from a total of %" PRIu64 "\n",
+                 n_alns_to_sample, total_for_sampling);
+        return -1;
+    }
+
+    // calculate fraction of alignments to keep
+    keep_aln_fraction = (double) n_alns_to_sample / total_for_sampling;
+
+    // create multi-region iterator
+    if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+        return -2; // # nocov end
+    }
+
+    return 0;
+}

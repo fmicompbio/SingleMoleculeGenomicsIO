@@ -528,58 +528,22 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     */
     } else {
         if (n_alns_to_sample > 0) {
-            /*
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------
 
-            // check if tnames_for_sampling exist and count alignments
-            uint64_t mapped = 0, unmapped = 0, total_for_sampling = 0;
-            std::set<std::string> tnames_for_sampling_set(tnames_for_sampling.begin(), tnames_for_sampling.end());
-            std::set<std::string> tnames_existing;
-            double rand_val = 0.0;
-            regcnt = 0;
-            regions_c = (char**) calloc((unsigned int) tnames_for_sampling.size(),
-                         sizeof(char*));
-            for (i = 0; i < in_samhdr->n_targets; i++) {
-                tnames_existing.insert(in_samhdr->target_name[i]);
+            double rand_val = 0.0, keep_aln_fraction = 0.0;
 
-                // for each target i that is in tnames_for_sampling_set,
-                // get the number of mapped and unmapped records
-                // and add it to regions_c
-                if (tnames_for_sampling_set.find(in_samhdr->target_name[i]) !=
-                    tnames_for_sampling_set.end() &&
-                    hts_idx_get_stat(idx, i, &mapped, &unmapped) == 0) {
-                    total_for_sampling += mapped;
-                    regions_c[regcnt] = in_samhdr->target_name[i];
-                    regcnt++;
-                }
-            }
-            for (i = 0; i < (int)tnames_for_sampling.size(); i++) {
-                if (tnames_existing.find(tnames_for_sampling[i]) == tnames_existing.end()) {
-                    Rcpp::warning("Ignoring unknown target name: %s",
-                                  tnames_for_sampling[i].c_str());
-                }
-            }
-
-            // check if we have enough alignments to sample from
-            if (total_for_sampling < (uint64_t)n_alns_to_sample) {
-                had_error = true;
-                snprintf(buffer, buffer_len,
-                         "Cannot sample %d alignments from a total of %" PRIu64 "\n",
-                         n_alns_to_sample, total_for_sampling);
+            success = create_multi_region_iterator_for_sampling(
+                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                keep_aln_fraction, iter, idx, in_samhdr, had_error,
+                buffer_len, buffer);
+            if (success != 0) {
                 goto end;
             }
-            double keep_aln_fraction = (double) n_alns_to_sample / total_for_sampling;
+
             if (verbose) {
                 snprintf(buffer, buffer_len, "sampling alignments with probability %g", keep_aln_fraction);
                 cli_alert_info(buffer);
-            }
-
-            // create multi-region iterator
-            if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-                had_error = true; // # nocov start
-                snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
-                goto end; // # nocov end
             }
 
             // iterate over regions
