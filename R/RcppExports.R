@@ -167,40 +167,72 @@ index_bam_cpp <- function(infile) {
     .Call(`_SingleMoleculeGenomicsIO_index_bam_cpp`, infile)
 }
 
-#' Constructor for pileup data in bam_pileup_cd*
+#' Read and pile-up base modifications from a mismatch bam file.
 #'
-#' @param data void* (client data)
-#' @param b bam1_t* (bam being loaded)
-#' @param cd bam_pileup_cd* (client data)
+#' @param inname_str Character scalar with name of the input bam file.
+#' @param regions Character vector specifying the region(s) for which
+#'     to extract overlapping reads, in the form \code{"chr:start-end"}.
+#'     The strings are interpreted by htslib, which understands:
+#'     \describe{
+#'         \item{"REF" or "REF:"}{: All reads with RNAME REF}
+#'         \item{"REF:START"}{: Reads with RNAME REF overlapping START to end of REF}
+#'         \item{"REF:-END"}{: Reads with RNAME REF overlapping start of REF to END}
+#'         \item{"REF:START-END"}{: Reads with RNAME REF overlapping START to END}
+#'         \item{"."}{: All reads from the start of the file}
+#'         \item{"*"}{: Unmapped reads at the end of the file (RNAME '*' in SAM)}
+#'     }
+#' @param pos_context_list,pos_context_rev_list Named Rcpp::List of positions
+#'     on each chromosome to be evaluated regarding mismatches to reads,
+#'     seperately for the plus and the minus strand.
+#' @param unmod_integer,mod_integer Integers encoding the read bases to be
+#'     interpreted as unmodified or modified, respectively. The encoding
+#'     scheme corresponds to the one in bam1_seqi from htslib.
+#' @param level Character scalar selecting the level of the returned data
+#'     (\code{"read"} or \code{"summary"}).
+#' @param n_threads Integer scalar defining the number of threads to
+#'     use for decompressing a sam record. Especially using in sampling mode
+#'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
+#'     decompressing bam records than processing them.
+#' @param verbose Logical scalar. If \code{TRUE}, report on progress.
 #'
-#' @return An integer scalar (zero on success, non-zero on failure)
+#' @return A named list with elements \code{"chrom"} (chromosome name),
+#'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
+#'     \code{"ref_strand"} (the strand from which the original molecule
+#'     originated). If \code{level} is \code{"summary"},
+#'     the list additionally contains slots \code{"Nmod"} (number of modified
+#'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
+#'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
+#'
+#' @examples
+#' library(Biostrings)
+#' bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
+#' ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
+#' posContext <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
+#'                             with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posContextRev <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
+#'                                with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posContextList <- lapply(posContext, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' posContextRevList <- lapply(posContextRev, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' res <- pileup_mismatchbam_cpp(bamfile, "QuasR", "chr1",
+#'                               posContextList, posContextRevList,
+#'                               unmod_integer = 8, unmod_integer_rev = 1,
+#'                               mod_integer = 2, mod_integer_rev = 4,
+#'                               level = "summary", 1, TRUE)
+#' str(res)
+#'
+#' @author Michael Stadler, Charlotte Soneson
+#'
+#' @importFrom cli cli_progress_step cli_progress_done
 #'
 #' @noRd
 #' @keywords internal
-NULL
-
-#' Destructor for pileup data in bam_pileup_cd*
-#'
-#' @param data void* (client data)
-#' @param b bam1_t* (bam being loaded)
-#' @param cd bam_pileup_cd* (client data)
-#'
-#' @return An integer scalar (zero)
-#'
-#' @noRd
-#' @keywords internal
-NULL
-
-#' Read alignment data for pileup operation
-#'
-#' @param data void* (client callback data holding alignment file handle)
-#' @param b bam1_t* (aligned read)
-#'
-#' @return same as sam_read1
-#'
-#' @noRd
-#' @keywords internal
-NULL
+pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads, verbose)
+}
 
 #' Read and pile-up base modifications from a bam file.
 #'
@@ -266,9 +298,9 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
     .Call(`_SingleMoleculeGenomicsIO_pileup_modbam_cpp`, inname_str, regions, modbase, level, mod_prob_thresh, n_threads, verbose)
 }
 
-#' Read base modifications from "C-to-T" bam file(s) - C++ helper function
+#' Read base modifications from mismatch bam file(s) - C++ helper function
 #'
-#' Parse C-to-T mismatches and return a list of vectors with
+#' Parse mismatches and return a list of vectors with
 #' information on base states. The function implements four distinct reading
 #' modes:
 #' \enumerate{
@@ -282,7 +314,7 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'         This mode is selected if \code{windowSize > 0}.}
 #'     \item{Extraction of summary-level modification counts for alignments
 #'         overlapping provided regions. This mode is selected if
-#'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.}
+#'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.} # TODO: remove summary mode here?
 #' }
 #'
 #' @param inname_str Character scalar with name of the input bam file.
@@ -605,6 +637,41 @@ NULL
 #'     that case, the error message is giving in \code{buffer}.
 #'
 #' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Constructor for pileup data in bam_pileup_cd*
+#'
+#' @param data void* (client data)
+#' @param b bam1_t* (bam being loaded)
+#' @param cd bam_pileup_cd* (client data)
+#'
+#' @return An integer scalar (zero on success, non-zero on failure)
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Destructor for pileup data in bam_pileup_cd*
+#'
+#' @param data void* (client data)
+#' @param b bam1_t* (bam being loaded)
+#' @param cd bam_pileup_cd* (client data)
+#'
+#' @return An integer scalar (zero)
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Read alignment data for pileup operation
+#'
+#' @param data void* (client callback data holding alignment file handle)
+#' @param b bam1_t* (aligned read)
+#'
+#' @return same as sam_read1
 #'
 #' @noRd
 #' @keywords internal

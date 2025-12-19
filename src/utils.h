@@ -62,3 +62,23 @@ int create_multi_region_iterator_for_sampling(
         int buffer_len,
         char *buffer);
 
+int intlist_to_setvector(sam_hdr_t *in_samhdr,
+                         Rcpp::List &pos_list,
+                         std::vector<std::set<int>> &pos_sets,
+                         char *buffer,
+                         int &buffer_len,
+                         bool &had_error);
+
+typedef struct plpconf {
+    const char *inname;
+    samFile *infile;
+    sam_hdr_t *in_samhdr;
+    hts_idx_t *idx;
+    hts_itr_t *iter;
+} plpconf;
+
+int plpconstructor(void *data, const bam1_t *b, bam_pileup_cd *cd);
+
+int plpdestructor(void *data, const bam1_t *b, bam_pileup_cd *cd);
+
+int readdata(void *data, bam1_t *b);

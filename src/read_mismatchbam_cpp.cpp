@@ -15,41 +15,6 @@
 #define MISMATCHBAM_MODE_PAIR      3
 #define MISMATCHBAM_MODE_SUMMARY   4
 
-// convert a named Rcpp::List with IntegerVector elements
-// to a std::vector<std::set<int>>, where the index in the
-// vector corresponds to the target name index as defined in in_samhdr
-//
-// return 0 if successfull, -1 if a target name was not found in in_samhdr
-int intlist_to_setvector(sam_hdr_t *in_samhdr,
-                         Rcpp::List &pos_list,
-                         std::vector<std::set<int>> &pos_sets,
-                         char *buffer,
-                         int &buffer_len,
-                         bool &had_error) {
-    Rcpp::CharacterVector nms;
-    Rcpp::IntegerVector vint;
-    int i = 0, j = 0, k = 0;
-
-    pos_sets.resize(in_samhdr->n_targets);
-    nms = pos_list.names();
-    for (i = 0; i < pos_list.size(); i++) {
-        j = sam_hdr_name2tid(in_samhdr, ((std::string)nms[i]).c_str());
-        if (j >= 0) {
-            vint = pos_list[i];
-            for (k = 0; k < vint.size(); k++) {
-                pos_sets[j].insert((int)vint[k]);
-            }
-        } else {
-            had_error = true;
-            snprintf(buffer, buffer_len,
-                     "Could not find chromosome %s in bam header\n",
-                     ((std::string)nms[i]).c_str());
-            return -1;
-        }
-    }
-    return 0;
-}
-
 // check if BAM file is conforming to bam_format
 // remark: we cannot guarantee in all cases that the bam file is conforming
 int check_bam_format(samFile *infile,
@@ -263,9 +228,9 @@ int process_mismatch_bam_record(
     return 0;
 }
 
-//' Read base modifications from "C-to-T" bam file(s) - C++ helper function
+//' Read base modifications from mismatch bam file(s) - C++ helper function
 //'
-//' Parse C-to-T mismatches and return a list of vectors with
+//' Parse mismatches and return a list of vectors with
 //' information on base states. The function implements four distinct reading
 //' modes:
 //' \enumerate{
@@ -279,7 +244,7 @@ int process_mismatch_bam_record(
 //'         This mode is selected if \code{windowSize > 0}.}
 //'     \item{Extraction of summary-level modification counts for alignments
 //'         overlapping provided regions. This mode is selected if
-//'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.}
+//'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.} # TODO: remove summary mode here?
 //' }
 //'
 //' @param inname_str Character scalar with name of the input bam file.

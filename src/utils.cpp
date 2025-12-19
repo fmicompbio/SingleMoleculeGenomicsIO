@@ -886,3 +886,106 @@ int create_multi_region_iterator_for_sampling(
 
     return 0;
 }
+
+// convert a named Rcpp::List with IntegerVector elements
+// to a std::vector<std::set<int>>, where the index in the
+// vector corresponds to the target name index as defined in in_samhdr
+//
+// return 0 if successfull, -1 if a target name was not found in in_samhdr
+int intlist_to_setvector(sam_hdr_t *in_samhdr,
+                         Rcpp::List &pos_list,
+                         std::vector<std::set<int>> &pos_sets,
+                         char *buffer,
+                         int &buffer_len,
+                         bool &had_error) {
+    Rcpp::CharacterVector nms;
+    Rcpp::IntegerVector vint;
+    int i = 0, j = 0, k = 0;
+
+    pos_sets.resize(in_samhdr->n_targets);
+    nms = pos_list.names();
+    for (i = 0; i < pos_list.size(); i++) {
+        j = sam_hdr_name2tid(in_samhdr, ((std::string)nms[i]).c_str());
+        if (j >= 0) {
+            vint = pos_list[i];
+            for (k = 0; k < vint.size(); k++) {
+                pos_sets[j].insert((int)vint[k]);
+            }
+        } else {
+            had_error = true;
+            snprintf(buffer, buffer_len,
+                     "Could not find chromosome %s in bam header\n",
+                     ((std::string)nms[i]).c_str());
+            return -1;
+        }
+    }
+    return 0;
+}
+
+// pileup helpers
+//' Constructor for pileup data in bam_pileup_cd*
+//'
+//' @param data void* (client data)
+//' @param b bam1_t* (bam being loaded)
+//' @param cd bam_pileup_cd* (client data)
+//'
+//' @return An integer scalar (zero on success, non-zero on failure)
+//'
+//' @noRd
+//' @keywords internal
+int plpconstructor(void *data, const bam1_t *b, bam_pileup_cd *cd) {
+    //plpconf *conf= (plpconf*)data; can use this to access anything required from the data in pileup init
+
+    //when using cd, initialize and use as it will be reused after destructor
+    cd->p = hts_base_mod_state_alloc();
+    if (!cd->p) {
+        // # nocov start
+        Rcpp::stop("Failed to allocate base modification state\n");
+        return 1;
+        // # nocov end
+    }
+
+    //parse the bam data and gather modification data from MM tags
+    return (-1 == bam_parse_basemod(b, (hts_base_mod_state*)cd->p)) ? 1 : 0;
+}
+
+//' Destructor for pileup data in bam_pileup_cd*
+//'
+//' @param data void* (client data)
+//' @param b bam1_t* (bam being loaded)
+//' @param cd bam_pileup_cd* (client data)
+//'
+//' @return An integer scalar (zero)
+//'
+//' @noRd
+//' @keywords internal
+int plpdestructor(void *data, const bam1_t *b, bam_pileup_cd *cd) {
+    if (cd->p) {
+        hts_base_mod_state_free((hts_base_mod_state *)cd->p);
+        cd->p = NULL;
+    }
+    return 0;
+}
+
+//' Read alignment data for pileup operation
+//'
+//' @param data void* (client callback data holding alignment file handle)
+//' @param b bam1_t* (aligned read)
+//'
+//' @return same as sam_read1
+//'
+//' @noRd
+//' @keywords internal
+int readdata(void *data, bam1_t *b) {
+    plpconf *conf = (plpconf*)data;
+    if (!conf || !conf->infile) {
+        // # nocov start
+        return -2;  //cant read data
+        // # nocov end
+    }
+
+    //read alignment and send
+    // return sam_read1(conf->infile, conf->infile->bam_header, b);
+    return sam_itr_next(conf->infile, conf->iter, b);
+}
+
