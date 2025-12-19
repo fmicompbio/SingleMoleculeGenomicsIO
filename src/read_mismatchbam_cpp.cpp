@@ -602,7 +602,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         R_CheckUserInterrupt();
                     } // # nocov end
                     if (success != 0) { // # nocov start
-                        goto end;
+                        goto end;       // currently there are no failure points in process_mismatch_bam_record
                     } // # nocov end
                 }
             }
@@ -668,9 +668,9 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     if (alncnt % 100 == 0) { // # nocov start
                         Rcpp::checkUserInterrupt();
                     } // # nocov end
-                    if (success != 0) {
-                        goto end;
-                    }
+                    if (success != 0) { // # nocov start
+                        goto end;       // currently there are no failure points in process_mismatch_bam_record
+                    } // # nocov end
                 }
             }
         }
