@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE
 #include "utils.h"
 
 typedef struct plpconf {
-    char *inname;
+    const char *inname;
     samFile *infile;
     sam_hdr_t *in_samhdr;
     hts_idx_t *idx;
@@ -185,9 +185,9 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
     // variable declarations
     bam1_t *bamdata = NULL;
     plpconf conf = {0};
-    conf.inname = (char*)inname_str.c_str();
+    conf.inname = inname_str.c_str();
     bam_plp_t plpiter = NULL;
-    int tid = -1, depth = -1, j = 0, k = 0, modlen = 0;
+    int tid = -1, depth = -1, j = 0, k = 0, modlen = 0, success = 0;
     #define NMODS 5
     hts_base_mod mods[NMODS] = {{0}}; //ACGTN
     int refpos = -1;
@@ -231,52 +231,22 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
     char unmodbase = get_unmodified_base(modbase);
     char unmodbase_complement = complement(unmodbase);
 
-    // initialize
-    if (!(bamdata = bam_init1())) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
-        goto end; // # nocov end
-    }
-
-    // open input files
-    if (!(conf.infile = sam_open(conf.inname, "r"))) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Could not open input file %s\n", conf.inname);
-        goto end; // # nocov end
-    }
-
-    // load index file
-    if (!(conf.idx = sam_index_load(conf.infile, conf.inname))) {
-        // # nocov start
-        had_error = true;
-        snprintf(buffer, buffer_len,
-                 "Failed to load the index for %s\n", conf.inname);
+    // prepare bam file for reading
+    success = open_bam_and_read_index_and_header(bamdata, conf.inname,
+                                                 conf.infile, conf.idx,
+                                                 conf.in_samhdr, n_threads,
+                                                 had_error, buffer_len, buffer);
+    if (success != 0) {
         goto end;
-        // # nocov end
     }
 
-    // read header
-    if (!(conf.in_samhdr = sam_hdr_read(conf.infile))) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Failed to read header from file!\n");
-        goto end; // # nocov end
-    }
-
-    // convert regions to C arrays
-    regcnt = (unsigned int) regions.size();
-    regions_c = (char**) calloc(regcnt, sizeof(char*));
-    for (int i = 0; i < (int) regcnt; i++) {
-        regions_c[i] = (char*) regions[i].c_str();
-    }
-
-    // create multi-region iterator
-    if (!(conf.iter = sam_itr_regarray(conf.idx, conf.in_samhdr, regions_c, regcnt))) {
-        // # nocov start
-        had_error = true;
-        snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+    success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                           conf.iter, conf.idx, conf.in_samhdr,
+                                           had_error, buffer_len, buffer);
+    if (success != 0) {
         goto end;
-        // # nocov end
     }
+
 
     // initialize pileup iterator
     if (!(plpiter = bam_plp_init(readdata, &conf))) {

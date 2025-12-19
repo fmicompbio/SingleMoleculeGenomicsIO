@@ -514,7 +514,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
 
         success = create_multi_region_iterator(regions, regcnt, regions_c,
                                                iter, idx, in_samhdr, had_error,
-        buffer_len, buffer);
+                                               buffer_len, buffer);
         if (success != 0) {
             goto end;
         }
