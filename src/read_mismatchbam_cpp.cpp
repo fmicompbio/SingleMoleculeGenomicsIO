@@ -436,45 +436,16 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     // ... return value for mode 3
     Rcpp::NumericMatrix pair_counts;
 
-    // initialize bam data storage
-    if (!(bamdata = bam_init1())) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
-        goto end; // # nocov end
-    }
-
-    // open input file
+    // prepare bam file for reading
     if (verbose) {
         snprintf(buffer, buffer_len, "opening input file {.file %s} using {%d} thread{?s}", inname, n_threads);
         cli_alert_info(buffer);
     }
-    if (!(infile = sam_open(inname, "r"))) {
-        had_error = true;
-        snprintf(buffer, buffer_len, "Could not open input file %s\n", inname);
+    success = open_bam_and_read_index_and_header(bamdata, inname, infile, idx,
+                                                 in_samhdr, n_threads,
+                                                 had_error, buffer_len, buffer);
+    if (success != 0) {
         goto end;
-    }
-    if (n_threads > 1) {
-        if (hts_set_threads(infile, n_threads)) {
-            had_error = true; // # nocov start
-            snprintf(buffer, buffer_len, "Error setting htslib threads to %d\n", n_threads);
-            goto end; // # nocov end
-        }
-    }
-
-    // load index file
-    if (!(idx = sam_index_load(infile, inname))) {
-        had_error = true;
-        snprintf(buffer, buffer_len,
-                 "Failed to load the index for %s\n", inname);
-        goto end;
-    }
-
-    // read header
-    if (!(in_samhdr = sam_hdr_read(infile))) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len,
-                 "Failed to read header from file %s\n", inname);
-        goto end; // # nocov end
     }
 
     // check if BAM file is conforming to bam_format

@@ -31,3 +31,12 @@ std::string construct_read_label(const bam1_t *aln,
                                  const std::vector<std::string> &ref_names,
                                  const std::vector<int> &ref_positions,
                                  const sam_hdr_t *hdr);
+int open_bam_and_read_index_and_header(bam1_t *&bamdata,
+                                       const char *&inname,
+                                       samFile *&infile,
+                                       hts_idx_t *&idx,
+                                       sam_hdr_t *&in_samhdr,
+                                       int n_threads,
+                                       bool &had_error,
+                                       int buffer_len,
+                                       char *buffer);

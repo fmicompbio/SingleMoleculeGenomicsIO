@@ -721,3 +721,66 @@ std::string construct_read_label(const bam1_t *aln,
 
     return label;
 }
+
+// Open bam file and read index and header
+//
+// This is a convenience function that bundles common steps to prepare
+// a bam file for reading. Specifically, it will:
+//   - initialize the bam1_t struct (`bamdata`)
+//   - open the bam file given by `inname` (`infile`)
+//   - read the bam index (`idx`)
+//   - read the bam header (`in_samhdr`)
+//   - set the htslib threads (`n_threads`)
+//
+// The function returns 0 on success, and a non-zero error code on failure
+// (with an error message written to `buffer` and `had_error` set to true).
+int open_bam_and_read_index_and_header(bam1_t *&bamdata,
+                                       const char *&inname,
+                                       samFile *&infile,
+                                       hts_idx_t *&idx,
+                                       sam_hdr_t *&in_samhdr,
+                                       int n_threads,
+                                       bool &had_error,
+                                       int buffer_len,
+                                       char *buffer) {
+    // initialize bam data storage
+    if (!(bamdata = bam_init1())) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
+        return -1; // # nocov end
+    }
+
+    // open bam file
+    if (!(infile = sam_open(inname, "r"))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Could not open input file %s\n", inname);
+        return -2;
+    }
+
+    // read bam index
+    if (!(idx = sam_index_load(infile, inname))) {
+        had_error = true;
+        snprintf(buffer, buffer_len,
+                 "Failed to load the index for %s\n", inname);
+        return -3;
+    }
+
+    // read bam header
+    if (!(in_samhdr = sam_hdr_read(infile))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len,
+                 "Failed to read header from file %s\n", inname);
+        return -4; // # nocov end
+    }
+
+    // set htslib threads
+    if (n_threads > 1) {
+        if (hts_set_threads(infile, n_threads)) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len, "Error setting htslib threads to %d\n", n_threads);
+            return -5; // # nocov end
+        }
+    }
+
+    return 0;
+}

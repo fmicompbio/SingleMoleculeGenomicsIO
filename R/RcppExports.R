@@ -533,22 +533,149 @@ sampleEntropy <- function(data, m, r, maxStarts = 1000L, nThreads = 1L) {
     .Call(`_SingleMoleculeGenomicsIO_sampleEntropy`, data, m, r, maxStarts, nThreads)
 }
 
+#' Calculate aligned bases (sum of 'M', '=', or 'X' operation lengths)
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#'
+#' @return An \code{int} giving the number of aligned bases.
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Extract quality score (qscore)
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#'
+#' @return A \code{double} corresponding to the value extracted from the "qs"
+#'     tag, or in case that is missing, calculated as the mean of base quality
+#'     values.
+#'
+#' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Get the forward read sequence from an alignment
+#'
+#' Extract the read sequence from a bam1_t corresponding to the plus-strand
+#' of the read (thus reverse-complementing the read for an minus-strand
+#' alignment) and write it to the char* array at qseq, allocating memory of
+#' sufficient length if needed. The allocated space (without terminating null
+#' character) is stored in qseq_len.
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#' @param qseq A \code{char**} (pointer to a character array) to which the
+#'     extracted sequence will be written.
+#' @param qseq_len A \code{int*} (pointer to int) in which the number of
+#'     allocated characters at \code{qseq} are stored (excluding the
+#'     terminating null character).
+#'
+#' @returns 0 if successful, -1 if memory allocation failed
+#'
+#' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Extract vector with modification probabilities from alignment
+#'
+#' Use htslib functions to parse the modification probabilities for
+#' `modbase`.
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#' @param modbase A \code{char} with the modified base code for which to
+#'     extract modification probabilities.
+#' @param unmodbase A \code{char} with the unmodified base corresponding to
+#'     \code{modbase}.
+#' @param mod_probs A \code{Rcpp::NumericVector*} to which the extracted
+#'     modification probabilities will be appended at the end.
+#' @param qseq A \code{char*} pointing to the forward read sequence.
+#' @param ms A \code{hts_base_mod_state*} (modification state struct) expected
+#'     to be pre-initialized.
+#' @param buffer A \code{char*} pointing to a pre-allocated character array
+#'     to which an error message is written in case of a failure.
+#' @param buffer_len An \code{int} giving the pre-allocated size of the array
+#'     at \code{buffer} (excluding the terminating null).
+#'
+#' @returns An \code{int}, if greater or equal to zero giving the number of
+#'     extracted probabilities, or less than zero if something failed. In
+#'     that case, the error message is giving in \code{buffer}.
+#'
+#' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Concatenate files
+#'
+#' @param input_files Character vector with input file names to concatenate.
+#' @param output_file Character scalar with output file name to write to.
+#'
+#' @return The \code{output_file} as a character scalar.
+#' @noRd
+#' @keywords internal
 concatenate_files <- function(input_files, output_file) {
     .Call(`_SingleMoleculeGenomicsIO_concatenate_files`, input_files, output_file)
 }
 
+#' Concatenate input sam/bam files into a single output sam/bam file
+#'
+#' The idea of this function is to be a simpler replacement for merging
+#' pre-sorted sam or bam files given in the correct order to a single
+#' output file. The header of the first input file is used for the output
+#' file, and no checks are done if the input files have compatible headers,
+#' are sorted or are given in the correct order - use with caution.
+#'
+#' @param input_files Character vector with input sam or bam file names to
+#'     concatenate.
+#' @param output_file Character scalar with output sam or bam file name to
+#'     write to.
+#' @param ncpu Integer scalar giving the number of parallel threads used for
+#'     de-/compressing input and output file records.
+#'
+#' @return The \code{output_file} as a character scalar.
+#' @noRd
+#' @keywords internal
 concatenate_hts_files <- function(input_files, output_file, ncpu = 4L) {
     .Call(`_SingleMoleculeGenomicsIO_concatenate_hts_files`, input_files, output_file, ncpu)
 }
 
+#' Get chromosome names for a bam file header
+#'
+#' @param bamfile Character scalar with name of bam file.
+#'
+#' @return A character vector with the chromosome (target sequence) names
+#'     extracted from the bam file header.
+#' @noRd
+#' @keywords internal
 getChromosomeNamesFromBam <- function(bamfile) {
     .Call(`_SingleMoleculeGenomicsIO_getChromosomeNamesFromBam`, bamfile)
 }
 
+#' Get unmodified base corresponding to a modified base
+#'
+#' @param b Modified base as a char
+#'
+#' @return The upper-case unmodified base corresponding to \code{b} as a
+#'     \code{char}.
+#' @noRd
+#' @keywords internal
 get_unmodified_base <- function(b) {
     .Call(`_SingleMoleculeGenomicsIO_get_unmodified_base`, b)
 }
 
+#' Create the complement of a base
+#'
+#' @param n single base as a char
+#'
+#' @return char (complement of \code{n})
+#'
+#' @noRd
+#' @keywords internal
 complement <- function(n) {
     .Call(`_SingleMoleculeGenomicsIO_complement`, n)
 }
