@@ -231,10 +231,6 @@ int count_pairs_bam_record(
     // process alignment
     alncnt++;
 
-    // check for interrupt every 100 alignments
-    if (alncnt % 100 == 0) // # nocov start
-        Rcpp::checkUserInterrupt(); // # nocov end
-
     // ... extract *forward* read sequence to char*
     //     (populates qseq and qseq_len)
     if (extract_forward_qseq(bamdata, qseq, qseq_len) != 0) {
@@ -590,7 +586,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                     cli_progress_set(bar, (double)alncnt); // # nocov
                 }
                 if (alncnt % 100 == 0) { // # nocov start
-                    R_CheckUserInterrupt();
+                    Rcpp::checkUserInterrupt();
                 } // # nocov end
                 if (success != 0) {
                     goto end;
