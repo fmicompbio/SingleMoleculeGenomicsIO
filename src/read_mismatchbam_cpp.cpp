@@ -476,17 +476,10 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         // ---------------------------------------------------------------------
         pair_counts = Rcpp::NumericMatrix(windowSize, 4);
 
-        // convert regions to C arrays
-        regcnt = (unsigned int) regions.size();
-        regions_c = (char**) calloc(regcnt, sizeof(char*));
-        for (i = 0; i < (int) regcnt; i++) {
-            regions_c[i] = (char*) regions[i].c_str();
-        }
-
-        // create multi-region iterator
-        if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-            had_error = true;
-            snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+        success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                               iter, idx, in_samhdr, had_error,
+        buffer_len, buffer);
+        if (success != 0) {
             goto end;
         }
 
@@ -643,18 +636,10 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         } else {
             // Mode 1: region-based alignment reading
             // ---------------------------------------------------------------------
-            // TODO: lift out parts from below here to reduce redundancy between modes and read_modbam_cpp
-            // convert regions to C arrays
-            regcnt = (unsigned int) regions.size();
-            regions_c = (char**) calloc(regcnt, sizeof(char*));
-            for (i = 0; i < (int) regcnt; i++) {
-                regions_c[i] = (char*) regions[i].c_str();
-            }
-
-            // create multi-region iterator
-            if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-                had_error = true;
-                snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+            success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                                   iter, idx, in_samhdr, had_error,
+                                                   buffer_len, buffer);
+            if (success != 0) {
                 goto end;
             }
 

@@ -40,3 +40,12 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
                                        bool &had_error,
                                        int buffer_len,
                                        char *buffer);
+int create_multi_region_iterator(std::vector<std::string> &regions,
+                                 unsigned int &regcnt,
+                                 char **&regions_c,
+                                 hts_itr_t *&iter,
+                                 hts_idx_t *idx,
+                                 sam_hdr_t *in_samhdr,
+                                 bool &had_error,
+                                 int buffer_len,
+                                 char *buffer);

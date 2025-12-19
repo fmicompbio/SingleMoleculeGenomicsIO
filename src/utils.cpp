@@ -784,3 +784,40 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
 
     return 0;
 }
+
+// Create a multi-region iterator
+//
+// This is a convenice function that bundles multiple steps required to
+// create an htslib bam file iterator for multiple regions. Specifically it
+//   - set `regcnt`
+//   - allocate an array of char* in `regions_c`
+//   - convert `regions` from std::vector<std::string> to char** in `regions_c`
+//   - create multi-region htslib iterator in `iter` (uses also  `idx` and `in_samhdr`)
+//
+// The function returns 0 on success, and a non-zero error code on failure
+// (with an error message written to `buffer` and `had_error` set to true).
+int create_multi_region_iterator(std::vector<std::string> &regions,
+                                 unsigned int &regcnt,
+                                 char **&regions_c,
+                                 hts_itr_t *&iter,
+                                 hts_idx_t *idx,
+                                 sam_hdr_t *in_samhdr,
+                                 bool &had_error,
+                                 int buffer_len,
+                                 char *buffer) {
+    // convert regions to C arrays
+    regcnt = (unsigned int) regions.size();
+    regions_c = (char**) calloc(regcnt, sizeof(char*));
+    for (unsigned int i = 0; i < regcnt; i++) {
+        regions_c[i] = (char*) regions[i].c_str();
+    }
+
+    // create multi-region iterator
+    if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+        return -1;
+    }
+
+    return 0;
+}
