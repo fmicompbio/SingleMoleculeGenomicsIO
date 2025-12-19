@@ -321,23 +321,22 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #' @param verbose Logical scalar. If \code{TRUE}, report on progress.
 #'
 #' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
-#'     \code{"ref_position"},
-#'     \code{"chrom"}, \code{"ref_strand"}, \code{seq_context},
+#'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"}, \code{"qscore"},
 #'     \code{"mod_prob"} and \code{"read_df"}. The meaning of these elements is
 #'     similar to the return value of \code{read_modbam_cpp} and described in
 #'     https://nanoporetech.github.io/modkit/intro_extract.html,
-#'     apart from \code{"mod_prob"}, which is equal to 0 (1) for bases at
-#'     C-to-T mismach positions and equal to 1 (0) for C-to-C match positions
-#'     for \code{mismatches_are_unmod = TRUE} (\code{mismatches_are_unmod = FALSE}),
-#'     and \code{"read_df"}, which is a \code{data.frame} with one row per
-#'     read and columns \code{"read_id"} (the read identifier), \code{"qscore"}
+#'     apart from \code{"mod_prob"}, which is equal to 0 or 1 for bases at
+#'     (mis-)match positions controlled by arguments \code{pos_context_list},
+#'     \code{unmod_integer}, \code{mod_integer} and their \code{_rev} variants.
+#'     \code{"read_df"} is a \code{data.frame} with one row per read and
+#'     columns \code{"read_id"} (the read identifier), \code{"qscore"}
 #'     (the read quality score recorded in the \code{qs} tag of each bam record),
 #'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
-#'     (the number of aligned bases), and \code{"ref_position"}, which is
-#'     0-based in the output of \code{modkit extract}, but 1-based here.
-#'     For reading mode 3., a named list with elements \code{"read_id"},
-#'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"},
-#'     \code{seq_context}, \code{"Nvalid"} and \code{"Nmod"}.
+#'     (the number of aligned bases), \code{"variant_label"} and
+#'     \code{"ref_strand"}. For reading mode 3., a named list with elements
+#'     \code{"read_id"}, \code{"ref_position"}, \code{"chrom"},
+#'     \code{"ref_strand"}, \code{"Nvalid"} and \code{"Nmod"}. For reading
+#'     mode 4., TODO
 #'
 #' @examples
 #' library(Biostrings)

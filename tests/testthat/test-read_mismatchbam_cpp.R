@@ -150,11 +150,11 @@ test_that("read_mismatchbam_cpp works", {
     invisible(lapply(resL, function(r) expect_type(r, "list")))
 
     expected_names <- c(
-        "read_id", "ref_position", "chrom", "ref_strand", "mod_prob", "read_df")
+        "read_id", "ref_position", "chrom", "ref_strand", "qscore", "mod_prob", "read_df")
     invisible(lapply(resL, function(r) expect_named(r, expected_names)))
 
     expected_types <- c(
-        "character", "integer", "character", "character", "double", "list")
+        "character", "integer", "character", "character", "double", "double", "list")
     for (i in seq_along(expected_names)) {
         invisible(lapply(resL, function(r) {
             expect_type(r[[expected_names[i]]], expected_types[i])

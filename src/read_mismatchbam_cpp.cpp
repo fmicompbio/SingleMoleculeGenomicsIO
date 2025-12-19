@@ -107,6 +107,7 @@ int process_mismatch_bam_record(
         // vectors for return values (per modification)
         std::vector<std::string> &read_id,
         std::vector<char> &ref_strand,
+        std::vector<double> &qscore,
         std::vector<std::string> &chrom,
         std::vector<int> &ref_position,
         std::vector<double> &mod_prob,
@@ -173,6 +174,7 @@ int process_mismatch_bam_record(
                     if (fwdbase & (unmod_int | mod_int)) {
                         read_id.push_back(bam_get_qname(bamdata));
                         ref_strand.push_back(useRC ? '-' : '+');
+                        qscore.push_back(bam_get_qual(bamdata)[read_pos]);
                         chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
                         ref_position.push_back(ref_pos);
                         mod_prob.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
@@ -282,23 +284,22 @@ int process_mismatch_bam_record(
 //' @param verbose Logical scalar. If \code{TRUE}, report on progress.
 //'
 //' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
-//'     \code{"ref_position"},
-//'     \code{"chrom"}, \code{"ref_strand"}, \code{seq_context},
+//'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"}, \code{"qscore"},
 //'     \code{"mod_prob"} and \code{"read_df"}. The meaning of these elements is
 //'     similar to the return value of \code{read_modbam_cpp} and described in
 //'     https://nanoporetech.github.io/modkit/intro_extract.html,
-//'     apart from \code{"mod_prob"}, which is equal to 0 (1) for bases at
-//'     C-to-T mismach positions and equal to 1 (0) for C-to-C match positions
-//'     for \code{mismatches_are_unmod = TRUE} (\code{mismatches_are_unmod = FALSE}),
-//'     and \code{"read_df"}, which is a \code{data.frame} with one row per
-//'     read and columns \code{"read_id"} (the read identifier), \code{"qscore"}
+//'     apart from \code{"mod_prob"}, which is equal to 0 or 1 for bases at
+//'     (mis-)match positions controlled by arguments \code{pos_context_list},
+//'     \code{unmod_integer}, \code{mod_integer} and their \code{_rev} variants.
+//'     \code{"read_df"} is a \code{data.frame} with one row per read and
+//'     columns \code{"read_id"} (the read identifier), \code{"qscore"}
 //'     (the read quality score recorded in the \code{qs} tag of each bam record),
 //'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
-//'     (the number of aligned bases), and \code{"ref_position"}, which is
-//'     0-based in the output of \code{modkit extract}, but 1-based here.
-//'     For reading mode 3., a named list with elements \code{"read_id"},
-//'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"},
-//'     \code{seq_context}, \code{"Nvalid"} and \code{"Nmod"}.
+//'     (the number of aligned bases), \code{"variant_label"} and
+//'     \code{"ref_strand"}. For reading mode 3., a named list with elements
+//'     \code{"read_id"}, \code{"ref_position"}, \code{"chrom"},
+//'     \code{"ref_strand"}, \code{"Nvalid"} and \code{"Nmod"}. For reading
+//'     mode 4., TODO
 //'
 //' @examples
 //' library(Biostrings)
@@ -421,6 +422,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     std::vector<std::string> read_id;
     std::vector<int> aligned_length;
     std::vector<char> ref_strand;
+    std::vector<double> qscore;
     std::vector<std::string> chrom;
     std::vector<int> ref_position;
     std::vector<double> mod_prob;
@@ -677,6 +679,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         // vectors for return values (per modification)
                         read_id,
                         ref_strand,
+                        qscore,
                         chrom,
                         ref_position,
                         mod_prob,
@@ -779,6 +782,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     Rcpp::_["ref_position"] = ref_position,
                     Rcpp::_["chrom"] = chrom,
                     Rcpp::_["ref_strand"] = ref_strand,
+                    Rcpp::_["qscore"] = qscore,
                     Rcpp::_["mod_prob"] = mod_prob,
                     Rcpp::_["read_df"] = df);
             }
