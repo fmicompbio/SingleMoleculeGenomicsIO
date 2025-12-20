@@ -126,9 +126,8 @@
 #' filtstats
 #'
 #' ## Visualize filter stats in UpSet plot, e.g. with ComplexUpset
-#' if (require(ComplexUpset)) {
-#'     ComplexUpset::upset(as.data.frame(filtstats$s1),
-#'                         intersect = colnames(filtstats$s1))
+#' if (require(SimpleUpset)) {
+#'     SimpleUpset::simpleUpSet(as.data.frame(filtstats$s1))
 #' }
 #'
 #' @importFrom SparseArray SVT_SparseArray rowSums colSums is_nonna nnawhich
