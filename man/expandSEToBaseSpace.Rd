@@ -28,6 +28,10 @@ Alternatively, a named numeric vector with genomic sequence names and
 lengths. Used to convert a character \code{region} to a \code{GRanges}
 object.}
 
+\item{keepAssays}{Character vector indicating which (read-level) assays to
+expand to base space. Only these assays will be present in the returned
+object.}
+
 \item{ignore.strand}{A logical scalar defining whether to ignore the strand
 of the \code{rowRanges(se)}.}
 }
