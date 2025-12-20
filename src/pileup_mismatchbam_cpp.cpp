@@ -122,14 +122,13 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     plpconf conf = {0};
     conf.inname = inname_str.c_str();
     bam_plp_t plpiter = NULL;
-    int tid = -1, depth = -1, j = 0, k = 0, success = 0;
+    int tid = -1, depth = -1, j = 0, success = 0;
     int refpos = -1;
     const bam_pileup1_t *plp = NULL;
     kstring_t insdata = KS_INITIALIZE; // TODO: need kstring_t here and in pileup_modbam_cpp?
     bool had_error = false;
     int buffer_len = 2000;
     char buffer[2000];
-    char readbase = '0';
     uint64_t refposcount = 0;
     unsigned int regcnt = 0;
     char **regions_c = NULL;
