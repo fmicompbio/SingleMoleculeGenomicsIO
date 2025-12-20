@@ -94,7 +94,7 @@ int process_mismatch_bam_record(
         Rcpp::CharacterVector &df_ref_strand) {
 
     // allocate variable only used inside process_mismatch_bam_record()
-    int i = 0, j = 0, strand = 0, impl = 0, pos = 0, r = 0;
+    int i = 0, j = 0;
     int ref_pos = 0, read_pos = 0, op = 0, op_len = 0;
     int unmod_int = 0, mod_int = 0;
     int this_read_len = bamdata->core.l_qseq;
@@ -401,7 +401,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     Rcpp::RObject bar;
 
     // ... general variables
-    int c = 0, i = 0, success = 0;
+    int c = 0, success = 0;
     unsigned long long n_unaligned = 0, n_total = 0;
     bool had_error = false;
     samFile *infile = NULL;
