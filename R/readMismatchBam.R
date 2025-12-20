@@ -336,16 +336,16 @@ readMismatchBam <- function(bamfiles,
         # combine information from R1 and R2
         resLL <- lapply(resLL, function(resL) {
             resL$read_df <- resL$read_df |>
-                mutate(read_id = factor(read_id, levels = unique(read_id))) |>
-                group_by(read_id) |>
-                summarize(qscore = mean(qscore),
-                          read_length = sum(read_length),
-                          aligned_length = sum(aligned_length),
-                          variant_label = ifelse(any(is.na(variant_label)), NA_character_,
-                                                 paste(variant_label, collapse = "")),
-                          ref_strand = paste(unique(ref_strand, collapse = "/")),
+                mutate(read_id = factor(.data$read_id, levels = unique(.data$read_id))) |>
+                group_by(.data$read_id) |>
+                summarize(qscore = mean(.data$qscore),
+                          read_length = sum(.data$read_length),
+                          aligned_length = sum(.data$aligned_length),
+                          variant_label = ifelse(any(is.na(.data$variant_label)), NA_character_,
+                                                 paste(.data$variant_label, collapse = "")),
+                          ref_strand = paste(unique(.data$ref_strand, collapse = "/")),
                           .groups = "drop") |>
-                mutate(read_id = as.character(read_id)) |>
+                mutate(read_id = as.character(.data$read_id)) |>
                 as.data.frame()
             rownames(resL$read_df) <- seq_len(nrow(resL$read_df))
             resL
