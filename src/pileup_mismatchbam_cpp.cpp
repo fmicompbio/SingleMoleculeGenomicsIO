@@ -241,8 +241,8 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
         // iterate over reads overlapping refpos
         for (j = 0; j < depth; ++j) {
             // is read j on the right strand?
-            if ((bam_format == "QuasR" && (isRC != plp[j].b->core.flag & BAM_FREVERSE)) ||
-                (bam_format == "Bismark") && (isRC != ((strcmp(bam_aux2Z(bam_aux_get(plp[j].b, "XG")), "GA") == 0) ? true : false))) {
+            if ((bam_format == "QuasR" && (isRC != (plp[j].b->core.flag & BAM_FREVERSE))) ||
+                (bam_format == "Bismark" && (isRC != ((strcmp(bam_aux2Z(bam_aux_get(plp[j].b, "XG")), "GA") == 0) ? true : false)))) {
                 continue;
             }
 
@@ -267,7 +267,7 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
             // ... check that the read base is either unmod_integer
             //     or mod_integer (otherwise do nothing)
             fwdbase = bam_seqi(bam_get_seq(plp[j].b), j);
-            if (!fwdbase & (unmod_int | mod_int)) {
+            if (!(fwdbase & (unmod_int | mod_int))) {
                 continue;
             }
 
