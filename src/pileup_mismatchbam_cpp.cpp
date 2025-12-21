@@ -259,8 +259,8 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
 
             // ... check that the read base is either unmod_integer
             //     or mod_integer (otherwise do nothing)
-            fwdbase = bam_seqi(bam_get_seq(plp[j].b), j);
             if (!(fwdbase & (unmod_int | mod_int))) {
+            fwdbase = bam_seqi(bam_get_seq(plp[j].b), plp[j].qpos);
                 continue;
             }
 
