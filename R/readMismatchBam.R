@@ -141,8 +141,8 @@ readMismatchBam <- function(bamfiles,
         cli_abort("{.arg sequenceContext} ({sequenceContext}) needs to have an odd number of characters")
     }
     if (!substr(sequenceContext,
-                ceiling(nchar(sequenceContext)),
-                ceiling(nchar(sequenceContext))) %in% DNA_BASES) {
+                ceiling(nchar(sequenceContext) / 2),
+                ceiling(nchar(sequenceContext) / 2)) %in% DNA_BASES) {
         cli_abort("The central base of {.arg sequenceContext} must be A, C, G or T")
     }
     .assertScalar(x = readBaseUnmod, type = "character", validValues = DNA_BASES)
