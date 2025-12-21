@@ -144,10 +144,7 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     std::vector<double> mod_prob;
     std::vector<std::string> read_id;
     int curr_Nmod = 0, curr_Nvalid = 0;
-    // int curr_Nmod[2] = {0, 0};   // for +/- strand modification counts
-    // int curr_Nvalid[2] = {0, 0};
-    // int curr_strand = 0;
-    std::map<std::string,uint8_t[2]> curr_reads; // curr_reads[read_id] = {qscore, state(0:unmod, 1:mod), strand(0:+, 1:-)}
+    std::map<std::string,uint8_t[2]> curr_reads; // curr_reads[read_id] = {qscore, state(0:unmod, 1:mod)}
     std::map<std::string,uint8_t[2]>::iterator curr_reads_it;
     std::vector<std::string> chrom;
     std::vector<int> ref_position;
@@ -230,10 +227,6 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
             continue;
         }
 
-        // curr_Nmod[0] = 0;
-        // curr_Nmod[1] = 0;
-        // curr_Nvalid[0] = 0;
-        // curr_Nvalid[1] = 0;
         curr_Nmod = 0;
         curr_Nvalid = 0;
         curr_reads.clear();
