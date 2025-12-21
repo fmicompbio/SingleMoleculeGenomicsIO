@@ -289,12 +289,13 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
                 curr_Nvalid++;
                 curr_Nmod += curr_reads_it->second[1];
             }
-            chrom.push_back(sam_hdr_tid2name(conf.in_samhdr, tid));
-            ref_position.push_back(refpos + 1);
-            ref_strand.push_back(isRC ? '-' : '+');
-            Nvalid.push_back(curr_Nvalid);
-            Nmod.push_back(curr_Nmod);
-
+            if (curr_Nvalid > 0) {
+                chrom.push_back(sam_hdr_tid2name(conf.in_samhdr, tid));
+                ref_position.push_back(refpos + 1);
+                ref_strand.push_back(isRC ? '-' : '+');
+                Nvalid.push_back(curr_Nvalid);
+                Nmod.push_back(curr_Nmod);
+            }
         } else if (level == "read") {
             for (curr_reads_it = curr_reads.begin();
                  curr_reads_it != curr_reads.end();
