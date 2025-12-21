@@ -234,7 +234,7 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
         // iterate over reads overlapping refpos
         for (j = 0; j < depth; ++j) {
             // is read j on the right strand?
-            if ((bam_format == "QuasR" && (isRC != (plp[j].b->core.flag & BAM_FREVERSE))) ||
+            if ((bam_format == "QuasR" && (isRC != ((plp[j].b->core.flag & BAM_FREVERSE) != 0))) ||
                 (bam_format == "Bismark" && (isRC != ((strcmp(bam_aux2Z(bam_aux_get(plp[j].b, "XG")), "GA") == 0) ? true : false)))) {
                 continue;
             }
@@ -259,8 +259,8 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
 
             // ... check that the read base is either unmod_integer
             //     or mod_integer (otherwise do nothing)
-            if (!(fwdbase & (unmod_int | mod_int))) {
             fwdbase = bam_seqi(bam_get_seq(plp[j].b), plp[j].qpos);
+            if (!((fwdbase & (unmod_int | mod_int)) != 0)) {
                 continue;
             }
 
@@ -270,13 +270,13 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
             if (curr_reads_it == curr_reads.end()) {
                 // add new read
                 curr_reads[curr_read_id][0] = (uint8_t)bam_get_qual(plp[j].b)[j];
-                curr_reads[curr_read_id][1] = (uint8_t)(fwdbase & mod_int ? 1 : 0);
+                curr_reads[curr_read_id][1] = (uint8_t)((fwdbase & mod_int) != 0 ? 1 : 0);
             } else {
                 // compare to current record and keep the one with highest qscore
                 if ((int)bam_get_qual(plp[j].b)[j] > curr_reads_it->second[0] &&
                     (int)(fwdbase & mod_int ? 1 : 0) != curr_reads_it->second[1]) {
                     curr_reads_it->second[0] = (uint8_t)bam_get_qual(plp[j].b)[j];
-                    curr_reads_it->second[1] = (uint8_t)(fwdbase & mod_int ? 1 : 0);
+                    curr_reads_it->second[1] = (uint8_t)((fwdbase & mod_int) != 0 ? 1 : 0);
                 }
             }
         }
