@@ -12,6 +12,7 @@ readMismatchBam(
   readBaseUnmod = "T",
   readBaseMod = "C",
   level = "read",
+  overlapAggregation = "maxQscore",
   sampleAnnot = NULL,
   nAlnsToSample = 0,
   seqnamesToSampleFrom = "chr19",
@@ -70,11 +71,21 @@ reads into an assay called \code{"mod_prob"}, with each column
 (sample) consisting of a position-by-read
 \code{\link[SparseArray]{NaMatrix}}. This is the
 default.}
+\item{"quickread"}{: Like "read", but using pileup-based data
+rather than parsing individual alignments. This mode does not
+support variant labels or read sampling. }
 \item{"summary"}{: Counts the total and modified bases for each
 position and strand and returns them in assays named
 \code{"Nvalid"} and \code{"Nmod"}, respectively, as well
 as the \code{Nmod/Nvalid} ratio in the assay \code{"FracMod"}.}
 }}
+
+\item{overlapAggregation}{Character scalar indicating how to aggregate
+modification probabilities for positions that are covered by both
+mates in a paired-end bam file. Only used if \code{level = "read"}. In
+other modes, aggregation corresponding to
+\code{overlapAggregation = "maxQscore"} is performed automatically.
+Currently supported values are \code{"maxQscore"}.}
 
 \item{sampleAnnot}{A \code{data.frame} (or \code{NULL}) providing annotations
 for the samples. It must contain at least one column, named

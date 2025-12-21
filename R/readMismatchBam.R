@@ -31,11 +31,20 @@
 #'             (sample) consisting of a position-by-read
 #'             \code{\link[SparseArray]{NaMatrix}}. This is the
 #'             default.}
+#'         \item{"quickread"}{: Like "read", but using pileup-based data
+#'             rather than parsing individual alignments. This mode does not
+#'             support variant labels or read sampling. }
 #'         \item{"summary"}{: Counts the total and modified bases for each
 #'             position and strand and returns them in assays named
 #'             \code{"Nvalid"} and \code{"Nmod"}, respectively, as well
 #'             as the \code{Nmod/Nvalid} ratio in the assay \code{"FracMod"}.}
 #'     }
+#' @param overlapAggregation Character scalar indicating how to aggregate
+#'     modification probabilities for positions that are covered by both
+#'     mates in a paired-end bam file. Only used if \code{level = "read"}. In
+#'     other modes, aggregation corresponding to
+#'     \code{overlapAggregation = "maxQscore"} is performed automatically.
+#'     Currently supported values are \code{"maxQscore"}.
 #' @param sequenceContext A character scalar with an odd number of characters,
 #'     specifying the genomic context on the plus strand, for which to report
 #'     (mis-)matches. The string may contain IUPAC ambiguity codes, e.g.
@@ -104,6 +113,7 @@ readMismatchBam <- function(bamfiles,
                             readBaseUnmod = "T",
                             readBaseMod = "C",
                             level = "read",
+                            overlapAggregation = "maxQscore",
                             sampleAnnot = NULL,
                             nAlnsToSample = 0,
                             seqnamesToSampleFrom = "chr19",
@@ -286,27 +296,100 @@ readMismatchBam <- function(bamfiles,
                  myncpuDecompression = ncpuDecompression,
                  myverbose = if (ncpuTotal > 1) FALSE else verbose) {
 
-            # extract base mismatches
-            read_mismatchbam_cpp(
-                inname_str = bamf,
-                bam_format = mybamFormat,
-                regions = myregions_str,
-                pos_context_list = myposContextList,
-                pos_context_rev_list = myposContextRevList,
-                unmod_integer = myunmodInteger,
-                unmod_integer_rev = myunmodIntegerRev,
-                mod_integer = mymodInteger,
-                mod_integer_rev = mymodIntegerRev,
-                level = mylevel,
-                n_alns_to_sample = as.integer(mynAlnsToSample),
-                tnames_for_sampling = myseqnamesToSampleFrom,
-                variantRefNames = myvariantRefNames,
-                variantRefPositions = as.integer(myvariantRefPositions),
-                windowSize = 0L,
-                n_threads = as.integer(myncpuDecompression),
-                verbose = myverbose)
+            if (mylevel == "read") {
+                # extract base mismatches
+                resL <- read_mismatchbam_cpp(
+                    inname_str = bamf,
+                    bam_format = mybamFormat,
+                    regions = myregions_str,
+                    pos_context_list = myposContextList,
+                    pos_context_rev_list = myposContextRevList,
+                    unmod_integer = myunmodInteger,
+                    unmod_integer_rev = myunmodIntegerRev,
+                    mod_integer = mymodInteger,
+                    mod_integer_rev = mymodIntegerRev,
+                    level = mylevel,
+                    n_alns_to_sample = as.integer(mynAlnsToSample),
+                    tnames_for_sampling = myseqnamesToSampleFrom,
+                    variantRefNames = myvariantRefNames,
+                    variantRefPositions = as.integer(myvariantRefPositions),
+                    windowSize = 0L,
+                    n_threads = as.integer(myncpuDecompression),
+                    verbose = myverbose)
+            } else if (mylevel == "summary") {
+                resL <- pileup_mismatchbam_cpp(
+                    inname_str = bamf,
+                    bam_format = mybamFormat,
+                    regions = myregions_str,
+                    pos_context_list = myposContextList,
+                    pos_context_rev_list = myposContextRevList,
+                    unmod_integer = myunmodInteger,
+                    unmod_integer_rev = myunmodIntegerRev,
+                    mod_integer = mymodInteger,
+                    mod_integer_rev = mymodIntegerRev,
+                    level = "summary",
+                    n_threads = as.integer(myncpuDecompression),
+                    verbose = myverbose
+                )
+            } else if (mylevel == "quickread") {
+                resL <- pileup_mismatchbam_cpp(
+                    inname_str = bamf,
+                    bam_format = mybamFormat,
+                    regions = myregions_str,
+                    pos_context_list = myposContextList,
+                    pos_context_rev_list = myposContextRevList,
+                    unmod_integer = myunmodInteger,
+                    unmod_integer_rev = myunmodIntegerRev,
+                    mod_integer = mymodInteger,
+                    mod_integer_rev = mymodIntegerRev,
+                    level = "read",
+                    n_threads = as.integer(myncpuDecompression),
+                    verbose = myverbose
+                )
+            }
+            resL
         }, BPPARAM = BPPARAM, BPOPTIONS = bpoptions(
             progressbar = (verbose && ncpuTotal > 1)))
+
+    # if level = "read" (results from read_mismatchbam_cpp), resolve overlapping
+    # parts of reads
+    if (level == "read" && overlapAggregation == "maxQscore") {
+        resLL <- lapply(resLL, function(resL) {
+            iByReadPos <- split(seq_along(resL$read_id),
+                                paste0(resL$read_id, resL$chrom, resL$ref_position,
+                                       resL$ref_strand))
+            if (any(lengths(iByReadPos) > 1)) {
+                resL$read_id <- unlist(unname(lapply(
+                    iByReadPos, function(i) unique(resL$read_id[i]))))
+                resL$ref_position <- unlist(unname(lapply(
+                    iByReadPos, function(i) unique(resL$ref_position[i]))))
+                resL$chrom <- unlist(unname(lapply(
+                    iByReadPos, function(i) unique(resL$chrom[i]))))
+                resL$ref_strand <- unlist(unname(lapply(
+                    iByReadPos, function(i) unique(resL$ref_strand[i]))))
+                resL$mod_prob <- unlist(unname(lapply(
+                    iByReadPos, function(i) resL$mod_prob[i[which.max(resL$qscore[i])]])))
+                resL$qscore <- unlist(unname(lapply(
+                    iByReadPos, function(i) max(resL$qscore[i]))))
+            }
+            if (any(duplicated(resL$read_df$read_id))) {
+                resL$read_df <- resL$read_df |>
+                    mutate(read_id = factor(.data$read_id, levels = unique(.data$read_id))) |>
+                    group_by(.data$read_id) |>
+                    summarize(qscore = mean(.data$qscore),
+                              read_length = sum(.data$read_length),
+                              aligned_length = sum(.data$aligned_length),
+                              variant_label = ifelse(any(is.na(.data$variant_label)), NA_character_,
+                                                     paste(.data$variant_label, collapse = "")),
+                              ref_strand = paste(unique(.data$ref_strand, collapse = "/")),
+                              .groups = "drop") |>
+                    mutate(read_id = as.character(.data$read_id)) |>
+                    as.data.frame()
+                rownames(resL$read_df) <- seq_len(nrow(resL$read_df))
+            }
+            resL
+        })
+    }
 
     # create GPos objects for each input
     gposL <- bplapply(resLL, function(resL, myseqinfo = seqinfo) {
@@ -332,25 +415,7 @@ readMismatchBam <- function(bamfiles,
         sequenceContextWidth = nchar(sequenceContext),
         sequenceReference = ref)
 
-    if (level %in% c("read")) {
-        # combine information from R1 and R2
-        resLL <- lapply(resLL, function(resL) {
-            resL$read_df <- resL$read_df |>
-                mutate(read_id = factor(.data$read_id, levels = unique(.data$read_id))) |>
-                group_by(.data$read_id) |>
-                summarize(qscore = mean(.data$qscore),
-                          read_length = sum(.data$read_length),
-                          aligned_length = sum(.data$aligned_length),
-                          variant_label = ifelse(any(is.na(.data$variant_label)), NA_character_,
-                                                 paste(.data$variant_label, collapse = "")),
-                          ref_strand = paste(unique(.data$ref_strand, collapse = "/")),
-                          .groups = "drop") |>
-                mutate(read_id = as.character(.data$read_id)) |>
-                as.data.frame()
-            rownames(resL$read_df) <- seq_len(nrow(resL$read_df))
-            resL
-        })
-
+    if (level %in% c("read", "quickread")) {
         # extract unique read names
         readL <- lapply(resLL, function(resL) resL$read_df$read_id)
 
@@ -402,7 +467,7 @@ readMismatchBam <- function(bamfiles,
         row.names = names(bamfiles),
         sample = names(bamfiles)
     )
-    if (level %in% c("read")) {
+    if (level %in% c("read", "quickread")) {
         cdata <- cbind(
             cdata,
             DataFrame(n_reads = unlist(lapply(readdfL, nrow), use.names = FALSE),
@@ -415,7 +480,7 @@ readMismatchBam <- function(bamfiles,
                                    drop = FALSE]
         cdata <- cbind(cdata, sampleAnnot)
     }
-    if (level %in% c("read")) {
+    if (level %in% c("read", "quickread")) {
         stopifnot(names(modmat) == cdata$sample)
         se <- SummarizedExperiment(
             assays = list(mod_prob = modmat),
@@ -451,7 +516,7 @@ readMismatchBam <- function(bamfiles,
     }
 
     # Remove reads with all NA values
-    if (level %in% c("read")) {
+    if (level %in% c("read", "quickread")) {
         se <- filterReads(se, readInfoCol = NULL, qcCol = NULL, prune = FALSE)
     }
     se
