@@ -419,6 +419,13 @@
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom cli cli_abort
 #'
+#' @returns A \code{\link[Biostrings]{DNAStringSet}} object.
+#'
+#' @examples
+#' ref <- refargToDNAStringSet(system.file("extdata", "reference.fa.gz",
+#'                                         package = "SingleMoleculeGenomicsIO"))
+#' ref
+#'
 #' @export
 refargToDNAStringSet <- function(sequenceReference) {
     if (!is(sequenceReference, "BSgenome") &&

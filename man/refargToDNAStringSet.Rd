@@ -9,6 +9,9 @@ refargToDNAStringSet(sequenceReference)
 \arguments{
 \item{sequenceReference}{A supported value defining the reference sequence.}
 }
+\value{
+A \code{\link[Biostrings]{DNAStringSet}} object.
+}
 \description{
 This function takes a supported argument value specifying the
 reference sequence (e.g. genome) and returns it as a
@@ -19,6 +22,12 @@ Currently supported argument values are:
 \item{"DNAStringSet"}{: A DNAStringSet object}
 \item{"character"}{: A path to a fasta file}
 }
+}
+\examples{
+ref <- refargToDNAStringSet(system.file("extdata", "reference.fa.gz",
+                                        package = "SingleMoleculeGenomicsIO"))
+ref
+
 }
 \author{
 Michael Stadler, Charlotte Soneson
