@@ -479,7 +479,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
     Rcpp::RObject bar;
 
     // ... general variables
-    int c = 0, i = 0, success = 0;
+    int c = 0, success = 0;
     unsigned long long n_unaligned = 0, n_total = 0;
     bool had_error = false;
     samFile *infile = NULL;
