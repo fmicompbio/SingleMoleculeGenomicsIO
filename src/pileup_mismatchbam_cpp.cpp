@@ -170,6 +170,13 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
         goto end;
     }
 
+    // check if BAM file is conforming to bam_format
+    success = check_bam_format(conf.infile, conf.in_samhdr, bamdata, bam_format,
+                               had_error, buffer, buffer_len);
+    if (success != 0) {
+        goto end;
+    }
+
     success = create_multi_region_iterator(regions, regcnt, regions_c,
                                            conf.iter, conf.idx, conf.in_samhdr,
                                            had_error, buffer_len, buffer);
