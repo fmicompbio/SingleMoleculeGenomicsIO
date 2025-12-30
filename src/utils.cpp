@@ -989,3 +989,38 @@ int readdata(void *data, bam1_t *b) {
     return sam_itr_next(conf->infile, conf->iter, b);
 }
 
+// check if BAM file is conforming to bam_format
+// remark: we cannot guarantee in all cases that the bam file is conforming
+int check_bam_format(samFile *infile,
+                     sam_hdr_t *in_samhdr,
+                     bam1_t *bamdata,
+                     std::string &bam_format,
+                     bool &had_error,
+                     char *buffer,
+                     int &buffer_len) {
+    int ret_r = -1, result = 0;
+    while ((ret_r = sam_read1(infile, in_samhdr, bamdata)) >= 0) {
+        if (!(bamdata->core.flag & BAM_FUNMAP)) {
+            if (bam_format == "Bismark") {
+                // XR and XG tags need to exist
+                if (bam_aux_get(bamdata, "XR") == NULL || bam_aux_get(bamdata, "XG") == NULL) {
+                    had_error = true;
+                    snprintf(buffer, buffer_len,
+                             "Invalid Bismark bam format (missing XR or XG tags)\n");
+                    result = 1;
+                }
+            } else if (bam_format == "QuasR") {
+                // paired alignments need to be on the same strand
+                if ((bamdata->core.flag & BAM_FPAIRED) &&
+                    (((bamdata->core.flag & BAM_FREVERSE) > 0) != ((bamdata->core.flag & BAM_FMREVERSE) > 0))) {
+                    had_error = true;
+                    snprintf(buffer, buffer_len,
+                             "Invalid QuasR bam format (paired alignments not on same strand)\n");
+                    result = 2;
+                }
+            }
+            break;
+        }
+    }
+    return result;
+}

@@ -82,3 +82,11 @@ int plpconstructor(void *data, const bam1_t *b, bam_pileup_cd *cd);
 int plpdestructor(void *data, const bam1_t *b, bam_pileup_cd *cd);
 
 int readdata(void *data, bam1_t *b);
+
+int check_bam_format(samFile *infile,
+                     sam_hdr_t *in_samhdr,
+                     bam1_t *bamdata,
+                     std::string &bam_format,
+                     bool &had_error,
+                     char *buffer,
+                     int &buffer_len);
