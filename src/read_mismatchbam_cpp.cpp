@@ -650,9 +650,9 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         df_aligned_length,
                         df_variant_label,
                         df_ref_strand);
-                    if (verbose && CLI_SHOULD_TICK) {
+                    if (verbose && CLI_SHOULD_TICK) { // # nocov start
                         cli_progress_set(bar, (double)alncnt);
-                    }
+                    } // # nocov end
                     if (alncnt % 100 == 0) { // # nocov start
                         Rcpp::checkUserInterrupt();
                     } // # nocov end
