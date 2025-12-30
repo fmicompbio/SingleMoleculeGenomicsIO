@@ -42,6 +42,17 @@ corresponding to \code{se}.
 \description{
 Expand the rows of a \code{RangedSummarizedExperiment} to single base resolution.
 }
+\examples{
+modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
+                          package = "SingleMoleculeGenomicsIO")
+se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
+                 modbase = "a", verbose = TRUE,
+                 BPPARAM = BiocParallel::SerialParam())
+se_exp <- expandSEToBaseSpace(se)
+dim(se)
+dim(se_exp)
+
+}
 \author{
 Charlotte Soneson, Michael Stadler
 }
