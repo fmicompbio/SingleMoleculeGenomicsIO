@@ -32,11 +32,13 @@ test_that("readMismatchBam works", {
                  "not all .bamfiles. exist")
     expect_error(readMismatchBam(bamfiles = bamfiles[1], bamFormat = "Bismark",
                                  regions = "chr1:6940000-6955000",
-                                 sequenceReference = ref),
+                                 sequenceReference = ref,
+                                 BPPARAM = BiocParallel::SerialParam()),
                  "Invalid Bismark bam format")
     expect_error(readMismatchBam(bamfiles = bamfiles[2], bamFormat = "QuasR",
                                  regions = "chr1:6940000-6955000",
-                                 sequenceReference = ref),
+                                 sequenceReference = ref,
+                                 BPPARAM = BiocParallel::SerialParam()),
                  "Invalid QuasR bam format")
     expect_error(readMismatchBam(bamfiles = bamfiles, bamFormat = "QuasR",
                                  regions = NULL, nAlnsToSample = 0,
