@@ -56,10 +56,6 @@ int process_bam_record(bam1_t *bamdata,        // bam record
     // process alignment
     alncnt++;
 
-    // check for interrupt every 100 alignments
-    if (alncnt % 100 == 0) // # nocov start
-        Rcpp::checkUserInterrupt(); // # nocov end
-
     // ... extract *forward* read sequence to char*
     //     (populates qseq and qseq_len)
     if (extract_forward_qseq(bamdata, qseq, qseq_len) != 0) {
