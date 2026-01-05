@@ -4,7 +4,7 @@
 #' \code{\link[SummarizedExperiment]{SummarizedExperiment}} object with
 #' information on base states. Base mismatches are typically resulting from
 #' single molecule genomics experiments, representing the accessibility of
-#' individual bases: For bisulphite-sequencing experiments, C-to-T mismatches
+#' individual bases: For bisulfite-sequencing experiments, C-to-T mismatches
 #' correspond to unmethylated (inaccessible) bases (\code{readBaseUnmod="T",
 #' readBaseMod="C"}, see below), while in deaminase-treatment based experiments,
 #' C-to-T mismatches represent modified (accessible) bases
@@ -14,7 +14,7 @@
 #' @inheritParams readModBam
 #' @inheritParams addSeqContext
 #' @param bamfiles Character vector with one or several paths of \code{BAM}
-#'     files, containing alignments with specific C-to-T mismatches.
+#'     files, containing alignments with specific (e.g., C-to-T) mismatches.
 #'     If \code{bamfiles} is a named vector, the names are used
 #'     as sample names and prefixes for read names. Otherwise, the prefixes will
 #'     be \code{s1}, ..., \code{sN}, where \code{N} is the length of
@@ -98,7 +98,7 @@
 #' @importFrom BiocParallel bplapply MulticoreParam bpnworkers bpworkers<-
 #'     bpoptions
 #' @importFrom Biostrings DNAString DNA_BASES
-#'     DNA_ALPHABET IUPAC_CODE_MAP vmatchPattern reverseComplement
+#'     IUPAC_CODE_MAP vmatchPattern reverseComplement
 #' @importFrom BSgenome getSeq
 #' @importFrom methods is
 #' @importFrom cli cli_abort cli_warn
