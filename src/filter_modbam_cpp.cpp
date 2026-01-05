@@ -363,7 +363,7 @@ Rcpp::NumericVector filter_modbam_cpp(std::string infile,
             cli_progress_set(bar, (double)alncnt);
         }
         if (alncnt % 100 == 0) { // # nocov start
-            R_CheckUserInterrupt();
+            Rcpp::checkUserInterrupt();
         } // # nocov end
     }
     if (-1 == c) {

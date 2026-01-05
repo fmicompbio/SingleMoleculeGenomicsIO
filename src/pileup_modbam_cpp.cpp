@@ -314,7 +314,7 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
             // # nocov end
         }
         if (refposcount % 1000000 == 0) { // # nocov start
-            R_CheckUserInterrupt();
+            Rcpp::checkUserInterrupt();
         } // # nocov end
     }
 

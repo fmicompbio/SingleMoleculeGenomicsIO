@@ -585,7 +585,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         cli_progress_set(bar, (double)alncnt);
                     } // # nocov end
                     if (alncnt % 100 == 0) { // # nocov start
-                        R_CheckUserInterrupt();
+                        Rcpp::checkUserInterrupt();
                     } // # nocov end
                     if (success != 0) { // # nocov start
                         goto end;       // currently there are no failure points in process_mismatch_bam_record

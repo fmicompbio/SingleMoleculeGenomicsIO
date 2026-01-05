@@ -664,7 +664,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                         cli_progress_set(bar, (double)alncnt);
                     }
                     if (alncnt % 100 == 0) { // # nocov start
-                        R_CheckUserInterrupt();
+                        Rcpp::checkUserInterrupt();
                     } // # nocov end
                     if (success != 0) { // # nocov start
                         goto end;
@@ -730,7 +730,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                         cli_progress_set(bar, (double)alncnt);
                     }
                     if (alncnt % 100 == 0) { // # nocov start
-                        R_CheckUserInterrupt();
+                        Rcpp::checkUserInterrupt();
                     } // # nocov end
                     if (success != 0) {
                         goto end;
