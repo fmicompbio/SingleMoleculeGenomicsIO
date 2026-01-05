@@ -59,7 +59,7 @@ int process_mismatch_bam_record(
         Rcpp::CharacterVector &df_ref_strand) {
 
     // allocate variable only used inside process_mismatch_bam_record()
-    int i = 0, j = 0;
+    unsigned int i = 0, j = 0;
     int ref_pos = 0, read_pos = 0, op = 0, op_len = 0;
     int unmod_int = 0, mod_int = 0;
     int this_read_len = bamdata->core.l_qseq;
@@ -107,7 +107,7 @@ int process_mismatch_bam_record(
         case BAM_CMATCH:  // match or mismatch (M)
         case BAM_CEQUAL:  // match (=)
         case BAM_CDIFF:   // mismatch (X)
-            for (j = 0; j < op_len; j++) {
+            for (j = 0; j < (unsigned int)op_len; j++) {
                 if (pos_set->count(ref_pos) > 0) {
                     // we need to analyze this position
                     // ... check that the read base is either unmod_integer
@@ -180,8 +180,8 @@ int process_mismatch_bam_record(
     } else if (mode == MISMATCHBAM_MODE_PAIR) {
         // process modposref and modstate to update counter in pair_counts
         int maxdist = pair_counts.nrow() - 1, currdist = 0;
-        for (i = 0; i < (int)modposref.size(); i++) {
-            for (j = i; j < (int)modposref.size(); j++) {
+        for (i = 0; i < modposref.size(); i++) {
+            for (j = i; j < modposref.size(); j++) {
                 currdist = modposref[j] - modposref[i];
                 if (currdist > maxdist)
                     break;
