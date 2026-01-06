@@ -775,25 +775,24 @@ test_that("readMismatchBam correctly labels reads", {
                            regions = varpos2,
                            variantPositions = varpos2,
                            BPPARAM = BiocParallel::SerialParam())
-    ## TODO
-    # bases <- c("A", "C", "G", "T", "-")
-    # expCnt <- matrix(
-    #     as.integer(c(0, 8, 0, 2, 0,
-    #                  0, 8, 0, 2, 0,
-    #                  8, 0, 2, 0, 0,
-    #                  8, 0, 2, 0, 0,
-    #                  2, 0, 7, 0, 1,
-    #                  0, 2, 7, 0, 1,
-    #                  2, 0, 7, 0, 1,
-    #                  2, 0, 7, 0, 1,
-    #                  0, 2, 7, 0, 1)),
-    #     ncol = length(bases), byrow = TRUE, dimnames = list(NULL, bases))
-    # obsCnt <- do.call(rbind, lapply(seq.int(9), function(i) {
-    #     f <- factor(
-    #         unlist(lapply(se2$readInfo$s1$variant_label, substr, i, i)),
-    #         levels = bases
-    #     )
-    #     unclass(table(f))
-    # }))
-    # expect_identical(obsCnt, expCnt)
+    bases <- c("A", "C", "G", "T", "-")
+    expCnt <- matrix(
+        as.integer(c(0, 2, 0, 1, 4,
+                     0, 1, 0, 0, 6,
+                     2, 0, 1, 0, 4,
+                     3, 0, 0, 0, 4,
+                     1, 0, 2, 0, 4,
+                     0, 0, 1, 0, 6,
+                     0, 0, 1, 0, 6,
+                     0, 0, 0, 0, 7,
+                     1, 0, 0, 0, 6)),
+        ncol = length(bases), byrow = TRUE, dimnames = list(NULL, bases))
+    obsCnt <- do.call(rbind, lapply(seq.int(9), function(i) {
+        f <- factor(
+            unlist(lapply(se2$readInfo$s1$variant_label, substr, i, i)),
+            levels = bases
+        )
+        unclass(table(f))
+    }))
+    expect_identical(obsCnt, expCnt)
 })
