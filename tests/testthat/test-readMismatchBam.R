@@ -476,8 +476,7 @@ test_that("readMismatchBam works", {
     # ... ... there is no guarantee that the reads have to be in the
     #         same order
     se1quickreordered <- subsetReads(se1quick, colnames(SummarizedExperiment::assay(se1, "mod_prob")[[1]]))
-    ## TODO: the colData are not identical (qscore, read_length)
-    # expect_identical(se1, se1quickreordered)
+    expect_identical(se1, se1quickreordered)
     expect_identical(rownames(se1), rownames(se1quickreordered))
     expect_identical(rowRanges(se1), rowRanges(se1quickreordered))
     expect_identical(assay(se1, "mod_prob"),
@@ -529,20 +528,10 @@ test_that("readMismatchBam works", {
     expect_identical(rowRanges(se2), rowRanges(se2sum))
     # ... compare to se2quick
     se2quickreordered <- subsetReads(se2quick, colnames(SummarizedExperiment::assay(se2, "mod_prob")[[1]]))
-    # expect_identical(se2, se2quickreordered)
-    expect_identical(rownames(se2), rownames(se2quickreordered))
-    expect_identical(rowRanges(se2), rowRanges(se2quickreordered))
-    expect_identical(assay(se2, "mod_prob"),
-                     assay(se2quickreordered, "mod_prob"))
-    expect_identical(metadata(se2), metadata(se2quickreordered))
-    expect_identical(colData(se2)[, c("sample", "n_reads")],
-                     colData(se2quickreordered)[, c("sample", "n_reads")])
-    expect_identical(rownames(colData(se2)$readInfo$quasr),
-                     rownames(colData(se2quickreordered)$readInfo$quasr))
+    expect_identical(se2, se2quickreordered)
 
     # ... content se3
     expect_identical(unname(se3$n_reads), 171L)
-    ## TODO: is the number of rows correct here?
     expect_identical(dim(assay(se3, "mod_prob")[[1]]), c(426L, 171L))
     expect_identical(dim(se3), c(426L, 1L))
     expect_identical(lapply(se3$readInfo, rownames),
@@ -579,19 +568,7 @@ test_that("readMismatchBam works", {
     expect_identical(rowRanges(se3), rowRanges(se3sum))
     # ... compare to se3quick
     se3quickreordered <- subsetReads(se3quick, colnames(SummarizedExperiment::assay(se3, "mod_prob")[[1]]))
-    ## TODO: colData not identical
-    # expect_identical(se3, se3quickreordered)
-    expect_identical(rownames(se3), rownames(se3quickreordered))
-    expect_identical(rowRanges(se3), rowRanges(se3quickreordered))
-    ## in principle, there is no guarantee that the reads have to be in the
-    ## same order (but here they are)
-    expect_identical(assay(se3, "mod_prob"),
-                     assay(se3quickreordered, "mod_prob"))
-    expect_identical(metadata(se3), metadata(se3quickreordered))
-    expect_identical(colData(se3)[, c("sample", "n_reads")],
-                     colData(se3quickreordered)[, c("sample", "n_reads")])
-    expect_identical(rownames(colData(se3)$readInfo$bismark),
-                     rownames(colData(se3quickreordered)$readInfo$bismark))
+    expect_identical(se3, se3quickreordered)
 
     # ... content of se3b
     true_readlevel_bismark <- data.frame(
@@ -637,7 +614,7 @@ test_that("readMismatchBam works", {
     expect_identical(aln4a[[1]], aln4b[[1]])
     expect_length(aln4a[[1]]$qname, 3L)
     expect_length(intersect(aln4a[[1]]$qname, aln4b[[2]]$qname), 0L)
-    # # ... ... check return values
+    # ... ... check return values
     mp4a <- assay(se4a, "mod_prob")
     mp4b <- assay(se4b, "mod_prob")
     expect_true(all(paste0("quasr-", aln4a[[1]]$qname) %in% colnames(mp4a$quasr)))
@@ -666,19 +643,7 @@ test_that("readMismatchBam works", {
                      colData(se6sum)[, c("sample")])
     expect_identical(rowRanges(se6), rowRanges(se6sum))
     # ... compare to se6quick
-    ## TODO: colData not identical
-    # expect_identical(se6, se6quick)
-    expect_identical(rownames(se6), rownames(se6quick))
-    expect_identical(rowRanges(se6), rowRanges(se6quick))
-    ## in principle, there is no guarantee that the reads have to be in the
-    ## same order (but here they are)
-    expect_identical(assay(se6, "mod_prob"),
-                     assay(se6quick, "mod_prob"))
-    expect_identical(metadata(se6), metadata(se6quick))
-    expect_identical(colData(se6)[, c("sample", "n_reads")],
-                     colData(se6quick)[, c("sample", "n_reads")])
-    expect_identical(rownames(colData(se6)$readInfo$quasr),
-                     rownames(colData(se6quick)$readInfo$quasr))
+    expect_identical(se6, se6quick)
 
     # ... content se7 (like se1, but with trim=TRUE)
     expect_identical(unname(se7$n_reads), 182L)
@@ -734,17 +699,7 @@ test_that("readMismatchBam works", {
     # ... ... there is no guarantee that the reads have to be in the
     #         same order
     se8quickreordered <- subsetReads(se8quick, colnames(SummarizedExperiment::assay(se8, "mod_prob")[[1]]))
-    ## TODO: the colData are not identical (qscore, read_length)
-    # expect_identical(se8, se8quickreordered)
-    expect_identical(rownames(se8), rownames(se8quickreordered))
-    expect_identical(rowRanges(se8), rowRanges(se8quickreordered))
-    expect_identical(assay(se8, "mod_prob"),
-                     assay(se8quickreordered, "mod_prob"))
-    expect_identical(metadata(se8), metadata(se8quickreordered))
-    expect_identical(colData(se8)[, c("sample", "n_reads")],
-                     colData(se8quickreordered)[, c("sample", "n_reads")])
-    expect_identical(rownames(colData(se8)$readInfo$quasrsingle),
-                     rownames(colData(se8quickreordered)$readInfo$quasrsingle))
+    expect_identical(se8, se8quickreordered)
 })
 
 test_that("readMismatchBam correctly labels reads", {

@@ -353,24 +353,26 @@ readMismatchBam <- function(bamfiles,
 
     # if level = "read" (results from read_mismatchbam_cpp), resolve overlapping
     # parts of reads
-    if (level == "read" && overlapAggregation == "maxQscore") {
+    if (level %in% c("read", "quickread")) {
         resLL <- lapply(resLL, function(resL) {
-            iByReadPos <- split(seq_along(resL$read_id),
-                                paste0(resL$read_id, resL$chrom, resL$ref_position,
-                                       resL$ref_strand))
-            if (any(lengths(iByReadPos) > 1)) {
-                resL$read_id <- unlist(unname(lapply(
-                    iByReadPos, function(i) unique(resL$read_id[i]))))
-                resL$ref_position <- unlist(unname(lapply(
-                    iByReadPos, function(i) unique(resL$ref_position[i]))))
-                resL$chrom <- unlist(unname(lapply(
-                    iByReadPos, function(i) unique(resL$chrom[i]))))
-                resL$ref_strand <- unlist(unname(lapply(
-                    iByReadPos, function(i) unique(resL$ref_strand[i]))))
-                resL$mod_prob <- unlist(unname(lapply(
-                    iByReadPos, function(i) resL$mod_prob[i[which.max(resL$qscore[i])]])))
-                resL$qscore <- unlist(unname(lapply(
-                    iByReadPos, function(i) max(resL$qscore[i]))))
+            if (level == "read" && overlapAggregation == "maxQscore") {
+                iByReadPos <- split(seq_along(resL$read_id),
+                                    paste0(resL$read_id, resL$chrom, resL$ref_position,
+                                           resL$ref_strand))
+                if (any(lengths(iByReadPos) > 1)) {
+                    resL$read_id <- unlist(unname(lapply(
+                        iByReadPos, function(i) unique(resL$read_id[i]))))
+                    resL$ref_position <- unlist(unname(lapply(
+                        iByReadPos, function(i) unique(resL$ref_position[i]))))
+                    resL$chrom <- unlist(unname(lapply(
+                        iByReadPos, function(i) unique(resL$chrom[i]))))
+                    resL$ref_strand <- unlist(unname(lapply(
+                        iByReadPos, function(i) unique(resL$ref_strand[i]))))
+                    resL$mod_prob <- unlist(unname(lapply(
+                        iByReadPos, function(i) resL$mod_prob[i[which.max(resL$qscore[i])]])))
+                    resL$qscore <- unlist(unname(lapply(
+                        iByReadPos, function(i) max(resL$qscore[i]))))
+                }
             }
             if (any(duplicated(resL$read_df$read_id))) {
                 resL$read_df <- resL$read_df |>
