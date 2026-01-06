@@ -125,6 +125,7 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     int tid = -1, depth = -1, j = 0, success = 0;
     int refpos = -1;
     const bam_pileup1_t *plp = NULL;
+    bam_pileup1_t plp_j;
     kstring_t insdata = KS_INITIALIZE; // TODO: need kstring_t here and in pileup_modbam_cpp?
     bool had_error = false;
     int buffer_len = 2000;
@@ -240,9 +241,11 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
 
         // iterate over reads overlapping refpos
         for (j = 0; j < depth; ++j) {
+            plp_j = plp[j];
+
             // is read j on the right strand?
-            if ((bam_format == "QuasR" && (isRC != ((plp[j].b->core.flag & BAM_FREVERSE) != 0))) ||
-                (bam_format == "Bismark" && (isRC != ((strcmp(bam_aux2Z(bam_aux_get(plp[j].b, "XG")), "GA") == 0) ? true : false)))) {
+            if ((bam_format == "QuasR" && (isRC != ((plp_j.b->core.flag & BAM_FREVERSE) != 0))) ||
+                (bam_format == "Bismark" && (isRC != ((strcmp(bam_aux2Z(bam_aux_get(plp_j.b, "XG")), "GA") == 0) ? true : false)))) {
                 continue;
             }
 
@@ -251,39 +254,39 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
             if (level == "read" &&
                 std::count(df_read_id.begin(), df_read_id.end(), bam_get_qname(plp[j].b)) == 0 &&
                 !(plp[j].b->core.flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY))) {
-                df_read_id.push_back(bam_get_qname(plp[j].b));
-                df_qscore.push_back(extract_qscore(plp[j].b));
-                df_read_length.push_back(plp[j].b->core.l_qseq);
-                df_aligned_length.push_back(calculate_aligned_bases(plp[j].b));
+                df_read_id.push_back(bam_get_qname(plp_j.b));
+                df_qscore.push_back(extract_qscore(plp_j.b));
+                df_read_length.push_back(plp_j.b->core.l_qseq);
+                df_aligned_length.push_back(calculate_aligned_bases(plp_j.b));
                 df_variant_label.push_back(NA_STRING);
                 df_ref_strand.push_back(isRC ? "-" : "+");
             }
 
-            if (plp[j].is_del || plp[j].is_refskip ||
-                (plp[j].b->core.flag & BAM_FSECONDARY) ||
-                (plp[j].b->core.flag & BAM_FSUPPLEMENTARY)) {
+            if (plp_j.is_del || plp_j.is_refskip ||
+                (plp_j.b->core.flag & BAM_FSECONDARY) ||
+                (plp_j.b->core.flag & BAM_FSUPPLEMENTARY)) {
                 continue;
             }
 
             // ... check that the read base is either unmod_integer
             //     or mod_integer (otherwise do nothing)
-            fwdbase = bam_seqi(bam_get_seq(plp[j].b), plp[j].qpos);
+            fwdbase = bam_seqi(bam_get_seq(plp_j.b), plp_j.qpos);
             if (!((fwdbase & (unmod_int | mod_int)) != 0)) {
                 continue;
             }
 
             // store read in curr_reads
-            std::string curr_read_id(bam_get_qname(plp[j].b));
+            std::string curr_read_id(bam_get_qname(plp_j.b));
             curr_reads_it = curr_reads.find(curr_read_id);
             if (curr_reads_it == curr_reads.end()) {
                 // add new read
-                curr_reads[curr_read_id][0] = (uint8_t)bam_get_qual(plp[j].b)[j];
+                curr_reads[curr_read_id][0] = (uint8_t)bam_get_qual(plp_j.b)[plp_j.qpos];
                 curr_reads[curr_read_id][1] = (uint8_t)((fwdbase & mod_int) != 0 ? 1 : 0);
             } else {
                 // compare to current record and keep the one with highest qscore
-                if ((int)bam_get_qual(plp[j].b)[j] > curr_reads_it->second[0] &&
+                if ((int)bam_get_qual(plp_j.b)[plp_j.qpos] > curr_reads_it->second[0] &&
                     (int)(fwdbase & mod_int ? 1 : 0) != curr_reads_it->second[1]) {
-                    curr_reads_it->second[0] = (uint8_t)bam_get_qual(plp[j].b)[j];
+                    curr_reads_it->second[0] = (uint8_t)bam_get_qual(plp_j.b)[plp_j.qpos];
                     curr_reads_it->second[1] = (uint8_t)((fwdbase & mod_int) != 0 ? 1 : 0);
                 }
             }
