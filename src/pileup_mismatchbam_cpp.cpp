@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <unistd.h>
 #include <ctype.h>
 #include <htslib/sam.h>
@@ -152,6 +153,8 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     std::vector<char> ref_strand;
 
     // ... return values (one per aligned read)
+    std::set<std::pair<std::string,uint16_t>> df_reads_seen;
+    std::pair<std::string,uint16_t> this_read;
     std::vector<std::string> df_read_id;
     std::vector<double> df_qscore;
     std::vector<int> df_read_length;
@@ -252,8 +255,9 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
             // if this is the first time the read is seen, add it to the
             // read df vectors
             if (level == "read" &&
-                std::count(df_read_id.begin(), df_read_id.end(), bam_get_qname(plp[j].b)) == 0 &&
-                !(plp[j].b->core.flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY))) {
+                df_reads_seen.count(this_read = std::make_pair(bam_get_qname(plp_j.b), plp_j.b->core.flag)) == 0 &&
+                !(plp_j.b->core.flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY))) {
+                df_reads_seen.insert(this_read);
                 df_read_id.push_back(bam_get_qname(plp_j.b));
                 df_qscore.push_back(extract_qscore(plp_j.b));
                 df_read_length.push_back(plp_j.b->core.l_qseq);
