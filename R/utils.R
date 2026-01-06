@@ -399,3 +399,49 @@
 
     return(gr)
 }
+
+#' Convert a supported reference sequence argument to a DNAStringSet
+#'
+#' This function takes a supported argument value specifying the
+#' reference sequence (e.g. genome) and returns it as a
+#' \code{\link[Biostrings]{DNAStringSet}} object.
+#' Currently supported argument values are:
+#' \describe{
+#'      \item{"BSgenome:"}{: A BSgenome object}
+#'      \item{"DNAStringSet"}{: A DNAStringSet object}
+#'      \item{"character"}{: A path to a fasta file}
+#' }
+#'
+#' @param sequenceReference A supported value defining the reference sequence.
+#'
+#' @author Michael Stadler, Charlotte Soneson
+#'
+#' @importFrom Biostrings readDNAStringSet DNAStringSet
+#' @importFrom cli cli_abort
+#'
+#' @returns A \code{\link[Biostrings]{DNAStringSet}} object.
+#'
+#' @examples
+#' ref <- refargToDNAStringSet(system.file("extdata", "reference.fa.gz",
+#'                                         package = "SingleMoleculeGenomicsIO"))
+#' ref
+#'
+#' @export
+refargToDNAStringSet <- function(sequenceReference) {
+    if (!is(sequenceReference, "BSgenome") &&
+        !is(sequenceReference, "DNAStringSet") &&
+        !(is.character(sequenceReference) && file.exists(sequenceReference))) {
+        cli_abort(paste0(
+            "{.arg sequenceReference} must be either a {.cls BSgenome} object, ",
+            "a {.cls DNAStringSet} object, or a path to a fasta file."))
+    }
+    if (is.character(sequenceReference)) {
+        ref <- readDNAStringSet(sequenceReference)
+        names(ref) <- sub(" .*$", "", names(ref))
+    } else if (is(sequenceReference, "BSgenome")) {
+        ref <- DNAStringSet(as.list(sequenceReference))
+    } else {
+        ref <- sequenceReference
+    }
+    return(ref)
+}

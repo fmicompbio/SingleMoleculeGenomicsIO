@@ -72,26 +72,12 @@ extractSeqContext <- function(x,
             "`sequenceContextWidth` was increased to {sequenceContextWidth}",
             " (must be an odd number)"))
     }
-    if (!is(sequenceReference, "BSgenome") &&
-        !is(sequenceReference, "DNAStringSet") &&
-        !(is.character(sequenceReference) && file.exists(sequenceReference))) {
-        cli_abort(paste0(
-            "{.arg sequenceReference} must be either a {.cls BSgenome} object, ",
-            "a {.cls DNAStringSet} object, or a path to a fasta file."))
-    }
+
+    # obtain reference sequences
+    ref <- refargToDNAStringSet(sequenceReference)
 
     # resize x
     xcontext <- resize(x, width = sequenceContextWidth, fix = "center")
-
-    # obtain reference sequences
-    if (is.character(sequenceReference)) {
-        ref <- readDNAStringSet(sequenceReference)
-        names(ref) <- sub(" .*$", "", names(ref))
-    } else if (is(sequenceReference, "BSgenome")) {
-        ref <- DNAStringSet(as.list(sequenceReference))
-    } else {
-        ref <- sequenceReference
-    }
 
     # extract sequences
     Npre <- pmax(0L, 1L - start(xcontext))

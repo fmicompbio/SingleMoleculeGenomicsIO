@@ -39,6 +39,7 @@
 #' @importFrom SummarizedExperiment colData
 #' @importFrom cli cli_abort
 #' @importFrom stats median mad
+#' @importFrom rlang .data
 #'
 #' @export
 plotReadStats <- function(se, readInfoCol = "readInfo", qcCol = "QC",

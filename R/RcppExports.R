@@ -167,40 +167,72 @@ index_bam_cpp <- function(infile) {
     .Call(`_SingleMoleculeGenomicsIO_index_bam_cpp`, infile)
 }
 
-#' Constructor for pileup data in bam_pileup_cd*
+#' Read and pile-up base modifications from a mismatch bam file.
 #'
-#' @param data void* (client data)
-#' @param b bam1_t* (bam being loaded)
-#' @param cd bam_pileup_cd* (client data)
+#' @param inname_str Character scalar with name of the input bam file.
+#' @param regions Character vector specifying the region(s) for which
+#'     to extract overlapping reads, in the form \code{"chr:start-end"}.
+#'     The strings are interpreted by htslib, which understands:
+#'     \describe{
+#'         \item{"REF" or "REF:"}{: All reads with RNAME REF}
+#'         \item{"REF:START"}{: Reads with RNAME REF overlapping START to end of REF}
+#'         \item{"REF:-END"}{: Reads with RNAME REF overlapping start of REF to END}
+#'         \item{"REF:START-END"}{: Reads with RNAME REF overlapping START to END}
+#'         \item{"."}{: All reads from the start of the file}
+#'         \item{"*"}{: Unmapped reads at the end of the file (RNAME '*' in SAM)}
+#'     }
+#' @param pos_context_list,pos_context_rev_list Named Rcpp::List of positions
+#'     on each chromosome to be evaluated regarding mismatches to reads,
+#'     seperately for the plus and the minus strand.
+#' @param unmod_integer,mod_integer Integers encoding the read bases to be
+#'     interpreted as unmodified or modified, respectively. The encoding
+#'     scheme corresponds to the one in bam1_seqi from htslib.
+#' @param level Character scalar selecting the level of the returned data
+#'     (\code{"read"} or \code{"summary"}).
+#' @param n_threads Integer scalar defining the number of threads to
+#'     use for decompressing a sam record. Especially using in sampling mode
+#'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
+#'     decompressing bam records than processing them.
+#' @param verbose Logical scalar. If \code{TRUE}, report on progress.
 #'
-#' @return An integer scalar (zero on success, non-zero on failure)
+#' @return A named list with elements \code{"chrom"} (chromosome name),
+#'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
+#'     \code{"ref_strand"} (the strand from which the original molecule
+#'     originated). If \code{level} is \code{"summary"},
+#'     the list additionally contains slots \code{"Nmod"} (number of modified
+#'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
+#'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
+#'
+#' @examples
+#' library(Biostrings)
+#' bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
+#' ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
+#' posContext <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
+#'                             with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posContextRev <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
+#'                                with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posContextList <- lapply(posContext, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' posContextRevList <- lapply(posContextRev, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' res <- pileup_mismatchbam_cpp(bamfile, "QuasR", "chr1",
+#'                               posContextList, posContextRevList,
+#'                               unmod_integer = 8, unmod_integer_rev = 1,
+#'                               mod_integer = 2, mod_integer_rev = 4,
+#'                               level = "summary", 1, TRUE)
+#' str(res)
+#'
+#' @author Michael Stadler, Charlotte Soneson
+#'
+#' @importFrom cli cli_progress_step cli_progress_done
 #'
 #' @noRd
 #' @keywords internal
-NULL
-
-#' Destructor for pileup data in bam_pileup_cd*
-#'
-#' @param data void* (client data)
-#' @param b bam1_t* (bam being loaded)
-#' @param cd bam_pileup_cd* (client data)
-#'
-#' @return An integer scalar (zero)
-#'
-#' @noRd
-#' @keywords internal
-NULL
-
-#' Read alignment data for pileup operation
-#'
-#' @param data void* (client callback data holding alignment file handle)
-#' @param b bam1_t* (aligned read)
-#'
-#' @return same as sam_read1
-#'
-#' @noRd
-#' @keywords internal
-NULL
+pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads, verbose)
+}
 
 #' Read and pile-up base modifications from a bam file.
 #'
@@ -266,6 +298,122 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
     .Call(`_SingleMoleculeGenomicsIO_pileup_modbam_cpp`, inname_str, regions, modbase, level, mod_prob_thresh, n_threads, verbose)
 }
 
+#' Read base modifications from mismatch bam file(s) - C++ helper function
+#'
+#' Parse mismatches and return a list of vectors with
+#' information on base states. The function implements four distinct reading
+#' modes:
+#' \enumerate{
+#'     \item{Extraction of read-level modification probabilities for
+#'         alignments overlapping provided regions. This mode is selected
+#'         if \code{n_alns_to_sample = 0} and \code{level = "read"}.}
+#'     \item{Extraction of read-level modification probabilities for alignments
+#'         randomly sampled from provided chromosomes. This is selected
+#'         if \code{n_alns_to_sample > 0} and \code{level = "read"}.}
+#'     \item{Counting of pairs of bases by distance and modification state.
+#'         This mode is selected if \code{windowSize > 0}.}
+#'     \item{Extraction of summary-level modification counts for alignments
+#'         overlapping provided regions. This mode is selected if
+#'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.} # TODO: remove summary mode here?
+#' }
+#'
+#' @param inname_str Character scalar with name of the input bam file.
+#' @param regions Character vector specifying the region(s) for which
+#'     to extract overlapping reads, in the form \code{"chr:start-end"}
+#' @param pos_context_list,pos_context_rev_list Named Rcpp::List of positions
+#'     on each chromosome to be evaluated regarding mismatches to reads,
+#'     seperately for the plus and the minus strand.
+#' @param unmod_integer,mod_integer Integers encoding the read bases to be
+#'     interpreted as unmodified or modified, respectively. The encoding
+#'     scheme corresponds to the one in bam1_seqi from htslib.
+#' @param level Character scalar selecting the level of the returned data
+#'     (\code{"read"} or \code{"summary"}).
+#' @param n_alns_to_sample Integer defining the number of alignments
+#'     to randomly sample. Note that for paired-end bam files, individual
+#'     reads are sampled and pairs will not be complete.
+#' @param tnames_for_sampling String vector with target names (chromosomes)
+#'     from which to sample \code{n_alns_to_sample} alignments. Ignored if
+#'     \code{n_alns_to_sample = 0}.
+#' @param variantRefNames Character vector with target names (chromosomes)
+#'     of single nucleotide variants.
+#' @param variantRefPositions Integer vector with 0-based target positions
+#'     of single nucleotide variants. Expected to have identical length and
+#'     to be parallel to \code{variantRefNames}.
+#' @param windowSize Numeric scalar giving the maximum window size
+#'     covering pairs of modified bases to consider in pair-counting mode.
+#'     A window size of 1 corresponds to a single base, a size of 2 to
+#'     directly adjacent bases, etc.
+#' @param minMapQ Numeric scalar giving the minimal mapping quality to include
+#'     alignments in pair-counting mode.
+#' @param minAlignedLength Numeric scalar giving the minimal alignment length
+#'     to include alignments in pair-counting mode.
+#' @param n_threads Integer scalar defining the number of threads to
+#'     use for decompressing a sam record. Especially useful in sampling mode
+#'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
+#'     decompressing bam records than processing them.
+#' @param verbose Logical scalar. If \code{TRUE}, report on progress.
+#'
+#' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
+#'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"}, \code{"qscore"},
+#'     \code{"mod_prob"} and \code{"read_df"}. The meaning of these elements is
+#'     similar to the return value of \code{read_modbam_cpp} and described in
+#'     https://nanoporetech.github.io/modkit/intro_extract.html,
+#'     apart from \code{"mod_prob"}, which is equal to 0 or 1 for bases at
+#'     (mis-)match positions controlled by arguments \code{pos_context_list},
+#'     \code{unmod_integer}, \code{mod_integer} and their \code{_rev} variants.
+#'     \code{"read_df"} is a \code{data.frame} with one row per read and
+#'     columns \code{"read_id"} (the read identifier), \code{"qscore"}
+#'     (the read quality score recorded in the \code{qs} tag of each bam record),
+#'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
+#'     (the number of aligned bases), \code{"variant_label"} and
+#'     \code{"ref_strand"}. For reading mode 3., a named list with elements
+#'     \code{"read_id"}, \code{"ref_position"}, \code{"chrom"},
+#'     \code{"ref_strand"}, \code{"Nvalid"} and \code{"Nmod"}. For reading
+#'     mode 4., TODO
+#'
+#' @examples
+#' library(Biostrings)
+#' bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
+#' ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
+#' posContext <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
+#'                             with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posContextRev <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
+#'                                with.indels = FALSE, fixed = "subject", algorithm = "auto")
+#' posContextList <- lapply(posContext, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' posContextRevList <- lapply(posContextRev, function(x) {
+#'     start(resize(x = x, width = 1, fix = "center")) - 1L
+#' })
+#' res1 <- read_mismatchbam_cpp(inname_str = bamfile,
+#'                              regions = "chr1:6940000-6955000",
+#'                              pos_context_list = posContextList,
+#'                              pos_context_rev_list = posContextRevList,
+#'                              unmod_integer = 8,
+#'                              unmod_integer_rev = 1,
+#'                              mod_integer = 2,
+#'                              mod_integer_rev = 4,
+#'                              level = "summary",
+#'                              n_alns_to_sample = 0,
+#'                              tnames_for_sampling = character(0),
+#'                              variantRefNames = character(0),
+#'                              variantRefPositions = integer(0),
+#'                              n_threads = 1,
+#'                              verbose = TRUE)
+#' str(res1)
+NULL
+
+#'
+#' @author Charlotte Soneson, Michael Stadler
+#'
+#' @importFrom cli cli_progress_step cli_progress_done cli_alert_info
+#'
+#' @noRd
+#' @keywords internal
+read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
+}
+
 #' Read base modifications from a bam file.
 #'
 #' Parse ML and MM tags (see https://samtools.github.io/hts-specs/SAMtags.pdf,
@@ -309,7 +457,7 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #' @param minAlignedLength Numeric scalar giving the minimal alignment length
 #'     to include alignments in pair-counting mode.
 #' @param n_threads Integer scalar defining the number of threads to
-#'     use for decompressing a sam record. Especially using in sampling mode
+#'     use for decompressing a sam record. Especially useful in sampling mode
 #'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
 #'     decompressing bam records than processing them.
 #' @param verbose Logical scalar. If \code{TRUE}, report on progress.
@@ -417,22 +565,184 @@ sampleEntropy <- function(data, m, r, maxStarts = 1000L, nThreads = 1L) {
     .Call(`_SingleMoleculeGenomicsIO_sampleEntropy`, data, m, r, maxStarts, nThreads)
 }
 
+#' Calculate aligned bases (sum of 'M', '=', or 'X' operation lengths)
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#'
+#' @return An \code{int} giving the number of aligned bases.
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Extract quality score (qscore)
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#'
+#' @return A \code{double} corresponding to the value extracted from the "qs"
+#'     tag, or in case that is missing, calculated as the mean of base quality
+#'     values.
+#'
+#' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Get the forward read sequence from an alignment
+#'
+#' Extract the read sequence from a bam1_t corresponding to the plus-strand
+#' of the read (thus reverse-complementing the read for an minus-strand
+#' alignment) and write it to the char* array at qseq, allocating memory of
+#' sufficient length if needed. The allocated space (without terminating null
+#' character) is stored in qseq_len.
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#' @param qseq A \code{char**} (pointer to a character array) to which the
+#'     extracted sequence will be written.
+#' @param qseq_len A \code{int*} (pointer to int) in which the number of
+#'     allocated characters at \code{qseq} are stored (excluding the
+#'     terminating null character).
+#'
+#' @returns 0 if successful, -1 if memory allocation failed
+#'
+#' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Extract vector with modification probabilities from alignment
+#'
+#' Use htslib functions to parse the modification probabilities for
+#' `modbase`.
+#'
+#' @param bamdata A \code{bam1_t*} with the alignment.
+#' @param modbase A \code{char} with the modified base code for which to
+#'     extract modification probabilities.
+#' @param unmodbase A \code{char} with the unmodified base corresponding to
+#'     \code{modbase}.
+#' @param mod_probs A \code{Rcpp::NumericVector*} to which the extracted
+#'     modification probabilities will be appended at the end.
+#' @param qseq A \code{char*} pointing to the forward read sequence.
+#' @param ms A \code{hts_base_mod_state*} (modification state struct) expected
+#'     to be pre-initialized.
+#' @param buffer A \code{char*} pointing to a pre-allocated character array
+#'     to which an error message is written in case of a failure.
+#' @param buffer_len An \code{int} giving the pre-allocated size of the array
+#'     at \code{buffer} (excluding the terminating null).
+#'
+#' @returns An \code{int}, if greater or equal to zero giving the number of
+#'     extracted probabilities, or less than zero if something failed. In
+#'     that case, the error message is giving in \code{buffer}.
+#'
+#' @author Michael Stadler
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Constructor for pileup data in bam_pileup_cd*
+#'
+#' @param data void* (client data)
+#' @param b bam1_t* (bam being loaded)
+#' @param cd bam_pileup_cd* (client data)
+#'
+#' @return An integer scalar (zero on success, non-zero on failure)
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Destructor for pileup data in bam_pileup_cd*
+#'
+#' @param data void* (client data)
+#' @param b bam1_t* (bam being loaded)
+#' @param cd bam_pileup_cd* (client data)
+#'
+#' @return An integer scalar (zero)
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Read alignment data for pileup operation
+#'
+#' @param data void* (client callback data holding alignment file handle)
+#' @param b bam1_t* (aligned read)
+#'
+#' @return same as sam_read1
+#'
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Concatenate files
+#'
+#' @param input_files Character vector with input file names to concatenate.
+#' @param output_file Character scalar with output file name to write to.
+#'
+#' @return The \code{output_file} as a character scalar.
+#' @noRd
+#' @keywords internal
 concatenate_files <- function(input_files, output_file) {
     .Call(`_SingleMoleculeGenomicsIO_concatenate_files`, input_files, output_file)
 }
 
+#' Concatenate input sam/bam files into a single output sam/bam file
+#'
+#' The idea of this function is to be a simpler replacement for merging
+#' pre-sorted sam or bam files given in the correct order to a single
+#' output file. The header of the first input file is used for the output
+#' file, and no checks are done if the input files have compatible headers,
+#' are sorted or are given in the correct order - use with caution.
+#'
+#' @param input_files Character vector with input sam or bam file names to
+#'     concatenate.
+#' @param output_file Character scalar with output sam or bam file name to
+#'     write to.
+#' @param ncpu Integer scalar giving the number of parallel threads used for
+#'     de-/compressing input and output file records.
+#'
+#' @return The \code{output_file} as a character scalar.
+#' @noRd
+#' @keywords internal
 concatenate_hts_files <- function(input_files, output_file, ncpu = 4L) {
     .Call(`_SingleMoleculeGenomicsIO_concatenate_hts_files`, input_files, output_file, ncpu)
 }
 
+#' Get chromosome names for a bam file header
+#'
+#' @param bamfile Character scalar with name of bam file.
+#'
+#' @return A character vector with the chromosome (target sequence) names
+#'     extracted from the bam file header.
+#' @noRd
+#' @keywords internal
 getChromosomeNamesFromBam <- function(bamfile) {
     .Call(`_SingleMoleculeGenomicsIO_getChromosomeNamesFromBam`, bamfile)
 }
 
+#' Get unmodified base corresponding to a modified base
+#'
+#' @param b Modified base as a char
+#'
+#' @return The upper-case unmodified base corresponding to \code{b} as a
+#'     \code{char}.
+#' @noRd
+#' @keywords internal
 get_unmodified_base <- function(b) {
     .Call(`_SingleMoleculeGenomicsIO_get_unmodified_base`, b)
 }
 
+#' Create the complement of a base
+#'
+#' @param n single base as a char
+#'
+#' @return char (complement of \code{n})
+#'
+#' @noRd
+#' @keywords internal
 complement <- function(n) {
     .Call(`_SingleMoleculeGenomicsIO_complement`, n)
 }

@@ -8,195 +8,6 @@
 #include <cli/progress.h>
 #include "utils.h"
 
-
-// Helper functions
-// -----------------------------------------------------------------------------
-// convert 0-based read position to 0-based reference sequence position
-// (a position of -1 means unaligned)
-std::vector<int> read_to_reference_pos(const bam1_t *aln,
-                                       const std::vector<int> &read_positions) {
-    // variables
-    size_t read_positions_index = 0; // index to elements of read_positions
-    const uint32_t *cigar = bam_get_cigar(aln);  // cigar array
-    int ref_pos = aln->core.pos;  // reference position (0-based)
-    int read_pos = 0;  // read position (0-based)
-
-    // return value: 0-based reference positions, initialized to -1
-    std::vector<int> ref_positions(read_positions.size(), -1);
-
-    // iterate over the CIGAR operations i
-    for (unsigned int i = 0; i < aln->core.n_cigar && read_positions_index < read_positions.size(); i++) {
-        int op = bam_cigar_op(cigar[i]);  // operation type
-        int op_len = bam_cigar_oplen(cigar[i]);  // operation length
-
-        switch (op) {
-        case BAM_CMATCH:  // match or mismatch (M)
-        case BAM_CEQUAL:  // match (=)
-        case BAM_CDIFF:   // mismatch (X)
-            while (read_positions_index < read_positions.size() &&
-                   read_pos + op_len > read_positions[read_positions_index]) {
-                ref_positions[read_positions_index] = ref_pos + (read_positions[read_positions_index] - read_pos);
-                read_positions_index++;
-            }
-            ref_pos += op_len;
-            read_pos += op_len;
-            break;
-
-        case BAM_CINS:  // insertion (I)
-            if (read_pos + op_len > read_positions[read_positions_index]) {
-                // the current read position is within an insertion -->
-                //     no corresponding reference position
-                while (read_positions_index < read_positions.size() &&
-                       read_pos + op_len > read_positions[read_positions_index]) {
-                    ref_positions[read_positions_index] = -1;
-                    read_positions_index++;
-                }
-            }
-            read_pos += op_len;
-            break;
-
-        case BAM_CDEL:       // deletion (D)
-        case BAM_CREF_SKIP:  // reference skip (N)
-            ref_pos += op_len;
-            break;
-
-        case BAM_CSOFT_CLIP:  // soft clipping (S)
-            if (read_pos + op_len > read_positions[read_positions_index]) {
-                // the current read position is within a soft-clipped region -->
-                //     no corresponding reference position
-                while (read_positions_index < read_positions.size() &&
-                       read_pos + op_len > read_positions[read_positions_index]) {
-                    ref_positions[read_positions_index] = -1;
-                    read_positions_index++;
-                }
-            }
-            read_pos += op_len;
-            break;
-
-        case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
-        case BAM_CPAD:        // padding (P)
-            // these do not consume any positions in the read or reference
-            break;
-
-        default:
-            Rcpp::warning("Unknown CIGAR operation: %d", op);
-        return ref_positions; // # nocov end
-        }
-    }
-
-    return ref_positions;
-}
-
-// convert 0-based reference position to 0-based read sequence position
-// (a position of -1 means uncovered)
-// Note: assumes that ref_pos is sorted ascendingly and on the same target as aln
-std::vector<int> reference_to_read_pos(const bam1_t *aln,
-                                       const std::vector<int> &ref_positions) {
-    // variables
-    size_t ref_positions_index = 0; // index to elements of ref_positions
-    const uint32_t *cigar = bam_get_cigar(aln);  // cigar array
-    int ref_pos = aln->core.pos;  // reference position (0-based)
-    int read_pos = 0;  // read position (0-based)
-
-    // return value: 0-based reference positions, initialized to -1
-    std::vector<int> read_positions(ref_positions.size(), -1);
-
-    // iterate over the CIGAR operations i
-    for (unsigned int i = 0; i < aln->core.n_cigar && ref_positions_index < ref_positions.size(); i++) {
-        int op = bam_cigar_op(cigar[i]);  // operation type
-        int op_len = bam_cigar_oplen(cigar[i]);  // operation length
-
-        switch (op) {
-        case BAM_CMATCH:  // match or mismatch (M)
-        case BAM_CEQUAL:  // match (=)
-        case BAM_CDIFF:   // mismatch (X)
-            while (ref_positions_index < ref_positions.size() &&
-                   ref_pos + op_len > ref_positions[ref_positions_index]) {
-                read_positions[ref_positions_index] = read_pos + (ref_positions[ref_positions_index] - ref_pos);
-                ref_positions_index++;
-            }
-            ref_pos += op_len;
-            read_pos += op_len;
-            break;
-
-        case BAM_CINS:  // insertion (I)
-        case BAM_CSOFT_CLIP:  // soft clipping (S)
-            // no reference position is aligned to read bases in an insertion
-            //     or soft clipped end -> only advance read_pos
-            read_pos += op_len;
-            break;
-
-        case BAM_CDEL:       // deletion (D)
-        case BAM_CREF_SKIP:  // reference skip (N)
-            if (ref_pos + op_len > ref_positions[ref_positions_index]) {
-                // the current reference position is within a deletion -->
-                //     no corresponding read position
-                while (ref_positions_index < ref_positions.size() &&
-                       ref_pos + op_len > ref_positions[ref_positions_index]) {
-                    read_positions[ref_positions_index] = -1;
-                    ref_positions_index++;
-                }
-            }
-            ref_pos += op_len;
-            break;
-
-        case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
-        case BAM_CPAD:        // padding (P)
-            // these do not consume any positions in the read or reference
-            break;
-
-        default:
-            Rcpp::warning("Unknown CIGAR operation: %d", op);
-        return read_positions; // # nocov end
-        }
-    }
-
-    return read_positions;
-}
-
-
-// construct a read label based on variant positions
-std::string construct_read_label(const bam1_t *aln,
-                                 const std::vector<std::string> &ref_names,
-                                 const std::vector<int> &ref_positions,
-                                 const sam_hdr_t *hdr) {
-    // initialize label
-    std::string label(ref_names.size(), '-');
-
-    // subset ref_positions to the ones overlapping aln
-    std::string tname(sam_hdr_tid2name(hdr, aln->core.tid));
-    int aln_start = aln->core.pos;
-    int aln_end = bam_endpos(aln);
-    size_t from = 0, to = 0;
-
-    while (from < ref_names.size() &&
-           (ref_names[from] != tname || ref_positions[from] < aln_start ||
-           ref_positions[from] > aln_end)) {
-        from++;
-    }
-
-    if (from < ref_names.size()) {
-        to = from;
-        while ((to < ref_names.size()) &&
-               (ref_names[to] == tname && ref_positions[to] < aln_end)) {
-            to++;
-        }
-
-        // subset ref_positions and convert to read_positions
-        uint8_t *seqdata = bam_get_seq(aln);
-        std::vector<int> ref_positions_overlapping(ref_positions.begin() + from, ref_positions.begin() + to);
-        std::vector<int> read_positions = reference_to_read_pos(
-            aln, ref_positions_overlapping);
-        for (size_t i = 0; i < read_positions.size(); i++) {
-            if (read_positions[i] != -1) {
-                label[from + i] = seq_nt16_str[bam_seqi(seqdata, read_positions[i])];
-            }
-        }
-    }
-
-    return label;
-}
-
 // process a single bam record:
 // - increase alignment counter (passed by reference)
 // - extract information from record (qscore, modification information, etc.)
@@ -244,10 +55,6 @@ int process_bam_record(bam1_t *bamdata,        // bam record
 
     // process alignment
     alncnt++;
-
-    // check for interrupt every 100 alignments
-    if (alncnt % 100 == 0) // # nocov start
-        Rcpp::checkUserInterrupt(); // # nocov end
 
     // ... extract *forward* read sequence to char*
     //     (populates qseq and qseq_len)
@@ -420,10 +227,6 @@ int count_pairs_bam_record(
     // process alignment
     alncnt++;
 
-    // check for interrupt every 100 alignments
-    if (alncnt % 100 == 0) // # nocov start
-        Rcpp::checkUserInterrupt(); // # nocov end
-
     // ... extract *forward* read sequence to char*
     //     (populates qseq and qseq_len)
     if (extract_forward_qseq(bamdata, qseq, qseq_len) != 0) {
@@ -581,7 +384,7 @@ int count_pairs_bam_record(
 //' @param minAlignedLength Numeric scalar giving the minimal alignment length
 //'     to include alignments in pair-counting mode.
 //' @param n_threads Integer scalar defining the number of threads to
-//'     use for decompressing a sam record. Especially using in sampling mode
+//'     use for decompressing a sam record. Especially useful in sampling mode
 //'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
 //'     decompressing bam records than processing them.
 //' @param verbose Logical scalar. If \code{TRUE}, report on progress.
@@ -672,7 +475,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
     Rcpp::RObject bar;
 
     // ... general variables
-    int c = 0, i = 0, success = 0;
+    int c = 0, success = 0;
     unsigned long long n_unaligned = 0, n_total = 0;
     bool had_error = false;
     samFile *infile = NULL;
@@ -712,49 +515,22 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
     // ... return value for mode 3
     Rcpp::NumericMatrix pair_counts;
 
-    // initialize bam data storage
-    if (!(bamdata = bam_init1())) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
-        goto end; // # nocov end
-    }
-    if (!(ms = hts_base_mod_state_alloc())) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Failed to allocate state memory\n");
-        goto end; // # nocov end
-    }
-
-    // open input file
+    // prepare bam file for reading
     if (verbose) {
         snprintf(buffer, buffer_len, "opening input file {.file %s} using {%d} thread{?s}", inname, n_threads);
         cli_alert_info(buffer);
     }
-    if (!(infile = sam_open(inname, "r"))) {
-        had_error = true;
-        snprintf(buffer, buffer_len, "Could not open input file %s\n", inname);
-        goto end;
-    }
-    if (n_threads > 1) {
-        if (hts_set_threads(infile, n_threads)) {
-            had_error = true; // # nocov start
-            snprintf(buffer, buffer_len, "Error setting htslib threads to %d\n", n_threads);
-            goto end; // # nocov end
-        }
-    }
-
-    // load index file
-    if (!(idx = sam_index_load(infile, inname))) {
-        had_error = true;
-        snprintf(buffer, buffer_len,
-                 "Failed to load the index for %s\n", inname);
+    success = open_bam_and_read_index_and_header(bamdata, inname, infile, idx,
+                                                 in_samhdr, n_threads,
+                                                 had_error, buffer_len, buffer);
+    if (success != 0) {
         goto end;
     }
 
-    // read header
-    if (!(in_samhdr = sam_hdr_read(infile))) {
+    // initialize bam data storage for modifications
+    if (!(ms = hts_base_mod_state_alloc())) {
         had_error = true; // # nocov start
-        snprintf(buffer, buffer_len,
-                 "Failed to read header from file %s\n", inname);
+        snprintf(buffer, buffer_len, "Failed to allocate state memory\n");
         goto end; // # nocov end
     }
 
@@ -764,17 +540,10 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
         // ---------------------------------------------------------------------
         pair_counts = Rcpp::NumericMatrix(windowSize, 4);
 
-        // convert regions to C arrays
-        regcnt = (unsigned int) regions.size();
-        regions_c = (char**) calloc(regcnt, sizeof(char*));
-        for (i = 0; i < (int) regcnt; i++) {
-            regions_c[i] = (char*) regions[i].c_str();
-        }
-
-        // create multi-region iterator
-        if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-            had_error = true;
-            snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+        success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                               iter, idx, in_samhdr, had_error,
+                                               buffer_len, buffer);
+        if (success != 0) {
             goto end;
         }
 
@@ -813,7 +582,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                     cli_progress_set(bar, (double)alncnt); // # nocov
                 }
                 if (alncnt % 100 == 0) { // # nocov start
-                    R_CheckUserInterrupt();
+                    Rcpp::checkUserInterrupt();
                 } // # nocov end
                 if (success != 0) {
                     goto end;
@@ -826,54 +595,19 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------
 
-            // check if tnames_for_sampling exist and count alignments
-            uint64_t mapped = 0, unmapped = 0, total_for_sampling = 0;
-            std::set<std::string> tnames_for_sampling_set(tnames_for_sampling.begin(), tnames_for_sampling.end());
-            std::set<std::string> tnames_existing;
-            double rand_val = 0.0;
-            regcnt = 0;
-            regions_c = (char**) calloc((unsigned int) tnames_for_sampling.size(),
-                                        sizeof(char*));
-            for (i = 0; i < in_samhdr->n_targets; i++) {
-                tnames_existing.insert(in_samhdr->target_name[i]);
+            double rand_val = 0.0, keep_aln_fraction = 0.0;
 
-                // for each target i that is in tnames_for_sampling_set,
-                // get the number of mapped and unmapped records
-                // and add it to regions_c
-                if (tnames_for_sampling_set.find(in_samhdr->target_name[i]) !=
-                      tnames_for_sampling_set.end() &&
-                    hts_idx_get_stat(idx, i, &mapped, &unmapped) == 0) {
-                    total_for_sampling += mapped;
-                    regions_c[regcnt] = in_samhdr->target_name[i];
-                    regcnt++;
-                }
-            }
-            for (i = 0; i < (int)tnames_for_sampling.size(); i++) {
-                if (tnames_existing.find(tnames_for_sampling[i]) == tnames_existing.end()) {
-                    Rcpp::warning("Ignoring unknown target name: %s",
-                                  tnames_for_sampling[i].c_str());
-                }
-            }
-
-            // check if we have enough alignments to sample from
-            if (total_for_sampling < (uint64_t)n_alns_to_sample) {
-                had_error = true;
-                snprintf(buffer, buffer_len,
-                         "Cannot sample %d alignments from a total of %" PRIu64 "\n",
-                         n_alns_to_sample, total_for_sampling);
+            success = create_multi_region_iterator_for_sampling(
+                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                keep_aln_fraction, iter, idx, in_samhdr, had_error,
+                buffer_len, buffer);
+            if (success != 0) {
                 goto end;
             }
-            double keep_aln_fraction = (double) n_alns_to_sample / total_for_sampling;
+
             if (verbose) {
                 snprintf(buffer, buffer_len, "sampling alignments with probability %g", keep_aln_fraction);
                 cli_alert_info(buffer);
-            }
-
-            // create multi-region iterator
-            if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-                had_error = true; // # nocov start
-                snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
-                goto end; // # nocov end
             }
 
             // iterate over regions
@@ -926,7 +660,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                         cli_progress_set(bar, (double)alncnt);
                     }
                     if (alncnt % 100 == 0) { // # nocov start
-                        R_CheckUserInterrupt();
+                        Rcpp::checkUserInterrupt();
                     } // # nocov end
                     if (success != 0) { // # nocov start
                         goto end;
@@ -937,17 +671,10 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
         } else {
             // Mode 1: region-based alignment reading
             // ---------------------------------------------------------------------
-            // convert regions to C arrays
-            regcnt = (unsigned int) regions.size();
-            regions_c = (char**) calloc(regcnt, sizeof(char*));
-            for (i = 0; i < (int) regcnt; i++) {
-                regions_c[i] = (char*) regions[i].c_str();
-            }
-
-            // create multi-region iterator
-            if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-                had_error = true;
-                snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+            success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                                   iter, idx, in_samhdr, had_error,
+                                                   buffer_len, buffer);
+            if (success != 0) {
                 goto end;
             }
 
@@ -999,7 +726,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                         cli_progress_set(bar, (double)alncnt);
                     }
                     if (alncnt % 100 == 0) { // # nocov start
-                        R_CheckUserInterrupt();
+                        Rcpp::checkUserInterrupt();
                     } // # nocov end
                     if (success != 0) {
                         goto end;

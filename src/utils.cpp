@@ -8,530 +8,1019 @@
 
 #define CONCAT_BUFFER_SIZE 65536
 
- //' Concatenate files
- //'
- //' @param input_files Character vector with input file names to concatenate.
- //' @param output_file Character scalar with output file name to write to.
- //'
- //' @return The \code{output_file} as a character scalar.
- //' @noRd
- //' @keywords internal
- // [[Rcpp::export]]
- std::string concatenate_files(std::vector<std::string> input_files,
-                               const std::string output_file) {
-     int buffer_len = 2000;
-     char buffer[2000];
+//' Concatenate files
+//'
+//' @param input_files Character vector with input file names to concatenate.
+//' @param output_file Character scalar with output file name to write to.
+//'
+//' @return The \code{output_file} as a character scalar.
+//' @noRd
+//' @keywords internal
+// [[Rcpp::export]]
+std::string concatenate_files(std::vector<std::string> input_files,
+                              const std::string output_file) {
+    int buffer_len = 2000;
+    char buffer[2000];
 
-     FILE *out = fopen(output_file.c_str(), "wb");
-     if (!out) {
-         snprintf(buffer, buffer_len, "Could not create %s\n", output_file.c_str());
-         Rcpp::stop(buffer);
-     }
+    FILE *out = fopen(output_file.c_str(), "wb");
+    if (!out) {
+        snprintf(buffer, buffer_len, "Could not create %s\n", output_file.c_str());
+        Rcpp::stop(buffer);
+    }
 
-     for (size_t i = 0; i < input_files.size(); i++) {
-         FILE *in = fopen(input_files[i].c_str(), "rb");
-         if (!in) {
-             snprintf(buffer, buffer_len, "Could not open %s\n", input_files[i].c_str());
-             fclose(out);
-             Rcpp::stop(buffer);
-         }
+    for (size_t i = 0; i < input_files.size(); i++) {
+        FILE *in = fopen(input_files[i].c_str(), "rb");
+        if (!in) {
+            snprintf(buffer, buffer_len, "Could not open %s\n", input_files[i].c_str());
+            fclose(out);
+            Rcpp::stop(buffer);
+        }
 
-         char buffer[CONCAT_BUFFER_SIZE];
-         size_t bytes;
-         while ((bytes = fread(buffer, 1, CONCAT_BUFFER_SIZE, in)) > 0) {
-             fwrite(buffer, 1, bytes, out);
-         }
+        char buffer[CONCAT_BUFFER_SIZE];
+        size_t bytes;
+        while ((bytes = fread(buffer, 1, CONCAT_BUFFER_SIZE, in)) > 0) {
+            fwrite(buffer, 1, bytes, out);
+        }
 
-         fclose(in);
-     }
+        fclose(in);
+    }
 
-     fclose(out);
-     return output_file;
- }
+    fclose(out);
+    return output_file;
+}
 
- //' Concatenate input sam/bam files into a single output sam/bam file
- //'
- //' The idea of this function is to be a simpler replacement for merging
- //' pre-sorted sam or bam files given in the correct order to a single
- //' output file. The header of the first input file is used for the output
- //' file, and no checks are done if the input files have compatible headers,
- //' are sorted or are given in the correct order - use with caution.
- //'
- //' @param input_files Character vector with input sam or bam file names to
- //'     concatenate.
- //' @param output_file Character scalar with output sam or bam file name to
- //'     write to.
- //' @param ncpu Integer scalar giving the number of parallel threads used for
- //'     de-/compressing input and output file records.
- //'
- //' @return The \code{output_file} as a character scalar.
- //' @noRd
- //' @keywords internal
- // [[Rcpp::export]]
- std::string concatenate_hts_files(std::vector<std::string> input_files,
-                                   const std::string output_file,
-                                   int ncpu = 4) {
-     // variable declarations
-     const char *infile_c = NULL, *outfile_c = output_file.c_str();
-     bool had_error = false;
-     int buffer_len = 2000;
-     char buffer[2000];
-     const char *outmode = NULL;
+//' Concatenate input sam/bam files into a single output sam/bam file
+//'
+//' The idea of this function is to be a simpler replacement for merging
+//' pre-sorted sam or bam files given in the correct order to a single
+//' output file. The header of the first input file is used for the output
+//' file, and no checks are done if the input files have compatible headers,
+//' are sorted or are given in the correct order - use with caution.
+//'
+//' @param input_files Character vector with input sam or bam file names to
+//'     concatenate.
+//' @param output_file Character scalar with output sam or bam file name to
+//'     write to.
+//' @param ncpu Integer scalar giving the number of parallel threads used for
+//'     de-/compressing input and output file records.
+//'
+//' @return The \code{output_file} as a character scalar.
+//' @noRd
+//' @keywords internal
+// [[Rcpp::export]]
+std::string concatenate_hts_files(std::vector<std::string> input_files,
+                                  const std::string output_file,
+                                  int ncpu = 4) {
+    // variable declarations
+    const char *infile_c = NULL, *outfile_c = output_file.c_str();
+    bool had_error = false;
+    int buffer_len = 2000;
+    char buffer[2000];
+    const char *outmode = NULL;
 
-     // ... htslib
-     bam1_t *bamdata = NULL;
-     htsThreadPool tpool = {NULL, 0};
-     samFile *inhtsfile = NULL, *outhtsfile = NULL;
-     sam_hdr_t *inhtshdr = NULL, *outhtshdr = NULL;
+    // ... htslib
+    bam1_t *bamdata = NULL;
+    htsThreadPool tpool = {NULL, 0};
+    samFile *inhtsfile = NULL, *outhtsfile = NULL;
+    sam_hdr_t *inhtshdr = NULL, *outhtshdr = NULL;
 
-     // initialize
-     if (!(bamdata = bam_init1())) {
-         had_error = true; // # nocov start
-         snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
-         goto end; // # nocov end
-     }
+    // initialize
+    if (!(bamdata = bam_init1())) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
+        goto end; // # nocov end
+    }
 
-     // determine outmode based on extension of output_file
-     if (output_file.compare(output_file.size() - 4, 4, ".bam") == 0 ||
-         output_file.compare(output_file.size() - 4, 4, ".BAM") == 0) {
-         outmode = "wb";
-     } else if (output_file.compare(output_file.size() - 4, 4, ".sam") == 0 ||
-         output_file.compare(output_file.size() - 4, 4, ".SAM") == 0) {
-         outmode = "w";
-     } else {
-         had_error = true;
-         snprintf(buffer, buffer_len, "Unknown `output_file` extension (must be '.bam' or '.sam'): %s\n", outfile_c);
-         goto end;
-     }
+    // determine outmode based on extension of output_file
+    if (output_file.compare(output_file.size() - 4, 4, ".bam") == 0 ||
+        output_file.compare(output_file.size() - 4, 4, ".BAM") == 0) {
+        outmode = "wb";
+    } else if (output_file.compare(output_file.size() - 4, 4, ".sam") == 0 ||
+        output_file.compare(output_file.size() - 4, 4, ".SAM") == 0) {
+        outmode = "w";
+    } else {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Unknown `output_file` extension (must be '.bam' or '.sam'): %s\n", outfile_c);
+        goto end;
+    }
 
-     // open outhtsfile
-     if (!(outhtsfile = sam_open(outfile_c, outmode))) {
-         had_error = true; // # nocov start
-         snprintf(buffer, buffer_len, "Could not open %s\n", outfile_c);
-         goto end; // # nocov end
-     }
+    // open outhtsfile
+    if (!(outhtsfile = sam_open(outfile_c, outmode))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Could not open %s\n", outfile_c);
+        goto end; // # nocov end
+    }
 
-     // create a pool of ncpu threads...
-     if (!(tpool.pool = hts_tpool_init(ncpu))) {
-         had_error = true; // # nocov start
-         snprintf(buffer, buffer_len, "Failed to initialize the thread pool using {%d} threads\n", ncpu);
-         goto end; // # nocov end
-     }
-     // ... and use it for outhtsfile
-     if (hts_set_opt(outhtsfile, HTS_OPT_THREAD_POOL, &tpool) < 0) {
-         had_error = true; // # nocov start
-         snprintf(buffer, buffer_len, "Failed to set thread options\n");
-         goto end; // # nocov end
-     }
+    // create a pool of ncpu threads...
+    if (!(tpool.pool = hts_tpool_init(ncpu))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to initialize the thread pool using {%d} threads\n", ncpu);
+        goto end; // # nocov end
+    }
+    // ... and use it for outhtsfile
+    if (hts_set_opt(outhtsfile, HTS_OPT_THREAD_POOL, &tpool) < 0) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to set thread options\n");
+        goto end; // # nocov end
+    }
 
-     // iterate over input files
-     for (size_t i = 0; i < input_files.size(); i++) {
-         // open input file
-         infile_c = input_files[i].c_str();
-         if (!(inhtsfile = sam_open(infile_c, "r"))) {
-             had_error = true; // # nocov start
-             snprintf(buffer, buffer_len, "Could not open %s\n", infile_c);
-             goto end; // # nocov end
-         }
+    // iterate over input files
+    for (size_t i = 0; i < input_files.size(); i++) {
+        // open input file
+        infile_c = input_files[i].c_str();
+        if (!(inhtsfile = sam_open(infile_c, "r"))) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len, "Could not open %s\n", infile_c);
+            goto end; // # nocov end
+        }
 
-         // use thread pool for decompression
-         if (hts_set_opt(inhtsfile, HTS_OPT_THREAD_POOL, &tpool) < 0) {
-             had_error = true; // # nocov start
-             snprintf(buffer, buffer_len, "Failed to set thread options\n");
-             goto end; // # nocov end
-         }
+        // use thread pool for decompression
+        if (hts_set_opt(inhtsfile, HTS_OPT_THREAD_POOL, &tpool) < 0) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len, "Failed to set thread options\n");
+            goto end; // # nocov end
+        }
 
-         // read input header
-         if (!(inhtshdr = sam_hdr_read(inhtsfile))) {
-             had_error = true; // # nocov start
-             snprintf(buffer, buffer_len, "Failed to read header from %s\n", infile_c);
-             goto end; // # nocov end
-         }
+        // read input header
+        if (!(inhtshdr = sam_hdr_read(inhtsfile))) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len, "Failed to read header from %s\n", infile_c);
+            goto end; // # nocov end
+        }
 
-         // write header of first input file to output file
-         if (i == 0) {
-             outhtshdr = sam_hdr_dup(inhtshdr);
-             if (sam_hdr_write(outhtsfile, outhtshdr) == -1) {
-                 had_error = true; // # nocov start
-                 snprintf(buffer, buffer_len, "Failed to write header to %s\n", outfile_c);
-                 goto end; // # nocov end
-             }
-         }
+        // write header of first input file to output file
+        if (i == 0) {
+            outhtshdr = sam_hdr_dup(inhtshdr);
+            if (sam_hdr_write(outhtsfile, outhtshdr) == -1) {
+                had_error = true; // # nocov start
+                snprintf(buffer, buffer_len, "Failed to write header to %s\n", outfile_c);
+                goto end; // # nocov end
+            }
+        }
 
-         // read from inhtsfile and write to outhtsfile
-         while (sam_read1(inhtsfile, inhtshdr, bamdata) >= 0) {
-             if (sam_write1(outhtsfile, outhtshdr, bamdata) < 0) {
-                 had_error = true; // # nocov start
-                 snprintf(buffer, buffer_len, "Failed to write record from %s\n", infile_c);
-                 goto end; // #nocov end
-             }
-         }
+        // read from inhtsfile and write to outhtsfile
+        while (sam_read1(inhtsfile, inhtshdr, bamdata) >= 0) {
+            if (sam_write1(outhtsfile, outhtshdr, bamdata) < 0) {
+                had_error = true; // # nocov start
+                snprintf(buffer, buffer_len, "Failed to write record from %s\n", infile_c);
+                goto end; // #nocov end
+            }
+        }
 
-         // close inputs
-         if (inhtshdr) {
-             sam_hdr_destroy(inhtshdr);
-             inhtshdr = NULL;
-         }
-         sam_close(inhtsfile);
-         inhtsfile = NULL;
-     }
+        // close inputs
+        if (inhtshdr) {
+            sam_hdr_destroy(inhtshdr);
+            inhtshdr = NULL;
+        }
+        sam_close(inhtsfile);
+        inhtsfile = NULL;
+    }
 
-     end:
-         //clean up
-         if (bamdata) {
-             bam_destroy1(bamdata);
-         }
-         if (inhtshdr) {
-             sam_hdr_destroy(inhtshdr); // # nocov
-         }
-         if (outhtshdr) {
-             sam_hdr_destroy(outhtshdr);
-         }
-         if (outhtsfile) {
-             sam_close(outhtsfile);
-         }
-         if (inhtsfile) {
-             sam_close(inhtsfile); // # nocov
-         }
-         if (tpool.pool) {
-             hts_tpool_destroy(tpool.pool);
-         }
+    end:
+        //clean up
+        if (bamdata) {
+            bam_destroy1(bamdata);
+        }
+        if (inhtshdr) {
+            sam_hdr_destroy(inhtshdr); // # nocov
+        }
+        if (outhtshdr) {
+            sam_hdr_destroy(outhtshdr);
+        }
+        if (outhtsfile) {
+            sam_close(outhtsfile);
+        }
+        if (inhtsfile) {
+            sam_close(inhtsfile); // # nocov
+        }
+        if (tpool.pool) {
+            hts_tpool_destroy(tpool.pool);
+        }
 
-         if (had_error) {
-             // we encountered an error (message in `buffer`) --> stop
-             Rcpp::stop(buffer); // # nocov
+        if (had_error) {
+            // we encountered an error (message in `buffer`) --> stop
+            Rcpp::stop(buffer); // # nocov
 
-         } else {
-             return output_file;
-         }
- }
+        } else {
+            return output_file;
+        }
+}
 
- //' Get chromosome names for a bam file header
- //'
- //' @param bamfile Character scalar with name of bam file.
- //'
- //' @return A character vector with the chromosome (target sequence) names
- //'     extracted from the bam file header.
- //' @noRd
- //' @keywords internal
- // [[Rcpp::export]]
- Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string bamfile) {
-     int buffer_len = 2000;
-     char buffer[2000];
-     bool had_error = false;
-     samFile *inbamfile = NULL;
-     sam_hdr_t *inbamhdr = NULL;
-     Rcpp::CharacterVector chrs;
+//' Get chromosome names for a bam file header
+//'
+//' @param bamfile Character scalar with name of bam file.
+//'
+//' @return A character vector with the chromosome (target sequence) names
+//'     extracted from the bam file header.
+//' @noRd
+//' @keywords internal
+// [[Rcpp::export]]
+Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string bamfile) {
+    int buffer_len = 2000;
+    char buffer[2000];
+    bool had_error = false;
+    samFile *inbamfile = NULL;
+    sam_hdr_t *inbamhdr = NULL;
+    Rcpp::CharacterVector chrs;
 
-     // turn htslib logging off -> handle via Rcpp::warning or Rcpp::stop
-     hts_set_log_level(HTS_LOG_OFF);
+    // turn htslib logging off -> handle via Rcpp::warning or Rcpp::stop
+    hts_set_log_level(HTS_LOG_OFF);
 
-     // open input file
-     if (!(inbamfile = sam_open(bamfile.c_str(), "r"))) {
-         had_error = true;
-         snprintf(buffer, buffer_len, "Could not open %s\n", bamfile.c_str());
-         goto end;
-     }
+    // open input file
+    if (!(inbamfile = sam_open(bamfile.c_str(), "r"))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Could not open %s\n", bamfile.c_str());
+        goto end;
+    }
 
-     // read header
-     if (!(inbamhdr = sam_hdr_read(inbamfile))) {
-         had_error = true; // # nocov start
-         snprintf(buffer, buffer_len, "Failed to read header from file %s\n", bamfile.c_str());
-         goto end; // # nocov end
-     }
+    // read header
+    if (!(inbamhdr = sam_hdr_read(inbamfile))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to read header from file %s\n", bamfile.c_str());
+        goto end; // # nocov end
+    }
 
-     // extract target sequences
-     for (int i = 0; i < inbamhdr->n_targets; i++) {
-         chrs.push_back(inbamhdr->target_name[i]);
-     }
+    // extract target sequences
+    for (int i = 0; i < inbamhdr->n_targets; i++) {
+        chrs.push_back(inbamhdr->target_name[i]);
+    }
 
-     end:
-         //cleanup
-         if (inbamhdr) {
-             sam_hdr_destroy(inbamhdr);
-         }
-         if (inbamfile) {
-             sam_close(inbamfile);
-         }
-         if (had_error) {
-             // we encountered an error (message in `buffer`) --> stop
-             Rcpp::stop(buffer);
+    end:
+        //cleanup
+        if (inbamhdr) {
+            sam_hdr_destroy(inbamhdr);
+        }
+        if (inbamfile) {
+            sam_close(inbamfile);
+        }
+        if (had_error) {
+            // we encountered an error (message in `buffer`) --> stop
+            Rcpp::stop(buffer);
 
-         } else {
-             return chrs;
-         }
- }
+        } else {
+            return chrs;
+        }
+}
 
- //' Get unmodified base corresponding to a modified base
- //'
- //' @param b Modified base as a char
- //'
- //' @return The upper-case unmodified base corresponding to \code{b} as a
- //'     \code{char}.
- //' @noRd
- //' @keywords internal
- // [[Rcpp::export]]
- char get_unmodified_base(char b) {
-     switch (b) {
-     case 'm':
-     case 'h':
-     case 'f':
-     case 'c':
-     case 'C':
-         return 'C';
-     case 'g':
-     case 'e':
-     case 'b':
-     case 'T':
-         return 'T';
-     case 'U':
-         return 'U';
-     case 'a':
-     case 'A':
-         return 'A';
-     case 'o':
-     case 'G':
-         return 'G';
-     case 'n':
-     case 'N':
-     default:
-         return 'N';
-     }
- }
+//' Get unmodified base corresponding to a modified base
+//'
+//' @param b Modified base as a char
+//'
+//' @return The upper-case unmodified base corresponding to \code{b} as a
+//'     \code{char}.
+//' @noRd
+//' @keywords internal
+// [[Rcpp::export]]
+char get_unmodified_base(char b) {
+    switch (b) {
+    case 'm':
+    case 'h':
+    case 'f':
+    case 'c':
+    case 'C':
+        return 'C';
+    case 'g':
+    case 'e':
+    case 'b':
+    case 'T':
+        return 'T';
+    case 'U':
+        return 'U';
+    case 'a':
+    case 'A':
+        return 'A';
+    case 'o':
+    case 'G':
+        return 'G';
+    case 'n':
+    case 'N':
+    default:
+        return 'N';
+    }
+}
 
- //' Create the complement of a base
- //'
- //' @param n single base as a char
- //'
- //' @return char (complement of \code{n})
- //'
- //' @noRd
- //' @keywords internal
- // [[Rcpp::export]]
- char complement(char n) {
-     switch(n) {
-     case 'A':
-     case 'a':
-         return 'T';
-     case 'T':
-     case 't':
-         return 'A';
-     case 'G':
-     case 'g':
-         return 'C';
-     case 'C':
-     case 'c':
-         return 'G';
-     case 'N':
-     case 'n':
-     default:
-         return 'N';
-     }
- }
+//' Create the complement of a base
+//'
+//' @param n single base as a char
+//'
+//' @return char (complement of \code{n})
+//'
+//' @noRd
+//' @keywords internal
+// [[Rcpp::export]]
+char complement(char n) {
+    switch(n) {
+    case 'A':
+    case 'a':
+        return 'T';
+    case 'T':
+    case 't':
+        return 'A';
+    case 'G':
+    case 'g':
+        return 'C';
+    case 'C':
+    case 'c':
+        return 'G';
+    case 'N':
+    case 'n':
+    default:
+        return 'N';
+    }
+}
 
- //' Calculate aligned bases (sum of 'M', '=', or 'X' operation lengths)
- //'
- //' @param bamdata A \code{bam1_t*} with the alignment.
- //'
- //' @return An \code{int} giving the number of aligned bases.
- //'
- //' @noRd
- //' @keywords internal
- int calculate_aligned_bases(bam1_t *bamdata) {
-     uint32_t *cigar = bam_get_cigar(bamdata);
-     int aligned_bases = 0;
+//' Calculate aligned bases (sum of 'M', '=', or 'X' operation lengths)
+//'
+//' @param bamdata A \code{bam1_t*} with the alignment.
+//'
+//' @return An \code{int} giving the number of aligned bases.
+//'
+//' @noRd
+//' @keywords internal
+int calculate_aligned_bases(bam1_t *bamdata) {
+    uint32_t *cigar = bam_get_cigar(bamdata);
+    int aligned_bases = 0;
 
-     // loop over CIGAR operations
-     for (uint32_t i = 0; i < bamdata->core.n_cigar; i++) {
-         uint32_t op = bam_cigar_op(cigar[i]);
+    // loop over CIGAR operations
+    for (uint32_t i = 0; i < bamdata->core.n_cigar; i++) {
+        uint32_t op = bam_cigar_op(cigar[i]);
 
-         // only count 'M', '=', or 'X' operations
-         if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
-             aligned_bases += bam_cigar_oplen(cigar[i]);
-         }
-     }
+        // only count 'M', '=', or 'X' operations
+        if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
+            aligned_bases += bam_cigar_oplen(cigar[i]);
+        }
+    }
 
-     return aligned_bases;
- }
+    return aligned_bases;
+}
 
- //' Extract quality score (qscore)
- //'
- //' @param bamdata A \code{bam1_t*} with the alignment.
- //'
- //' @return A \code{double} corresponding to the value extracted from the "qs"
- //'     tag, or in case that is missing, calculated as the mean of base quality
- //'     values.
- //'
- //' @author Michael Stadler
- //'
- //' @noRd
- //' @keywords internal
- double extract_qscore(bam1_t *bamdata) {
-     uint8_t *qual = NULL, *qs_data = bam_aux_get(bamdata, "qs");
-     double qs_value = 0.0, sum_qual = 0.0;
-     if (qs_data != NULL) {
-         qs_value = bam_aux2f(qs_data);
-     } else {
-         // qs tag is missing --> calculate mean of base QUAL values
-         qual = bam_get_qual(bamdata);
-         sum_qual = 0;
-         for (int j = 0; j < bamdata->core.l_qseq; j++) {
-             sum_qual += qual[j];
-         }
-         qs_value = ((double) sum_qual) / bamdata->core.l_qseq;
-     }
-     return qs_value;
- }
+//' Extract quality score (qscore)
+//'
+//' @param bamdata A \code{bam1_t*} with the alignment.
+//'
+//' @return A \code{double} corresponding to the value extracted from the "qs"
+//'     tag, or in case that is missing, calculated as the mean of base quality
+//'     values.
+//'
+//' @author Michael Stadler
+//'
+//' @noRd
+//' @keywords internal
+double extract_qscore(bam1_t *bamdata) {
+    uint8_t *qual = NULL, *qs_data = bam_aux_get(bamdata, "qs");
+    double qs_value = 0.0, sum_qual = 0.0;
+    if (qs_data != NULL) {
+        qs_value = bam_aux2f(qs_data);
+    } else {
+        // qs tag is missing --> calculate mean of base QUAL values
+        qual = bam_get_qual(bamdata);
+        sum_qual = 0;
+        for (int j = 0; j < bamdata->core.l_qseq; j++) {
+            sum_qual += qual[j];
+        }
+        qs_value = ((double) sum_qual) / bamdata->core.l_qseq;
+    }
+    return qs_value;
+}
 
- //' Get the forward read sequence from an alignment
- //'
- //' Extract the read sequence from a bam1_t corresponding to the plus-strand
- //' of the read (thus reverse-complementing the read for an minus-strand
- //' alignment) and write it to the char* array at qseq, allocating memory of
- //' sufficient length if needed. The allocated space (without terminating null
- //' character) is stored in qseq_len.
- //'
- //' @param bamdata A \code{bam1_t*} with the alignment.
- //' @param qseq A \code{char**} (pointer to a character array) to which the
- //'     extracted sequence will be written.
- //' @param qseq_len A \code{int*} (pointer to int) in which the number of
- //'     allocated characters at \code{qseq} are stored (escluding the
- //'     terminating null character).
- //'
- //' @returns 0 if sucessful, -1 if memory allocation failed
- //'
- //' @author Michael Stadler
- //'
- //' @noRd
- //' @keywords internal
- int extract_forward_qseq(bam1_t *bamdata, // alignment
-                          char *&qseq,     // buffer for forward read sequence
-                          int &qseq_len) { // allocated length of qseq
-     uint8_t *data = bam_get_seq(bamdata);
-     int this_read_len = bamdata->core.l_qseq, j = 0;
+//' Get the forward read sequence from an alignment
+//'
+//' Extract the read sequence from a bam1_t corresponding to the plus-strand
+//' of the read (thus reverse-complementing the read for an minus-strand
+//' alignment) and write it to the char* array at qseq, allocating memory of
+//' sufficient length if needed. The allocated space (without terminating null
+//' character) is stored in qseq_len.
+//'
+//' @param bamdata A \code{bam1_t*} with the alignment.
+//' @param qseq A \code{char**} (pointer to a character array) to which the
+//'     extracted sequence will be written.
+//' @param qseq_len A \code{int*} (pointer to int) in which the number of
+//'     allocated characters at \code{qseq} are stored (excluding the
+//'     terminating null character).
+//'
+//' @returns 0 if successful, -1 if memory allocation failed
+//'
+//' @author Michael Stadler
+//'
+//' @noRd
+//' @keywords internal
+int extract_forward_qseq(bam1_t *bamdata, // alignment
+                         char *&qseq,     // buffer for forward read sequence
+                         int &qseq_len) { // allocated length of qseq
+    uint8_t *data = bam_get_seq(bamdata);
+    int this_read_len = bamdata->core.l_qseq, j = 0;
 
-     if (qseq_len < this_read_len) {
-         if (qseq) // # nocov start
-             free((void*) qseq); // # nocov end
-         qseq = (char*) calloc(this_read_len + 1, sizeof(char));
-         if (qseq == NULL) // # nocov start
-             return -1; // # nocov end
-         qseq_len = this_read_len;
-     }
-     if (bam_is_rev(bamdata)) {
-         for (j = 0; j < this_read_len; j++) {
-             qseq[this_read_len - 1 - j] = complement(seq_nt16_str[bam_seqi(data, j)]);
-         }
-     } else {
-         for (j = 0; j < this_read_len; j++) {
-             qseq[j] = seq_nt16_str[bam_seqi(data, j)];
-         }
-     }
-     return 0;
- }
+    if (qseq_len < this_read_len) {
+        if (qseq) // # nocov start
+            free((void*) qseq); // # nocov end
+        qseq = (char*) calloc(this_read_len + 1, sizeof(char));
+        if (qseq == NULL) // # nocov start
+            return -1; // # nocov end
+        qseq_len = this_read_len;
+    }
+    if (bam_is_rev(bamdata)) {
+        for (j = 0; j < this_read_len; j++) {
+            qseq[this_read_len - 1 - j] = complement(seq_nt16_str[bam_seqi(data, j)]);
+        }
+    } else {
+        for (j = 0; j < this_read_len; j++) {
+            qseq[j] = seq_nt16_str[bam_seqi(data, j)];
+        }
+    }
+    return 0;
+}
 
- //' Extract vector with modification probabilities from alignment
- //'
- //' Use htslib functions to parse the modification probabilities for
- //' `modbase`.
- //'
- //' @param bamdata A \code{bam1_t*} with the alignment.
- //' @param modbase A \code{char} with the modified base code for which to
- //'     extract modification probabilities.
- //' @param unmodbase A \code{char} with the unmodified base corresponding to
- //'     \code{modbase}.
- //' @param mod_probs A \code{Rcpp::NumericVector*} to which the extracted
- //'     modification probabilities will be appended at the end.
- //' @param qseq A \code{char*} pointing to the forward read sequence.
- //' @param ms A \code{hts_base_mod_state*} (modification state struct) expected
- //'     to be pre-initialized.
- //' @param buffer A \code{char*} pointing to a pre-allocated character array
- //'     to which an error message is written in case of a failure.
- //' @param buffer_len An \code{int} giving the pre-allocated size of the array
- //'     at \code{buffer} (excluding the terminating null).
- //'
- //' @returns An \code{int}, if greater or equal to zero giving the number of
- //'     extracted probabilities, or less than zero if something failed. In
- //'     that case, the error message is giving in \code{buffer}.
- //'
- //' @author Michael Stadler
- //'
- //' @noRd
- //' @keywords internal
- int extract_mod_probs(bam1_t *bamdata,
-                       char modbase,
-                       char unmodbase,
-                       Rcpp::NumericVector *mod_probs,
-                       Rcpp::IntegerVector *mod_pos,   // may be NULL
-                       char* qseq,
-                       hts_base_mod_state *ms,
-                       char* buffer,
-                       int buffer_len) {
+//' Extract vector with modification probabilities from alignment
+//'
+//' Use htslib functions to parse the modification probabilities for
+//' `modbase`.
+//'
+//' @param bamdata A \code{bam1_t*} with the alignment.
+//' @param modbase A \code{char} with the modified base code for which to
+//'     extract modification probabilities.
+//' @param unmodbase A \code{char} with the unmodified base corresponding to
+//'     \code{modbase}.
+//' @param mod_probs A \code{Rcpp::NumericVector*} to which the extracted
+//'     modification probabilities will be appended at the end.
+//' @param qseq A \code{char*} pointing to the forward read sequence.
+//' @param ms A \code{hts_base_mod_state*} (modification state struct) expected
+//'     to be pre-initialized.
+//' @param buffer A \code{char*} pointing to a pre-allocated character array
+//'     to which an error message is written in case of a failure.
+//' @param buffer_len An \code{int} giving the pre-allocated size of the array
+//'     at \code{buffer} (excluding the terminating null).
+//'
+//' @returns An \code{int}, if greater or equal to zero giving the number of
+//'     extracted probabilities, or less than zero if something failed. In
+//'     that case, the error message is giving in \code{buffer}.
+//'
+//' @author Michael Stadler
+//'
+//' @noRd
+//' @keywords internal
+int extract_mod_probs(bam1_t *bamdata,
+                      char modbase,
+                      char unmodbase,
+                      Rcpp::NumericVector *mod_probs,
+                      Rcpp::IntegerVector *mod_pos,   // may be NULL
+                      char* qseq,
+                      hts_base_mod_state *ms,
+                      char* buffer,
+                      int buffer_len) {
 
-     // declare variables
-     int i = 0, j = 0, strand = 0, impl = 0, pos = 0, r = 0;
-     int this_read_len = bamdata->core.l_qseq, n_probs = 0;
-     hts_base_mod mod[5] = {{0}};  //for ATCGN
-     char canonical = '0';
+    // declare variables
+    int i = 0, j = 0, strand = 0, impl = 0, pos = 0, r = 0;
+    int this_read_len = bamdata->core.l_qseq, n_probs = 0;
+    hts_base_mod mod[5] = {{0}};  //for ATCGN
+    char canonical = '0';
 
-     // parse base modifications
-     if (bam_parse_basemod(bamdata, ms)) { // # nocov start
-         snprintf(buffer, buffer_len, "Failed to parse the base mods (read %s)\n",
-                  bam_get_qname(bamdata));
-         return -1; // # nocov end
-     }
+    // parse base modifications
+    if (bam_parse_basemod(bamdata, ms)) { // # nocov start
+        snprintf(buffer, buffer_len, "Failed to parse the base mods (read %s)\n",
+                 bam_get_qname(bamdata));
+        return -1; // # nocov end
+    }
 
-     // process read if modifications of the right type are present
-     // bam_mods_query_type:
-     // - returns 0 on success, -1 if not found
-     // - also fills out `canonical`, `strand` and `impl`
-     //   (`impl` is a boolean for whether unlisted positions should be
-     //    implicitly assumed to be unmodified, or require an explicit
-     //    score and should be considered as unknown)
-     if (bam_mods_query_type(ms, modbase, &strand, &impl, &canonical) == 0) {
-         // ... loop over sequence positions i
-         for (i = 0; i < this_read_len; i++) {
-             // i is the position in the aligned read (possibly reverse-complemented)
-             // pos is the position in the original read (qseq)
-             if (bam_is_rev(bamdata)) {
-                 pos = this_read_len - 1 - i;
-             } else{
-                 pos = i;
-             }
+    // process read if modifications of the right type are present
+    // bam_mods_query_type:
+    // - returns 0 on success, -1 if not found
+    // - also fills out `canonical`, `strand` and `impl`
+    //   (`impl` is a boolean for whether unlisted positions should be
+    //    implicitly assumed to be unmodified, or require an explicit
+    //    score and should be considered as unknown)
+    if (bam_mods_query_type(ms, modbase, &strand, &impl, &canonical) == 0) {
+        // ... loop over sequence positions i
+        for (i = 0; i < this_read_len; i++) {
+            // i is the position in the aligned read (possibly reverse-complemented)
+            // pos is the position in the original read (qseq)
+            if (bam_is_rev(bamdata)) {
+                pos = this_read_len - 1 - i;
+            } else{
+                pos = i;
+            }
 
-             // r: number of found modifications (>=1, 0 or -1 if failed)
-             r = bam_mods_at_next_pos(bamdata, ms, mod, sizeof(mod)/sizeof(mod[0]));
-             if (r <= -1) { // # nocov start
-                 snprintf(buffer, buffer_len, "Failed to get modifications (read %s)\n",
-                          bam_get_qname(bamdata));
-                 return -2; // # nocov end
-             } else if (r > (int)(sizeof(mod) / sizeof(mod[0]))) { // # nocov start
-                 snprintf(buffer, buffer_len,
-                          "More modifications than SingleMoleculeGenomicsIO:::extract_mod_probs can handle (read %s)\n",
-                          bam_get_qname(bamdata));
-                 return -3; // # nocov end
-             } else if (!r && impl) {
-                 // implied base without modification at position i
-                 if (qseq[pos] == unmodbase) {
-                     // base of the right type -> add to results
-                     mod_probs->push_back(0.0);
-                     if (mod_pos) mod_pos->push_back(pos);
-                     n_probs++;
-                 }
-             }
-             // modifications
-             for (j = 0; j < r; j++) {
-                 if (mod[j].modified_base == modbase) {
-                     // found modified base of the right type -> add to results
-                     // `qual` of N corresponds to call probability
-                     //     in [N/256, (N+1)/256] -> store midpoint
-                     mod_probs->push_back(((double) mod[j].qual + 0.5) / 256.0);
-                     if (mod_pos) mod_pos->push_back(pos);
-                     n_probs++;
-                 }
-             }
-         }
-     }
+            // r: number of found modifications (>=1, 0 or -1 if failed)
+            r = bam_mods_at_next_pos(bamdata, ms, mod, sizeof(mod)/sizeof(mod[0]));
+            if (r <= -1) { // # nocov start
+                snprintf(buffer, buffer_len, "Failed to get modifications (read %s)\n",
+                         bam_get_qname(bamdata));
+                return -2; // # nocov end
+            } else if (r > (int)(sizeof(mod) / sizeof(mod[0]))) { // # nocov start
+                snprintf(buffer, buffer_len,
+                         "More modifications than SingleMoleculeGenomicsIO:::extract_mod_probs can handle (read %s)\n",
+                         bam_get_qname(bamdata));
+                return -3; // # nocov end
+            } else if (!r && impl) {
+                // implied base without modification at position i
+                if (qseq[pos] == unmodbase) {
+                    // base of the right type -> add to results
+                    mod_probs->push_back(0.0);
+                    if (mod_pos) mod_pos->push_back(pos);
+                    n_probs++;
+                }
+            }
+            // modifications
+            for (j = 0; j < r; j++) {
+                if (mod[j].modified_base == modbase) {
+                    // found modified base of the right type -> add to results
+                    // `qual` of N corresponds to call probability
+                    //     in [N/256, (N+1)/256] -> store midpoint
+                    mod_probs->push_back(((double) mod[j].qual + 0.5) / 256.0);
+                    if (mod_pos) mod_pos->push_back(pos);
+                    n_probs++;
+                }
+            }
+        }
+    }
 
-     return n_probs;
- }
+    return n_probs;
+}
+
+// convert 0-based read position to 0-based reference sequence position
+// (a position of -1 means unaligned)
+std::vector<int> read_to_reference_pos(const bam1_t *aln,
+                                       const std::vector<int> &read_positions) {
+    // variables
+    size_t read_positions_index = 0; // index to elements of read_positions
+    const uint32_t *cigar = bam_get_cigar(aln);  // cigar array
+    int ref_pos = aln->core.pos;  // reference position (0-based)
+    int read_pos = 0;  // read position (0-based)
+
+    // return value: 0-based reference positions, initialized to -1
+    std::vector<int> ref_positions(read_positions.size(), -1);
+
+    // iterate over the CIGAR operations i
+    for (unsigned int i = 0; i < aln->core.n_cigar && read_positions_index < read_positions.size(); i++) {
+        int op = bam_cigar_op(cigar[i]);  // operation type
+        int op_len = bam_cigar_oplen(cigar[i]);  // operation length
+
+        switch (op) {
+        case BAM_CMATCH:  // match or mismatch (M)
+        case BAM_CEQUAL:  // match (=)
+        case BAM_CDIFF:   // mismatch (X)
+            while (read_positions_index < read_positions.size() &&
+                   read_pos + op_len > read_positions[read_positions_index]) {
+                ref_positions[read_positions_index] = ref_pos + (read_positions[read_positions_index] - read_pos);
+                read_positions_index++;
+            }
+            ref_pos += op_len;
+            read_pos += op_len;
+            break;
+
+        case BAM_CINS:  // insertion (I)
+        case BAM_CSOFT_CLIP:  // soft clipping (S)
+            if (read_pos + op_len > read_positions[read_positions_index]) {
+                // the current read position is within an insertion or soft-clipped region -->
+                //     no corresponding reference position
+                while (read_positions_index < read_positions.size() &&
+                       read_pos + op_len > read_positions[read_positions_index]) {
+                    ref_positions[read_positions_index] = -1;
+                    read_positions_index++;
+                }
+            }
+            read_pos += op_len;
+            break;
+
+        case BAM_CDEL:       // deletion (D)
+        case BAM_CREF_SKIP:  // reference skip (N)
+            ref_pos += op_len;
+            break;
+
+        case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
+        case BAM_CPAD:        // padding (P)
+            // these do not consume any positions in the read or reference
+            break;
+
+        default:
+            Rcpp::warning("Unknown CIGAR operation: %d", op);
+        return ref_positions; // # nocov end
+        }
+    }
+
+    return ref_positions;
+}
+
+// convert 0-based reference position to 0-based read sequence position
+// (a position of -1 means uncovered)
+// Note: assumes that ref_pos is sorted ascendingly and on the same target as aln
+std::vector<int> reference_to_read_pos(const bam1_t *aln,
+                                       const std::vector<int> &ref_positions) {
+    // variables
+    size_t ref_positions_index = 0; // index to elements of ref_positions
+    const uint32_t *cigar = bam_get_cigar(aln);  // cigar array
+    int ref_pos = aln->core.pos;  // reference position (0-based)
+    int read_pos = 0;  // read position (0-based)
+
+    // return value: 0-based reference positions, initialized to -1
+    std::vector<int> read_positions(ref_positions.size(), -1);
+
+    // iterate over the CIGAR operations i
+    for (unsigned int i = 0; i < aln->core.n_cigar && ref_positions_index < ref_positions.size(); i++) {
+        int op = bam_cigar_op(cigar[i]);  // operation type
+        int op_len = bam_cigar_oplen(cigar[i]);  // operation length
+
+        switch (op) {
+        case BAM_CMATCH:  // match or mismatch (M)
+        case BAM_CEQUAL:  // match (=)
+        case BAM_CDIFF:   // mismatch (X)
+            while (ref_positions_index < ref_positions.size() &&
+                   ref_pos + op_len > ref_positions[ref_positions_index]) {
+                read_positions[ref_positions_index] = read_pos + (ref_positions[ref_positions_index] - ref_pos);
+                ref_positions_index++;
+            }
+            ref_pos += op_len;
+            read_pos += op_len;
+            break;
+
+        case BAM_CINS:  // insertion (I)
+        case BAM_CSOFT_CLIP:  // soft clipping (S)
+            // no reference position is aligned to read bases in an insertion
+            //     or soft clipped end -> only advance read_pos
+            read_pos += op_len;
+            break;
+
+        case BAM_CDEL:       // deletion (D)
+        case BAM_CREF_SKIP:  // reference skip (N)
+            if (ref_pos + op_len > ref_positions[ref_positions_index]) {
+                // the current reference position is within a deletion -->
+                //     no corresponding read position
+                while (ref_positions_index < ref_positions.size() &&
+                       ref_pos + op_len > ref_positions[ref_positions_index]) {
+                    read_positions[ref_positions_index] = -1;
+                    ref_positions_index++;
+                }
+            }
+            ref_pos += op_len;
+            break;
+
+        case BAM_CHARD_CLIP:  // hard clipping (H) // # nocov start
+        case BAM_CPAD:        // padding (P)
+            // these do not consume any positions in the read or reference
+            break;
+
+        default:
+            Rcpp::warning("Unknown CIGAR operation: %d", op);
+        return read_positions; // # nocov end
+        }
+    }
+
+    return read_positions;
+}
+
+
+// construct a read label based on variant positions
+std::string construct_read_label(const bam1_t *aln,
+                                 const std::vector<std::string> &ref_names,
+                                 const std::vector<int> &ref_positions,
+                                 const sam_hdr_t *hdr) {
+    // initialize label
+    std::string label(ref_names.size(), '-');
+
+    // subset ref_positions to the ones overlapping aln
+    std::string tname(sam_hdr_tid2name(hdr, aln->core.tid));
+    int aln_start = aln->core.pos;
+    int aln_end = bam_endpos(aln);
+    size_t from = 0, to = 0;
+
+    while (from < ref_names.size() &&
+           (ref_names[from] != tname || ref_positions[from] < aln_start ||
+           ref_positions[from] > aln_end)) {
+        from++;
+    }
+
+    if (from < ref_names.size()) {
+        to = from;
+        while ((to < ref_names.size()) &&
+               (ref_names[to] == tname && ref_positions[to] < aln_end)) {
+            to++;
+        }
+
+        // subset ref_positions and convert to read_positions
+        uint8_t *seqdata = bam_get_seq(aln);
+        std::vector<int> ref_positions_overlapping(ref_positions.begin() + from, ref_positions.begin() + to);
+        std::vector<int> read_positions = reference_to_read_pos(
+            aln, ref_positions_overlapping);
+        for (size_t i = 0; i < read_positions.size(); i++) {
+            if (read_positions[i] != -1) {
+                label[from + i] = seq_nt16_str[bam_seqi(seqdata, read_positions[i])];
+            }
+        }
+    }
+
+    return label;
+}
+
+// Open bam file and read index and header
+//
+// This is a convenience function that bundles common steps to prepare
+// a bam file for reading. Specifically, it will:
+//   - initialize the bam1_t struct (`bamdata`)
+//   - open the bam file given by `inname` (`infile`)
+//   - read the bam index (`idx`)
+//   - read the bam header (`in_samhdr`)
+//   - set the htslib threads (`n_threads`)
+//
+// The function returns 0 on success, and a non-zero error code on failure
+// (with an error message written to `buffer` and `had_error` set to true).
+int open_bam_and_read_index_and_header(bam1_t *&bamdata,
+                                       const char *&inname,
+                                       samFile *&infile,
+                                       hts_idx_t *&idx,
+                                       sam_hdr_t *&in_samhdr,
+                                       int n_threads,
+                                       bool &had_error,
+                                       int buffer_len,
+                                       char *buffer) {
+    // initialize bam data storage
+    if (!(bamdata = bam_init1())) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to initialize bamdata\n");
+        return -1; // # nocov end
+    }
+
+    // open bam file
+    if (!(infile = sam_open(inname, "r"))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Could not open input file %s\n", inname);
+        return -2;
+    }
+
+    // read bam index
+    if (!(idx = sam_index_load(infile, inname))) {
+        had_error = true;
+        snprintf(buffer, buffer_len,
+                 "Failed to load the index for %s\n", inname);
+        return -3;
+    }
+
+    // read bam header
+    if (!(in_samhdr = sam_hdr_read(infile))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len,
+                 "Failed to read header from file %s\n", inname);
+        return -4; // # nocov end
+    }
+
+    // set htslib threads
+    if (n_threads > 1) {
+        if (hts_set_threads(infile, n_threads)) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len, "Error setting htslib threads to %d\n", n_threads);
+            return -5; // # nocov end
+        }
+    }
+
+    return 0;
+}
+
+// Create a multi-region iterator
+//
+// This is a convenice function that bundles multiple steps required to
+// create an htslib bam file iterator for multiple regions. Specifically it
+//   - set `regcnt`
+//   - allocate an array of char* in `regions_c`
+//   - convert `regions` from std::vector<std::string> to char** in `regions_c`
+//   - create multi-region htslib iterator in `iter` (uses also  `idx` and `in_samhdr`)
+//
+// The function returns 0 on success, and a non-zero error code on failure
+// (with an error message written to `buffer` and `had_error` set to true).
+int create_multi_region_iterator(std::vector<std::string> &regions,
+                                 unsigned int &regcnt,
+                                 char **&regions_c,
+                                 hts_itr_t *&iter,
+                                 hts_idx_t *idx,
+                                 sam_hdr_t *in_samhdr,
+                                 bool &had_error,
+                                 int buffer_len,
+                                 char *buffer) {
+    // convert regions to C arrays
+    regcnt = (unsigned int) regions.size();
+    regions_c = (char**) calloc(regcnt, sizeof(char*));
+    for (unsigned int i = 0; i < regcnt; i++) {
+        regions_c[i] = (char*) regions[i].c_str();
+    }
+
+    // create multi-region iterator
+    if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+// Create a multi-region iterator for sampling
+//
+// This is a convenicence function that bundles multiple steps required to
+// randomly sample records from specified target sequences. Specifically it
+//   - set `regcnt` (intersection of )
+//   - allocate an array of char* in `regions_c`
+//   - copy target names from `in_samhdr` to `regions_c` if they exist in `tnames_for_sampling`
+//     (warn bout elements in `tnames_for_sampling` that were ignored)
+//   - calculate `keep_aln_fraction` (warn if there are not enough alignments)
+//   - create multi-region htslib iterator in `iter` (uses also  `idx` and `in_samhdr`)
+//
+// The function returns 0 on success, and a non-zero error code on failure
+// (with an error message written to `buffer` and `had_error` set to true).
+int create_multi_region_iterator_for_sampling(
+        unsigned int &regcnt,
+        char **&regions_c,
+        int &n_alns_to_sample,
+        std::vector<std::string> &tnames_for_sampling,
+        double &keep_aln_fraction,
+        hts_itr_t *&iter,
+        hts_idx_t *idx,
+        sam_hdr_t *in_samhdr,
+        bool &had_error,
+        int buffer_len,
+        char *buffer) {
+    // declare variables
+    int i = 0;
+    uint64_t mapped = 0, unmapped = 0, total_for_sampling = 0;
+    std::set<std::string> tnames_for_sampling_set(tnames_for_sampling.begin(), tnames_for_sampling.end());
+    std::set<std::string> tnames_existing;
+
+    regcnt = 0;
+    regions_c = (char**) calloc((unsigned int) tnames_for_sampling.size(),
+                 sizeof(char*));
+    for (i = 0; i < in_samhdr->n_targets; i++) {
+        tnames_existing.insert(in_samhdr->target_name[i]);
+
+        // for each target i that is in tnames_for_sampling_set,
+        // get the number of mapped and unmapped records
+        // and add it to regions_c
+        if (tnames_for_sampling_set.find(in_samhdr->target_name[i]) !=
+            tnames_for_sampling_set.end() &&
+            hts_idx_get_stat(idx, i, &mapped, &unmapped) == 0) {
+            total_for_sampling += mapped;
+            regions_c[regcnt] = in_samhdr->target_name[i];
+            regcnt++;
+        }
+    }
+    for (i = 0; i < (int)tnames_for_sampling.size(); i++) {
+        if (tnames_existing.find(tnames_for_sampling[i]) == tnames_existing.end()) {
+            Rcpp::warning("Ignoring unknown target name: %s",
+                          tnames_for_sampling[i].c_str());
+        }
+    }
+
+    // check if we have enough alignments to sample from
+    if (total_for_sampling < (uint64_t)n_alns_to_sample) {
+        had_error = true;
+        snprintf(buffer, buffer_len,
+                 "Cannot sample %d alignments from a total of %" PRIu64 "\n",
+                 n_alns_to_sample, total_for_sampling);
+        return -1;
+    }
+
+    // calculate fraction of alignments to keep
+    keep_aln_fraction = (double) n_alns_to_sample / total_for_sampling;
+
+    // create multi-region iterator
+    if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
+        had_error = true; // # nocov start
+        snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
+        return -2; // # nocov end
+    }
+
+    return 0;
+}
+
+// convert a named Rcpp::List with IntegerVector elements
+// to a std::vector<std::set<int>>, where the index in the
+// vector corresponds to the target name index as defined in in_samhdr
+//
+// return 0 if successfull, -1 if a target name was not found in in_samhdr
+int intlist_to_setvector(sam_hdr_t *in_samhdr,
+                         Rcpp::List &pos_list,
+                         std::vector<std::set<int>> &pos_sets,
+                         char *buffer,
+                         int &buffer_len,
+                         bool &had_error) {
+    Rcpp::CharacterVector nms;
+    Rcpp::IntegerVector vint;
+    int i = 0, j = 0, k = 0;
+
+    pos_sets.resize(in_samhdr->n_targets);
+    nms = pos_list.names();
+    for (i = 0; i < pos_list.size(); i++) {
+        j = sam_hdr_name2tid(in_samhdr, ((std::string)nms[i]).c_str());
+        if (j >= 0) {
+            vint = pos_list[i];
+            for (k = 0; k < vint.size(); k++) {
+                pos_sets[j].insert((int)vint[k]);
+            }
+        } else {
+            had_error = true;
+            snprintf(buffer, buffer_len,
+                     "Could not find chromosome %s in bam header\n",
+                     ((std::string)nms[i]).c_str());
+            return -1;
+        }
+    }
+    return 0;
+}
+
+// pileup helpers
+//' Constructor for pileup data in bam_pileup_cd*
+//'
+//' @param data void* (client data)
+//' @param b bam1_t* (bam being loaded)
+//' @param cd bam_pileup_cd* (client data)
+//'
+//' @return An integer scalar (zero on success, non-zero on failure)
+//'
+//' @noRd
+//' @keywords internal
+int plpconstructor(void *data, const bam1_t *b, bam_pileup_cd *cd) {
+    //plpconf *conf= (plpconf*)data; can use this to access anything required from the data in pileup init
+
+    //when using cd, initialize and use as it will be reused after destructor
+    cd->p = hts_base_mod_state_alloc();
+    if (!cd->p) {
+        // # nocov start
+        Rcpp::stop("Failed to allocate base modification state\n");
+        return 1;
+        // # nocov end
+    }
+
+    //parse the bam data and gather modification data from MM tags
+    return (-1 == bam_parse_basemod(b, (hts_base_mod_state*)cd->p)) ? 1 : 0;
+}
+
+//' Destructor for pileup data in bam_pileup_cd*
+//'
+//' @param data void* (client data)
+//' @param b bam1_t* (bam being loaded)
+//' @param cd bam_pileup_cd* (client data)
+//'
+//' @return An integer scalar (zero)
+//'
+//' @noRd
+//' @keywords internal
+int plpdestructor(void *data, const bam1_t *b, bam_pileup_cd *cd) {
+    if (cd->p) {
+        hts_base_mod_state_free((hts_base_mod_state *)cd->p);
+        cd->p = NULL;
+    }
+    return 0;
+}
+
+//' Read alignment data for pileup operation
+//'
+//' @param data void* (client callback data holding alignment file handle)
+//' @param b bam1_t* (aligned read)
+//'
+//' @return same as sam_read1
+//'
+//' @noRd
+//' @keywords internal
+int readdata(void *data, bam1_t *b) {
+    plpconf *conf = (plpconf*)data;
+    if (!conf || !conf->infile) {
+        // # nocov start
+        return -2;  //cant read data
+        // # nocov end
+    }
+
+    //read alignment and send
+    // return sam_read1(conf->infile, conf->infile->bam_header, b);
+    return sam_itr_next(conf->infile, conf->iter, b);
+}
+
+// check if BAM file is conforming to bam_format
+// remark: we cannot guarantee in all cases that the bam file is conforming
+int check_bam_format(samFile *infile,
+                     sam_hdr_t *in_samhdr,
+                     bam1_t *bamdata,
+                     std::string &bam_format,
+                     bool &had_error,
+                     char *buffer,
+                     int &buffer_len) {
+    int ret_r = -1, result = 0;
+    while ((ret_r = sam_read1(infile, in_samhdr, bamdata)) >= 0) {
+        if (!(bamdata->core.flag & BAM_FUNMAP)) {
+            if (bam_format == "Bismark") {
+                // XR and XG tags need to exist
+                if (bam_aux_get(bamdata, "XR") == NULL || bam_aux_get(bamdata, "XG") == NULL) {
+                    had_error = true;
+                    snprintf(buffer, buffer_len,
+                             "Invalid Bismark bam format (missing XR or XG tags)\n");
+                    result = 1;
+                }
+            } else if (bam_format == "QuasR") {
+                // paired alignments need to be on the same strand
+                if ((bamdata->core.flag & BAM_FPAIRED) &&
+                    (((bamdata->core.flag & BAM_FREVERSE) > 0) != ((bamdata->core.flag & BAM_FMREVERSE) > 0))) {
+                    had_error = true;
+                    snprintf(buffer, buffer_len,
+                             "Invalid QuasR bam format (paired alignments not on same strand)\n");
+                    result = 2;
+                }
+            }
+            break;
+        }
+    }
+    return result;
+}

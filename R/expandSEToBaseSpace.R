@@ -12,6 +12,9 @@
 #'     Alternatively, a named numeric vector with genomic sequence names and
 #'     lengths. Used to convert a character \code{region} to a \code{GRanges}
 #'     object.
+#' @param keepAssays Character vector indicating which (read-level) assays to
+#'     expand to base space. Only these assays will be present in the returned
+#'     object.
 #' @param ignore.strand A logical scalar defining whether to ignore the strand
 #'     of the \code{rowRanges(se)}.
 #'
@@ -27,6 +30,16 @@
 #' @return A single-base resolution \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
 #'     corresponding to \code{se}.
 #' @author Charlotte Soneson, Michael Stadler
+#'
+#' @examples
+#' modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
+#'                           package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
+#'                  modbase = "a", verbose = TRUE,
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' se_exp <- expandSEToBaseSpace(se)
+#' dim(se)
+#' dim(se_exp)
 #'
 #' @export
 expandSEToBaseSpace <- function(se,
