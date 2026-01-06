@@ -127,7 +127,6 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     int refpos = -1;
     const bam_pileup1_t *plp = NULL;
     bam_pileup1_t plp_j;
-    kstring_t insdata = KS_INITIALIZE; // TODO: need kstring_t here and in pileup_modbam_cpp?
     bool had_error = false;
     int buffer_len = 2000;
     char buffer[2000];
@@ -354,7 +353,6 @@ end:
     if (plpiter) {
         bam_plp_destroy(plpiter);
     }
-    ks_free(&insdata);
 
     if (had_error) {
         // we encountered an error (message in `buffer`) --> stop

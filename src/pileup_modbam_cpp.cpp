@@ -118,7 +118,6 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
     hts_base_mod mods[NMODS] = {{0}}; //ACGTN
     int refpos = -1;
     const bam_pileup1_t *plp = NULL;
-    kstring_t insdata = KS_INITIALIZE;
     bool had_error = false;
     int buffer_len = 2000;
     char buffer[2000];
@@ -338,7 +337,6 @@ end:
     if (plpiter) {
         bam_plp_destroy(plpiter);
     }
-    ks_free(&insdata);
 
     if (had_error) {
         // we encountered an error (message in `buffer`) --> stop
