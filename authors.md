@@ -22,7 +22,7 @@
 Source:
 [`DESCRIPTION`](https://github.com/fmicompbio/SingleMoleculeGenomicsIO/blob/devel/DESCRIPTION)
 
-Stadler M, Soneson C, Papasaikas P, Smallwood S (2025).
+Stadler M, Soneson C, Papasaikas P, Smallwood S (2026).
 *SingleMoleculeGenomicsIO: Tools for reading single molecule genomics
 data*. R package version 0.1.0,
 <https://github.com/fmicompbio/SingleMoleculeGenomicsIO>.
@@ -30,7 +30,7 @@ data*. R package version 0.1.0,
     @Manual{,
       title = {SingleMoleculeGenomicsIO: Tools for reading single molecule genomics data},
       author = {Michael Stadler and Charlotte Soneson and Panagiotis Papasaikas and Sebastien Smallwood},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.1.0},
       url = {https://github.com/fmicompbio/SingleMoleculeGenomicsIO},
     }

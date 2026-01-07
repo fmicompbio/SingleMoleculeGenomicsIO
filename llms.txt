@@ -42,6 +42,10 @@ Current contributors include:
   : Calculate or add summary statistics for read-level base modification
   data
 
+- [`countMismatchStatePairs()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countMismatchStatePairs.md)
+  : Count pairs of modified bases by distance and modification state for
+  bam files where modifications are indicated by sequence mismatches
+
 - [`countStatePairs()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countStatePairs.md)
   : Count pairs of modified bases by distance and modification state
 
@@ -78,11 +82,17 @@ Current contributors include:
   Read collapsed single-molecule footprinting data from a `bedMethyl`
   file
 
+- [`readMismatchBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readMismatchBam.md)
+  : Read base modifications from "C-to-T" bam file(s)
+
 - [`readModBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.md)
   : Read base modifications from bam file(s)
 
 - [`readModkitExtract()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModkitExtract.md)
   : Read modkit extract file(s)
+
+- [`refargToDNAStringSet()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/refargToDNAStringSet.md)
+  : Convert a supported reference sequence argument to a DNAStringSet
 
 - [`regroupReads()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)
   [`regroupReadsByColData()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)

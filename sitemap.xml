@@ -10,6 +10,7 @@
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/addSeqContext.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/annotateReadSegments.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/calcReadStats.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countMismatchStatePairs.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countStatePairs.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/expandSEToBaseSpace.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractSeqContext.html</loc></url>
@@ -20,8 +21,10 @@
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/index.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/plotReadStats.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readBedMethyl.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readMismatchBam.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModkitExtract.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/refargToDNAStringSet.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/sampleEntropy.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/subsetReads.html</loc></url>

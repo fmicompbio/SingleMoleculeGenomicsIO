@@ -146,12 +146,15 @@ se <- readModBam(bamfile = modbamfile, regions = "chr1:6920000-6995000",
                  modbase = "a", verbose = TRUE,
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [20ms]
+#> ✔ finding unique genomic positions... [27ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 #> ℹ collapsed 29545 positions to 8439 unique ones
-#> ✔ collapsed 29545 positions to 8439 unique ones [113ms]
+#> ✔ collapsed 29545 positions to 8439 unique ones [133ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 se <- addReadStats(se, name = "QC",
                    BPPARAM = BiocParallel::SerialParam())
 #> Warning: Too few points to estimate noise floor (8); raw noise variances are used.
@@ -179,10 +182,11 @@ filtstats
 #> 
 
 ## Visualize filter stats in UpSet plot, e.g. with ComplexUpset
-if (require(ComplexUpset)) {
-    ComplexUpset::upset(as.data.frame(filtstats$s1),
-                        intersect = colnames(filtstats$s1))
+if (require(SimpleUpset)) {
+    SimpleUpset::simpleUpSet(as.data.frame(filtstats$s1))
 }
-#> Loading required package: ComplexUpset
-#> Warning: there is no package called ‘ComplexUpset’
+#> Loading required package: SimpleUpset
+#> Loading required package: ggplot2
+#> Loading required package: patchwork
+
 ```

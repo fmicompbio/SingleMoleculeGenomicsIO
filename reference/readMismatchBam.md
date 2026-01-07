@@ -1,29 +1,34 @@
-# Read base modifications from bam file(s)
+# Read base modifications from "C-to-T" bam file(s)
 
-Parse ML and MM tags (see
-https://samtools.github.io/hts-specs/SAMtags.pdf, section 1.7) and
-return a
+Parse read-to-genome mismatches and return a
 [`SummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
-object with information on modified bases. Implicitly called bases will
-get a modification probability of zero. Secondary and supplementary
-alignments are ignored.
+object with information on base states. Base mismatches are typically
+resulting from single molecule genomics experiments, representing the
+accessibility of individual bases: For bisulfite-sequencing experiments,
+C-to-T mismatches correspond to unmethylated (inaccessible) bases
+(`readBaseUnmod="T", readBaseMod="C"`, see below), while in
+deaminase-treatment based experiments, C-to-T mismatches represent
+modified (accessible) bases (`readBaseUnmod="C", readBaseMod="T"`).
+Secondary and supplementary alignments are ignored.
 
 ## Usage
 
 ``` r
-readModBam(
+readMismatchBam(
   bamfiles,
+  bamFormat = "QuasR",
   regions = NULL,
-  modbase,
-  level = ifelse(nAlnsToSample == 0 & is.null(variantPositions), "quickread", "read"),
+  sequenceContext = "GCH",
+  readBaseUnmod = "T",
+  readBaseMod = "C",
+  level = "read",
+  overlapAggregation = "maxQscore",
   sampleAnnot = NULL,
   nAlnsToSample = 0,
   seqnamesToSampleFrom = "chr19",
   seqinfo = NULL,
-  sequenceContextWidth = 0,
   sequenceReference = NULL,
   variantPositions = NULL,
-  modProbThreshold = 0.5,
   trim = FALSE,
   BPPARAM = MulticoreParam(4L, RNGseed = 42L),
   verbose = FALSE
@@ -34,12 +39,17 @@ readModBam(
 
 - bamfiles:
 
-  Character vector with one or several paths of `modBAM` files,
-  containing information about base modifications in `MM` and `ML` tags.
-  If `bamfiles` is a named vector, the names are used as sample names
-  and prefixes for read names. Otherwise, the prefixes will be `s1`,
-  ..., `sN`, where `N` is the length of `bamfiles`. All `bamfiles` must
-  have an index.
+  Character vector with one or several paths of `BAM` files, containing
+  alignments with specific (e.g., C-to-T) mismatches. If `bamfiles` is a
+  named vector, the names are used as sample names and prefixes for read
+  names. Otherwise, the prefixes will be `s1`, ..., `sN`, where `N` is
+  the length of `bamfiles`. All `bamfiles` must have an index.
+
+- bamFormat:
+
+  A character scalar giving the format of `BAM` files. Currently
+  supported ar `BAM` files that have been created with `"QuasR"` (using
+  `qAlign` in bisulfite mode) or `"Bismark"`.
 
 - regions:
 
@@ -56,13 +66,23 @@ readModBam(
   positions will typically extend out of the specified regions. If
   `nAlnsToSample` is set to a non-zero value, `regions` is ignored.
 
-- modbase:
+- sequenceContext:
 
-  Character vector defining the modified base for each sample. If
-  `modbase` is a named vector, the names should correspond to the names
-  of `bamfiles`. Otherwise, it will be assumed that the elements are in
-  the same order as the files in `bamfiles`. If `modbase` has length 1,
-  the same modified base will be used for all samples.
+  A character scalar with an odd number of characters, specifying the
+  genomic context on the plus strand, for which to report (mis-)matches.
+  The string may contain IUPAC ambiguity codes, e.g.
+  `sequenceContext="GCH"` would correspond to all GpC dinucleotides,
+  excluding C's that are in CpG dinucleotides. The call will be made by
+  comparing the genomic base in the middle of `sequenceContext` to the
+  aligned base in the read and interpreted according to `readBaseUnmod`
+  and `readBaseMod`. The genomic sequence context will be returned in
+  `rowData(x)$sequenceContext`.
+
+- readBaseUnmod, readBaseMod:
+
+  Character scalars defining the read bases that are interpreted as
+  unmodified or modified, respectively, when aligned to the middle base
+  of `sequenceContext`.
 
 - level:
 
@@ -75,15 +95,13 @@ readModBam(
       assay called `"mod_prob"`, with each column (sample) consisting of
       a position-by-read
       [`NaMatrix`](https://rdrr.io/pkg/SparseArray/man/NaArray-class.html).
-      This is the default if `nAlnsToSample` is non-zero or
-      `variantPositions` is not `NULL`.
+      This is the default.
 
   "quickread"
 
-  :   : Like "read", but runs faster, does not support read sampling,
-      and does not return all annotations currently provided by "read".
-      This is the default if `nAlnsToSample` is zero and
-      `variantPositions` is `NULL`.
+  :   : Like "read", but using pileup-based data rather than parsing
+      individual alignments. This mode does not support variant labels
+      or read sampling.
 
   "summary"
 
@@ -91,6 +109,14 @@ readModBam(
       and returns them in assays named `"Nvalid"` and `"Nmod"`,
       respectively, as well as the `Nmod/Nvalid` ratio in the assay
       `"FracMod"`.
+
+- overlapAggregation:
+
+  Character scalar indicating how to aggregate modification
+  probabilities for positions that are covered by both mates in a
+  paired-end bam file. Only used if `level = "read"`. In other modes,
+  aggregation corresponding to `overlapAggregation = "maxQscore"` is
+  performed automatically. Currently supported values are `"maxQscore"`.
 
 - sampleAnnot:
 
@@ -108,7 +134,11 @@ readModBam(
   `BPPARAM` object (see below). Please note that secondary and
   supplementary alignments in `bamfiles` contribute to the total number
   of alignments but will not be sampled, thus the number of returned
-  alignments may be lower than `nAlnsToSample`.
+  alignments may be lower than `nAlnsToSample`. Also, sampled reads that
+  do not overlap a site with the indicated sequence context will not be
+  returned, which may further reduce the number of returned alignments.
+  Note that for paired-end bam files, individual reads are sampled and
+  pairs will not be complete.
 
 - seqnamesToSampleFrom:
 
@@ -125,14 +155,14 @@ readModBam(
   sequence names and lengths. Useful to set the sorting order of
   sequence names.
 
-- sequenceContextWidth, sequenceReference:
+- sequenceReference:
 
-  Define the sequence context to be extracted around modified bases. By
-  default ( `sequenceContextWidth = 0`), no sequence context will be
-  extracted, otherwise it will be returned in
-  `rowData(x)$sequenceContext`. See
-  [`addSeqContext`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/addSeqContext.md)
-  for details.
+  A [`BSgenome`](https://rdrr.io/pkg/BSgenome/man/BSgenome-class.html)
+  object, or a character scalar giving the path to a fasta formatted
+  file with reference sequences, or a
+  [`DNAStringSet`](https://rdrr.io/pkg/Biostrings/man/XStringSet-class.html)
+  object. The sequence context (see `sequenceContextWidth` argument)
+  will be extracted from these sequences.
 
 - variantPositions:
 
@@ -140,12 +170,6 @@ readModBam(
   nucleotide variant positions, to be used to construct read labels for
   allele-specific analysis. Ignored if `NULL` or `nAlnsToSample > 0`
   (sampling-mode).
-
-- modProbThreshold:
-
-  A numeric scalar, indicating the modification probability threshold to
-  use to classify a base as 'modified' or 'unmodified'. Only used if
-  `level` is `"summary"`.
 
 - trim:
 
@@ -160,7 +184,9 @@ readModBam(
   A
   [`BiocParallelParam`](https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html)
   object that controls the number of parallel CPU threads to use for
-  some of the steps in `readModBam()`. The default value is
+  some of the steps in
+  [`readModBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.md).
+  The default value is
   ([`MulticoreParam`](https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html)`(4L, RNGseed = 42L)`).
   If randomly sampling reads (`nAlnsToSample > 0`), make sure to set the
   `RNGseed` argument when constructing the `BPPARAM` object for
@@ -178,11 +204,6 @@ A
 object with genomic positions in rows and samples in columns. The assays
 depend on the value of the `level` argument (see above).
 
-## See also
-
-https://samtools.github.io/hts-specs/SAMtags.pdf describing the SAM ML
-and MM tags for base modifications.
-
 ## Author
 
 Michael Stadler, Charlotte Soneson
@@ -190,28 +211,38 @@ Michael Stadler, Charlotte Soneson
 ## Examples
 
 ``` r
-modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
-                          package = "SingleMoleculeGenomicsIO")
-readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
-           modbase = "a", verbose = TRUE,
-           BPPARAM = BiocParallel::SerialParam())
-#> ℹ extracting base modifications from modBAM files
+bamfile <- system.file("extdata", "BisSeq_quasr_single.bam",
+                       package = "SingleMoleculeGenomicsIO")
+reffile <- system.file("extdata", "reference.fa.gz",
+                       package = "SingleMoleculeGenomicsIO")
+se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
+                      sequenceReference = reffile, sequenceContext = "NCG",
+                      readBaseUnmod = "T", readBaseMod = "C",
+                      verbose = TRUE, BPPARAM = BiocParallel::SerialParam())
+#> ℹ finding positions with NCG
+#> ℹ extracting base mismatches from BAM files
+#> ℹ finding positions with NCG
+#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/BisSeq_quasr_single.bam using 1 thread
+#> ℹ finding positions with NCG
+#> ℹ reading alignments overlapping 1 region
+#> ℹ finding positions with NCG
+#> ℹ removed 0 unaligned (e.g. soft-masked) of 0 called bases
+#> ℹ finding positions with NCG
+#> ℹ read 184 alignments
+#> ℹ finding positions with NCG
+#> ✔ finding positions with NCG [113ms]
+#> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [22ms]
+#> ✔ finding unique genomic positions... [43ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
-#> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [186ms]
+#> ℹ collapsed 50 positions to 38 unique ones
+#> ✔ collapsed 50 positions to 38 unique ones [24ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
-#> class: RangedSummarizedExperiment 
-#> dim: 4772 1 
-#> metadata(3): readLevelData variantPositions filteredOutReads
-#> assays(1): mod_prob
-#> rownames(4772): chr1:6925830:- chr1:6925834:- ... chr1:6941622:-
-#>   chr1:6941631:-
-#> rowData names(0):
-#> colnames(1): s1
-#> colData names(4): sample modbase n_reads readInfo
+#> ℹ extracting sequence contexts
+#> ✔ extracting sequence contexts [255ms]
+#> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 ```
