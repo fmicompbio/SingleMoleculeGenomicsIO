@@ -35,6 +35,7 @@
 #' @noRd
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom Biostrings vcountPattern
+#' @importFrom IRanges width
 #' @importFrom cli cli_abort
 #'
 .keepPositionsBySequenceContext <- function(se, sequenceContext = NULL) {
@@ -47,6 +48,15 @@
         }
         .assertVector(x = rowData(se)$sequenceContext,
                       type = "DNAStringSet")
+        if (length(unique(width(rowData(se)$sequenceContext))) != 1) {
+            cli_abort("All sequence contexts in {.arg se} must have the same length")
+        }
+        if (length(unique(nchar(sequenceContext))) != 1) {
+            cli_abort("All provided sequence contexts must have the same length")
+        }
+        if (nchar(sequenceContext)[1] != width(rowData(se)$sequenceContext)[1]) {
+            cli_abort("The provided sequence contexts must have the same length as the ones in {.arg se}")
+        }
         nmatch <- Reduce("+", lapply(sequenceContext, function(pat) {
             vcountPattern(pat, rowData(se)$sequenceContext, fixed = "subject")
         }), init = rep(0, nrow(se)))

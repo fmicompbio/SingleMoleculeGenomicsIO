@@ -98,6 +98,19 @@ test_that(".keepPositionsBySequenceContext works", {
                                                  sequenceContext = "ACT"),
                  "must be of class .DNAStringSet.")
 
+    setmp <- se
+    rowData(setmp)$sequenceContext[1] <- "CT"
+    expect_error(.keepPositionsBySequenceContext(se = setmp,
+                                                 sequenceContext = "ACT"),
+                 "All sequence contexts in .se. must have the same length")
+
+    expect_error(.keepPositionsBySequenceContext(se = se,
+                                                 sequenceContext = c("AC", "ACT")),
+                 "All provided sequence contexts must have the same length")
+    expect_error(.keepPositionsBySequenceContext(se = se,
+                                                 sequenceContext = "NACTN"),
+                 "must have the same length as the ones")
+
     se1 <- .keepPositionsBySequenceContext(se = se, sequenceContext = "TAG")
     w <- which(as.character(rowData(se)$sequenceContext) == "TAG")
     expect_length(w, nrow(se1))
@@ -130,7 +143,9 @@ test_that(".keepPositionsBySequenceContext works", {
                           sequenceReference = gnm)
     se1 <- .keepPositionsBySequenceContext(se = sec5, sequenceContext = "NTAGN")
     se2 <- .keepPositionsBySequenceContext(se = sec3, sequenceContext = "TAG")
-    se3 <- .keepPositionsBySequenceContext(se = sec5, sequenceContext = "TAG")
+    se3 <- .keepPositionsBySequenceContext(se = sec5,
+                                           sequenceContext = c("TAGNN", "NTAGN",
+                                                               "NNTAG"))
     expect_identical(nrow(se1), nrow(se2))
     expect_identical(rownames(se1), rownames(se2))
     expect_false(nrow(se1) == nrow(se3))
