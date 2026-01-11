@@ -674,11 +674,11 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         // mate not yet seen - duplicate and store this record
                         // until the mate is seen
                         dup = bam_dup1(bamdata);
-                        if (!dup) {
+                        if (!dup) { // # nocov start
                             had_error = true;
                             snprintf(buffer, buffer_len, "Failed to duplicate bam record for %s\n", curr_read_id.c_str());
                             goto end;
-                        }
+                        } // # nocov end
                         inserted = curr_records.emplace(curr_read_id, dup);
                         if (!inserted.second) { // # nocov start
                             // if insertion failed - destroy record

@@ -339,7 +339,6 @@ test_that("read_mismatchbam_cpp works", {
             n_threads = 2, verbose = TRUE)
     ))
 
-
     # ... collect all mode 1 and mode 2 results in list
     resL <- list(res1, res2, res3, res4a, res4b, res4c, res5)
 
