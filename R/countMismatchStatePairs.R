@@ -1,6 +1,6 @@
 #' Count pairs of modified bases by distance and modification state for bam files where modifications are indicated by sequence mismatches
 #'
-#' For all pairs of bases with modification calls in a read, tabulate the
+#' For all pairs of bases with modification calls in a read (pair), tabulate the
 #' number of pairs at a given distance with a given modification state.
 #'
 #' @inheritParams countStatePairs

@@ -80,7 +80,7 @@ bam records.}
 A \code{DataFrame} with \code{windowSize} rows and five columns.
 }
 \description{
-For all pairs of bases with modification calls in a read, tabulate the
+For all pairs of bases with modification calls in a read (pair), tabulate the
 number of pairs at a given distance with a given modification state.
 }
 \examples{
