@@ -9,6 +9,8 @@ test_that("read_mismatchbam_cpp works", {
                                         package = "SingleMoleculeGenomicsIO")
     quasr_single_indel_bamfile <- system.file("extdata", "BisSeq_quasr_single_indels.bam",
                                               package = "SingleMoleculeGenomicsIO")
+    quasr_paired_indel_bamfile <- system.file("extdata", "BisSeq_quasr_paired_indels.bam",
+                                              package = "SingleMoleculeGenomicsIO")
     bismark_paired_bamfile <- system.file("extdata", "BisSeq_bismark_paired.bam",
                                           package = "SingleMoleculeGenomicsIO")
     true_meth <- data.frame(
@@ -338,6 +340,15 @@ test_that("read_mismatchbam_cpp works", {
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
+    res7 <- read_mismatchbam_cpp(
+        inname_str = quasr_paired_indel_bamfile, bam_format = "QuasR",
+        regions = "chr1:6925411-6925964", pos_context_list = posContextL,
+        pos_context_rev_list = posContextRevL, windowSize = 30,
+        unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
+        mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
+        level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+        variantRefNames = character(0), variantRefPositions = integer(0),
+        n_threads = 2, verbose = TRUE)
 
     # ... collect all mode 1 and mode 2 results in list
     resL <- list(res1, res2, res3, res4a, res4b, res4c, res5)
@@ -451,4 +462,15 @@ test_that("read_mismatchbam_cpp works", {
     expect_named(res6, "pair_counts")
     expect_type(res6$pair_counts, "double")
     expect_identical(dim(res6$pair_counts), c(30L, 4L))
+
+    # ... content of res7
+    expect_type(res7, "list")
+    expect_named(res7, "pair_counts")
+    expect_type(res7$pair_counts, "double")
+    expect_identical(dim(res7$pair_counts), c(30L, 4L))
+    exp <- matrix(0, nrow = 30L, ncol = 4L)
+    exp[1, 1] <- 12   # 3 read pairs, 4 positions in interval, all unmethylated
+    exp[7, 1] <- exp[16, 1] <- exp[19, 1] <- exp[25, 1] <- 3
+    exp[10, 1] <- 6
+    expect_identical(res7$pair_counts, exp)
 })
