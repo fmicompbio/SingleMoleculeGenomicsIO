@@ -71,17 +71,17 @@ int process_mismatch_bam_record_pair(
         useRC = bamdata1->core.flag & BAM_FREVERSE;
         useRC2 = bamdata2->core.flag & BAM_FREVERSE;
         if (useRC != useRC2) {
-            had_error = true; // # nocov start
+            had_error = true;
             snprintf(buffer, buffer_len, "Inconsistent strands for mates\n");
-            return -1; // # nocov end
+            return -1;
         }
     } else if (bam_format == "Bismark") {
         useRC = (strcmp(bam_aux2Z(bam_aux_get(bamdata1, "XG")), "GA") == 0) ? true : false;
         useRC2 = (strcmp(bam_aux2Z(bam_aux_get(bamdata2, "XG")), "GA") == 0) ? true : false;
         if (useRC != useRC2) {
-            had_error = true; // # nocov start
+            had_error = true;
             snprintf(buffer, buffer_len, "Inconsistent strands for mates\n");
-            return -1; // # nocov end
+            return -1;
         }
     }
     pos_set = useRC ? &(pos_context_rev_sets[bamdata1->core.tid]) : &(pos_context_sets[bamdata1->core.tid]);

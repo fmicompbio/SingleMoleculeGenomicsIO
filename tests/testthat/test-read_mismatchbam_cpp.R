@@ -11,8 +11,14 @@ test_that("read_mismatchbam_cpp works", {
                                               package = "SingleMoleculeGenomicsIO")
     quasr_paired_indel_bamfile <- system.file("extdata", "BisSeq_quasr_paired_indels.bam",
                                               package = "SingleMoleculeGenomicsIO")
+    quasr_paired_bamfile_inconsistentstrand <- system.file(
+        "extdata", "BisSeq_quasr_paired_inconsistentstrand.bam",
+        package = "SingleMoleculeGenomicsIO")
     bismark_paired_bamfile <- system.file("extdata", "BisSeq_bismark_paired.bam",
                                           package = "SingleMoleculeGenomicsIO")
+    bismark_paired_bamfile_inconsistentstrand <- system.file(
+        "extdata", "BisSeq_bismark_paired_inconsistentstrand.bam",
+        package = "SingleMoleculeGenomicsIO")
     true_meth <- data.frame(
         chr = "chr1",
         pos = as.integer(c(6925411,6925417,6925426,6925435,6925860,6925866,6925872,6925875,6925963,6925964)),
@@ -155,6 +161,36 @@ test_that("read_mismatchbam_cpp works", {
                                       variantRefPositions = integer(0),
                                       n_threads = 1L, verbose = FALSE),
                  "Invalid QuasR bam format")
+    expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile_inconsistentstrand,
+                                      bam_format = "QuasR",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      windowSize = 30,
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Inconsistent strands for mates")
+    expect_error(read_mismatchbam_cpp(inname_str = bismark_paired_bamfile_inconsistentstrand,
+                                      bam_format = "Bismark",
+                                      regions = "chr1", pos_context_list = posContextL,
+                                      pos_context_rev_list = posContextRevL,
+                                      unmod_integer = bisseqIntegers[1],
+                                      unmod_integer_rev = bisseqIntegers[2],
+                                      mod_integer = bisseqIntegers[3],
+                                      mod_integer_rev = bisseqIntegers[4],
+                                      level = "read", n_alns_to_sample = 0,
+                                      tnames_for_sampling = "chr1",
+                                      windowSize = 30,
+                                      variantRefNames = character(0),
+                                      variantRefPositions = integer(0),
+                                      n_threads = 1L, verbose = FALSE),
+                 "Inconsistent strands for mates")
 
     # ... context chromosome not existing in bam header
     expect_error(read_mismatchbam_cpp(inname_str = quasr_paired_bamfile, bam_format = "QuasR",
@@ -348,7 +384,7 @@ test_that("read_mismatchbam_cpp works", {
         mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
         level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
-        n_threads = 2, verbose = TRUE)
+        n_threads = 2, verbose = FALSE)
 
     # ... collect all mode 1 and mode 2 results in list
     resL <- list(res1, res2, res3, res4a, res4b, res4c, res5)
