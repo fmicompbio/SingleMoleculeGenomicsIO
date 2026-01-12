@@ -1,7 +1,8 @@
 # Count pairs of modified bases by distance and modification state for bam files where modifications are indicated by sequence mismatches
 
-For all pairs of bases with modification calls in a read, tabulate the
-number of pairs at a given distance with a given modification state.
+For all pairs of bases with modification calls in a read (pair),
+tabulate the number of pairs at a given distance with a given
+modification state.
 
 ## Usage
 
@@ -140,7 +141,7 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ finding positions with C
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
-#> ✔ finding positions with C [89ms]
+#> ✔ finding positions with C [115ms]
 #> 
 tbl
 #> DataFrame with 200 rows and 5 columns
