@@ -722,7 +722,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     Rcpp::checkUserInterrupt();
                 } // # nocov end
                 if (success != 0) { // # nocov start
-                    goto end;       // currently there are no failure points in process_mismatch_bam_record_pair
+                    goto end;
                 } // # nocov end
             }
         }
