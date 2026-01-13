@@ -17,9 +17,12 @@ columns samples. The object should have at least one read-level assay.}
 \item{readGroups}{A named list, where each element corresponds to a new
 group of reads (a "sample").}
 
-\item{colNames}{A character vector corresponding to the names of columns in
-\code{colData(se)$readInfo}, the combination of which represent the
-desired grouping of the reads.}
+\item{colNames}{A character vector corresponding to the names of annotation
+(\code{colData}) columns, the combination of which represent the
+desired grouping of the reads. The names can be either columns of
+\code{colData(se)$readInfo}, or columns in \code{colData(se)} itself.
+If a column name is present in both of these, the column in
+\code{colData(se)$readInfo} will be used.}
 
 \item{withinSample}{A logical scalar, indicating whether the regrouping
 should be done within each current sample (column of \code{se}) or not.

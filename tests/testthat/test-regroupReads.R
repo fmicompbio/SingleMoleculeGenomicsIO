@@ -5,6 +5,8 @@ test_that("read regrouping works", {
                                package = "SingleMoleculeGenomicsIO")
     se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
                      modbase = "a", verbose = FALSE,
+                     sampleAnnot = data.frame(sample = c("s1", "s2"),
+                                              group = c("g1", "g1")),
                      variantPositions = GPos(seqnames = "chr1",
                                              pos = c(6940000, 6940500)),
                      BPPARAM = BiocParallel::SerialParam())
@@ -45,6 +47,8 @@ test_that("read regrouping works", {
     expect_error(regroupReadsByColData(se = se, colNames = "variant_label",
                                        withinSample = c(TRUE, FALSE)),
                  "must have length 1")
+    expect_error(regroupReadsByColData(se = se, colNames = "QC"),
+                 "is not atomic and can not be used for read regrouping")
 
     # regroup reads based on predefined grouping
     sere <- regroupReads(se, readGroups = groups)
@@ -187,4 +191,24 @@ test_that("read regrouping works", {
                      unname(as.matrix(assay(se2, "mod_prob"))[, expectedOrder2]))
     expect_identical(colnames(sere), names(groups2))
     expect_identical(rowRanges(se2), rowRanges(sere))
+
+    # colData column
+    sere <- regroupReadsByColData(se, colNames = "group",
+                                  withinSample = FALSE)
+    expect_identical(dim(sere), c(nrow(se), 1L))
+    expect_identical(dim(assay(sere, "mod_prob")[[1]]), c(nrow(se), 5L))
+    expect_identical(colnames(sere), "g1")
+    expect_identical(colnames(assay(sere, "mod_prob")[[1]]),
+                     paste0("g1-", colnames(as.matrix(assay(se, "mod_prob")))))
+
+    # group + readInfo column
+    sere1 <- regroupReadsByColData(se, colNames = "variant_label",
+                                   withinSample = FALSE)
+    sere2 <- regroupReadsByColData(se, colNames = c("variant_label", "group"),
+                                   withinSample = FALSE)
+    expect_identical(dim(sere1), dim(sere2))
+    expect_identical(colnames(sere1), c("G-", "GT"))
+    expect_identical(colnames(sere2), c("G--g1", "GT-g1"))
+    expect_identical(nnavals(assay(sere1, "mod_prob")[[1]]),
+                     nnavals(assay(sere2, "mod_prob")[[1]]))
 })
