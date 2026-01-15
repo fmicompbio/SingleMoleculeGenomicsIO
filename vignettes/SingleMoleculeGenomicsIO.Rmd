@@ -180,13 +180,15 @@ all incompletely covered positions:
 
 ```{r mod-prob-zeros}
 # modification probabilities at position "chr1:6928850:-"
-m["chr1:6928850:-", ]
+(idx <- which(seqnames(se) == "chr1" & start(se) == 6928850 & strand(se) == "-"))
+
+m[idx, ]
 
 # WRONG: take the mean of all values (including NAs)
-lapply(m["chr1:6928850:-", ], mean)
+lapply(m[idx, ], mean)
 
 # CORRECT: exclude the NA values (na.rm = TRUE)
-lapply(m["chr1:6928850:-", ], mean, na.rm = TRUE)
+lapply(m[idx, ], mean, na.rm = TRUE)
 ```
 
 Note that for sample2, in which no read overlaps the selected position,
@@ -213,7 +215,7 @@ assays with fractions (`"FracMod"`, `"Pmod"` and `"AvgConf"`), for positions
 without any observed data (see for example `"Pmod"` in `"sample2"`):
 
 ```{r summarized-pmod}
-assay(se_summary, "Pmod")["chr1:6928850:-", ]
+assay(se_summary, "Pmod")[idx, ]
 ```
 
 The summary statistics to calculate are selected using the `statistics` argument.
@@ -222,9 +224,9 @@ and total (`Nvalid`) reads at each position and sample, and calculate the
 fraction of modified bases from the two (`FracMod`).
 
 ```{r default-statistics}
-assay(se_summary, "Nmod")["chr1:6928850:-", ]
-assay(se_summary, "Nvalid")["chr1:6928850:-", ]
-assay(se_summary, "FracMod")["chr1:6928850:-", ]
+assay(se_summary, "Nmod")[idx, ]
+assay(se_summary, "Nvalid")[idx, ]
+assay(se_summary, "FracMod")[idx, ]
 ```
 
 In the above example, we additionally calculate the average modification
