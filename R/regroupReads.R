@@ -145,9 +145,12 @@ regroupReads <- function(se, readGroups) {
 #' Regroup reads by annotation column
 #'
 #' @rdname regroupReads
-#' @param colNames A character vector corresponding to the names of columns in
-#'     \code{colData(se)$readInfo}, the combination of which represent the
-#'     desired grouping of the reads.
+#' @param colNames A character vector corresponding to the names of annotation
+#'     (\code{colData}) columns, the combination of which represent the
+#'     desired grouping of the reads. The names can be either columns of
+#'     \code{colData(se)$readInfo}, or columns in \code{colData(se)} itself.
+#'     If a column name is present in both of these, the column in
+#'     \code{colData(se)$readInfo} will be used.
 #' @param withinSample A logical scalar, indicating whether the regrouping
 #'     should be done within each current sample (column of \code{se}) or not.
 #'     If \code{FALSE} (default), reads are pooled across samples before
@@ -157,14 +160,23 @@ regroupReads <- function(se, readGroups) {
 #' @export
 #'
 #' @importFrom SummarizedExperiment colData
+#' @importFrom cli cli_abort
 regroupReadsByColData <- function(se, colNames, withinSample = FALSE) {
     .assertVector(x = colNames, type = "character",
-                  validValues = colnames(se$readInfo[[1]]))
+                  validValues = c(colnames(colData(se)),
+                                  colnames(se$readInfo[[1]])))
     .assertScalar(x = withinSample, type = "logical")
 
     readInfo <- cbind(sample = rep(se$sample, vapply(se$readInfo, nrow, 0L)),
                       read_id = unlist(lapply(se$readInfo, rownames)),
                       do.call(rbind, se$readInfo))
+    # additional columns from colData(se)
+    for (m in setdiff(colNames, colnames(readInfo))) {
+        if (!is.atomic(se[[m]])) {
+            cli_abort("The {.var {m}} column is not atomic and can not be used for read regrouping")
+        }
+        readInfo[[m]] <- rep(se[[m]], vapply(se$readInfo, nrow, 0L))
+    }
     # generate read groups
     if (withinSample) {
         readGroups <- split(x = readInfo$read_id,
