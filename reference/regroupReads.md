@@ -28,9 +28,12 @@ regroupReadsByColData(se, colNames, withinSample = FALSE)
 
 - colNames:
 
-  A character vector corresponding to the names of columns in
-  `colData(se)$readInfo`, the combination of which represent the desired
-  grouping of the reads.
+  A character vector corresponding to the names of annotation
+  (`colData`) columns, the combination of which represent the desired
+  grouping of the reads. The names can be either columns of
+  `colData(se)$readInfo`, or columns in `colData(se)` itself. If a
+  column name is present in both of these, the column in
+  `colData(se)$readInfo` will be used.
 
 - withinSample:
 
@@ -82,11 +85,11 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
 #> ℹ read 2 alignments
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [52ms]
+#> ✔ finding unique genomic positions... [49ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [450ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [360ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 # number of reads per sample

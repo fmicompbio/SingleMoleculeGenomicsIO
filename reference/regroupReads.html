@@ -61,9 +61,12 @@ group of reads (a "sample").</p></dd>
 
 
 <dt id="arg-colnames">colNames<a class="anchor" aria-label="anchor" href="#arg-colnames"></a></dt>
-<dd><p>A character vector corresponding to the names of columns in
-<code>colData(se)$readInfo</code>, the combination of which represent the
-desired grouping of the reads.</p></dd>
+<dd><p>A character vector corresponding to the names of annotation
+(<code>colData</code>) columns, the combination of which represent the
+desired grouping of the reads. The names can be either columns of
+<code>colData(se)$readInfo</code>, or columns in <code>colData(se)</code> itself.
+If a column name is present in both of these, the column in
+<code>colData(se)$readInfo</code> will be used.</p></dd>
 
 
 <dt id="arg-withinsample">withinSample<a class="anchor" aria-label="anchor" href="#arg-withinsample"></a></dt>
@@ -116,11 +119,11 @@ no longer consistent with the regrouped read-level assays).</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> read 2 alignments</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[52ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[49ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> collapsed 17739 positions to 7967 unique ones</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[450ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[360ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
 <span class="r-in"><span><span class="co"># number of reads per sample</span></span></span>
