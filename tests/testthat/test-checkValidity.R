@@ -66,6 +66,12 @@ test_that("validity checks work", {
         "Read-level column data found, checking consistency"), "Read-level column data found, checking consistency"))
 
     rme1 <- rme_withreads
+    rownames(rme1) <- as.character(rowRanges(rme1))
+    rownames(rme1)[2] <- rownames(rme1)[1]
+    expect_error(.checkSEValidity(rme1),
+                 "anyDuplicated(rownames(se)) == 0L is not TRUE", fixed = TRUE)
+
+    rme1 <- rme_withreads
     SummarizedExperiment::assayNames(rme1) <- c("", "", "", "")
     expect_error(.checkSEValidity(rme1),
                  '!is.null(assayNames(se)) && all(assayNames(se) != "") && anyDuplicated(assayNames(se)) ==  .... is not TRUE', fixed = TRUE)

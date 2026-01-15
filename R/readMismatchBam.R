@@ -511,9 +511,6 @@ readMismatchBam <- function(bamfiles,
         )
     }
     if (nrow(se) > 0) {
-        rownames(se) <- paste0(
-            seqnames(rowRanges(se)), ":", pos(rowRanges(se)), ":",
-            strand(rowRanges(se)))
         colnames(se) <- rownames(colData(se))
     }
 

@@ -274,9 +274,6 @@ readModkitExtract <- function(fnames,
                         readLevelData = list(assayNames = "mod_prob",
                                              colDataColumns = character(0)))
     )
-    rownames(se) <- paste0(
-        seqnames(rowRanges(se)), ":", pos(rowRanges(se)), ":",
-        strand(rowRanges(se)))
     colnames(se) <- rownames(colData(se))
 
     se
