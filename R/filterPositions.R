@@ -83,14 +83,42 @@
     se[keep, ]
 }
 
-#' @keywords internal
-#' @noRd
+#' Prune positions with ambiguous strand information
+#'
+#' Filter a \code{\link[SummarizedExperiment]{SummarizedExperiment}} object
+#' so that each position (row) appears at most once. If the same position
+#' appears multiple times (once for each strand), keep the entry with the
+#' highest read coverage (the largest row sum of the \code{assayName} assay).
+#'
+#' @param se A \code{SummarizedExperiment} object.
+#' @param assayName A character scalar indicating the assay to use to
+#'     decide which row to retain if multiple rows represent the same
+#'     genomic position (on different strands). The row with the largest row
+#'     sum in this assay is retained.
+#' @param verbose Logical scalar. If \code{TRUE}, report on progress.
+#'
+#' @export
+#'
+#' @author Charlotte Soneson
+#'
+#' @examples
+#' modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam",
+#'                                         "6mA_2_10reads.bam"),
+#'                            package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6920000-6940000",
+#'                  modbase = "a", verbose = FALSE,
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' se <- flattenReadLevelAssay(se)
+#' sefilt <- pruneAmbiguousStrandPositions(se)
+#' dim(se)
+#' dim(sefilt)
+#'
 #' @importFrom SummarizedExperiment rowRanges assayNames assay
 #' @importFrom BiocGenerics pos
 #' @importFrom Seqinfo seqnames
 #' @importFrom cli cli_warn
 #'
-.pruneAmbiguousStrandPositions <- function(se, assayName = "Nvalid",
+pruneAmbiguousStrandPositions <- function(se, assayName = "Nvalid",
                                            verbose = FALSE) {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertVector(x = rowRanges(se), type = "GPos")
@@ -256,7 +284,7 @@ filterPositions <- function(se,
                 minNbrSamples = minNbrSamples
             )
         } else if (f == "repeated.positions") {
-            se <- .pruneAmbiguousStrandPositions(
+            se <- pruneAmbiguousStrandPositions(
                 se, assayName = assayNameAmbig
             )
         } else if (f == "all.na") {

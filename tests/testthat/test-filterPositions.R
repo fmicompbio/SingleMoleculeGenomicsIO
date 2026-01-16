@@ -188,7 +188,7 @@ test_that(".removeAllNAPositions works", {
     expect_identical(se1, se2)
 })
 
-test_that(".pruneAmbiguousStrandPositions works", {
+test_that("pruneAmbiguousStrandPositions works", {
     # generate some example data
     modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam", "6mA_2_10reads.bam"),
                                package = "SingleMoleculeGenomicsIO")
@@ -198,44 +198,44 @@ test_that(".pruneAmbiguousStrandPositions works", {
     se <- flattenReadLevelAssay(se)
     rownames(se) <- as.character(rowRanges(se))
 
-    expect_error(.pruneAmbiguousStrandPositions(se = "error"),
+    expect_error(pruneAmbiguousStrandPositions(se = "error"),
                  ".se. must be of class .SummarizedExperiment.")
-    expect_error(.pruneAmbiguousStrandPositions(se = se,
-                                                assayName = 1),
+    expect_error(pruneAmbiguousStrandPositions(se = se,
+                                               assayName = 1),
                  ".assayName. must be of class .character.")
-    expect_error(.pruneAmbiguousStrandPositions(se = se,
-                                                assayName = "missing"),
+    expect_error(pruneAmbiguousStrandPositions(se = se,
+                                               assayName = "missing"),
                  ".assayName. must be one of")
-    expect_error(.pruneAmbiguousStrandPositions(se = se,
-                                                assayName = c("Nvalid", "Nmod")),
+    expect_error(pruneAmbiguousStrandPositions(se = se,
+                                               assayName = c("Nvalid", "Nmod")),
                  ".assayName. must have length 1")
-    expect_error(.pruneAmbiguousStrandPositions(se = se,
-                                                assayName = "Nvalid",
-                                                verbose = "TRUE"),
+    expect_error(pruneAmbiguousStrandPositions(se = se,
+                                               assayName = "Nvalid",
+                                               verbose = "TRUE"),
                  ".verbose. must be of class .logical.")
-    expect_error(.pruneAmbiguousStrandPositions(se = se,
-                                                assayName = "Nvalid",
-                                                verbose = c(TRUE, FALSE)),
+    expect_error(pruneAmbiguousStrandPositions(se = se,
+                                               assayName = "Nvalid",
+                                               verbose = c(TRUE, FALSE)),
                  ".verbose. must have length 1")
 
     expect_identical(nrow(se), 9127L)
     expect_length(unique(paste0(seqnames(rowRanges(se)),
                                 pos(rowRanges(se)))), 8955L)
-    sefilt <- .pruneAmbiguousStrandPositions(se, assayName = "Nvalid",
-                                             verbose = FALSE)
+    sefilt <- pruneAmbiguousStrandPositions(se, assayName = "Nvalid",
+                                            verbose = FALSE)
     expect_length(unique(paste0(seqnames(rowRanges(se)),
                                 pos(rowRanges(se)))), nrow(sefilt))
     expect_message(expect_message(expect_message({
-        sefilt <- .pruneAmbiguousStrandPositions(se, assayName = "mod_prob",
-                                                 verbose = TRUE)},
+        sefilt <- pruneAmbiguousStrandPositions(se, assayName = "mod_prob",
+                                                verbose = TRUE)},
         "172 rows removed to ensure"), "172 rows removed to ensure")
     )
     expect_length(unique(paste0(seqnames(rowRanges(se)),
                                 pos(rowRanges(se)))), nrow(sefilt))
     expect_identical(se[rownames(sefilt), ], sefilt)
     expect_message(expect_message(expect_message({
-        sefilt <- .pruneAmbiguousStrandPositions(sefilt, assayName = "mod_prob",
-                                                 verbose = TRUE)},
+        sefilt <- pruneAmbiguousStrandPositions(sefilt, assayName = "mod_prob",
+                                                verbose = TRUE)},
         "No genomic positions represented by multiple rows found"),
         "No genomic positions represented by multiple rows found")
     )
