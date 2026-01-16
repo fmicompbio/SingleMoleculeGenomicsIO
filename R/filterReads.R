@@ -14,13 +14,20 @@
 #' @returns A \code{DataFrame} of \code{NaArray}s with all columns containing at
 #'     least one non-\code{NA} value.
 #'
+#' @export
+#'
+#' @examples
+#' modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
+#'                           package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
+#'                  modbase = "a", verbose = FALSE,
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' removeAllNAReads(assay(se[1:10, ], "mod_prob"))
+#'
 #' @importFrom S4Vectors endoapply
 #' @importFrom SparseArray colSums is_nonna
 #' @importFrom BiocGenerics rownames rownames<-
-#'
-#' @noRd
-#' @keywords internal
-.removeAllNAReads <- function(x, prune = TRUE) {
+removeAllNAReads <- function(x, prune = TRUE) {
     .assertScalar(x = prune, type = "logical")
 
     rnms <- rownames(x)

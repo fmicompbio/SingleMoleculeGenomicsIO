@@ -1,4 +1,4 @@
-test_that(".removeAllNAReads works", {
+test_that("removeAllNAReads works", {
     naa1 <- naa2 <- NaArray(dim = c(10, 3))
     naa1[cbind(1:2, 1:2)] <- 1
     adat <- make_zero_col_DFrame(nrow = nrow(naa1))
@@ -8,10 +8,10 @@ test_that(".removeAllNAReads works", {
     adat[["summary2"]] <- rowSums(naa2, na.rm = FALSE)
     rownames(adat) <- paste0("r", seq.int(nrow(adat)))
 
-    expect_error(.removeAllNAReads(x = adat, prune = "error"))
+    expect_error(removeAllNAReads(x = adat, prune = "error"))
 
-    res1 <- .removeAllNAReads(x = adat, prune = FALSE)
-    res2 <- .removeAllNAReads(x = adat, prune = TRUE)
+    res1 <- removeAllNAReads(x = adat, prune = FALSE)
+    res2 <- removeAllNAReads(x = adat, prune = TRUE)
 
     expect_s4_class(res1, "DataFrame")
     expect_identical(dim(res1), c(10L, 4L))
