@@ -69,11 +69,11 @@ se <- readModBam(bamfile = modbamfiles, regions = "chr1:6940000-6955000",
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [27ms]
+#> ✔ finding unique genomic positions... [28ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [199ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [185ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 se <- addReadStats(se, BPPARAM = BiocParallel::SerialParam())

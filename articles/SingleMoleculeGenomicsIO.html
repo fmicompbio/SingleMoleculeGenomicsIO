@@ -131,10 +131,10 @@ from <code>modBam</code> files using <a href="https://nanoporetech.github.io/mod
 <span>                 BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[54ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[91ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 17739 positions to 7967 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[303ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[255ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="va">se</span></span>
 <span><span class="co">#&gt; class: RangedSummarizedExperiment </span></span>
@@ -452,12 +452,14 @@ data (e.g. <code>bed</code> files) that can also be imported using
 <span>                          verbose <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[24ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[26ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 11211 positions to 7967 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 11211 positions to 7967 unique ones <span style="color: #B2B2B2;">[41ms]</span></span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> collapsed 11211 positions to 7967 unique ones</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 11211 positions to 7967 unique ones <span style="color: #B2B2B2;">[44ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
 <span><span class="va">se_summary2</span></span>
 <span><span class="co">#&gt; class: RangedSummarizedExperiment </span></span>
 <span><span class="co">#&gt; dim: 7967 2 </span></span>
@@ -642,22 +644,23 @@ to different parts of the genome but without the need to load the entire
 <span>                        verbose <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                        BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span>RNGseed <span class="op">=</span> <span class="fl">1327828L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> removed 150 unaligned (e.g. soft-masked) of 41618 called bases</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> read 5 alignments</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> removed 1165 unaligned (e.g. soft-masked) of 80587 called bases</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> read 7 alignments</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[25ms]</span></span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> removed 150 unaligned (e.g. soft-masked) of 41618 called bases</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> read 5 alignments</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> removed 1165 unaligned (e.g. soft-masked) of 80587 called bases</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> read 7 alignments</span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[27ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 31912 positions to 7238 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 31912 positions to 7238 unique ones <span style="color: #B2B2B2;">[187ms]</span></span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> collapsed 31912 positions to 7238 unique ones</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 31912 positions to 7238 unique ones <span style="color: #B2B2B2;">[175ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
 <span><span class="va">se_sample</span><span class="op">$</span><span class="va">n_reads</span></span>
 <span><span class="co">#&gt; [1] 5 7</span></span></code></pre></div>
 <p>Note that the exact number of sampled reads may not be identical to

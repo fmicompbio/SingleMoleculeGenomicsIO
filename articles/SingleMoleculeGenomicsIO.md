@@ -77,10 +77,10 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [54ms]
+#> ✔ finding unique genomic positions... [91ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [303ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [255ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -433,12 +433,14 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           verbose = TRUE, 
                           BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [24ms]
+#> ✔ finding unique genomic positions... [26ms]
 #> 
-#> ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [41ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ collapsed 11211 positions to 7967 unique ones
+#> ✔ collapsed 11211 positions to 7967 unique ones [44ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 se_summary2
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
@@ -642,22 +644,23 @@ se_sample <- readModBam(bamfiles = modbamfiles,
                         verbose = TRUE, 
                         BPPARAM = BiocParallel::SerialParam(RNGseed = 1327828L))
 #> ℹ extracting base modifications from modBAM files
-#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ℹ sampling alignments with probability 0.5
-#> ℹ reading alignments overlapping 1 region
-#> ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
-#> ℹ read 5 alignments
-#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ℹ sampling alignments with probability 0.5
-#> ℹ reading alignments overlapping 1 region
-#> ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
-#> ℹ read 7 alignments
-#> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [25ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ sampling alignments with probability 0.5
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ reading alignments overlapping 1 region
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ read 5 alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ sampling alignments with probability 0.5
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ reading alignments overlapping 1 region
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ read 7 alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ finding unique genomic positions...
+#> ✔ finding unique genomic positions... [27ms]
 #> 
-#> ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [187ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ collapsed 31912 positions to 7238 unique ones
+#> ✔ collapsed 31912 positions to 7238 unique ones [175ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 se_sample$n_reads
 #> [1] 5 7
 ```

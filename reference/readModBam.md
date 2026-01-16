@@ -202,7 +202,7 @@ readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [131ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [116ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> class: RangedSummarizedExperiment 

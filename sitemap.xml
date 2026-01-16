@@ -25,6 +25,7 @@
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModkitExtract.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/refargToDNAStringSet.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regionStringToGRanges.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/sampleEntropy.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/subsetReads.html</loc></url>

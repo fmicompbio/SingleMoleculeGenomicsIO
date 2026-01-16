@@ -66,6 +66,11 @@
 - [`refargToDNAStringSet()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/refargToDNAStringSet.md)
   : Convert a supported reference sequence argument to a DNAStringSet
 
+- [`regionStringToGRanges()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regionStringToGRanges.md)
+  :
+
+  Convert character region(s) to a `GRanges` object
+
 - [`regroupReads()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)
   [`regroupReadsByColData()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)
   : Regroup reads
