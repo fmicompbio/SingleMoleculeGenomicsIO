@@ -44,8 +44,7 @@
 #' agree with the column names of the object, and the \code{sample} column
 #' in the \code{colData}.
 #'
-#' @keywords internal
-#' @noRd
+#' @export
 #'
 #' @param se A \code{SummarizedExperiment object}.
 #' @param verbose A logical scalar. If \code{TRUE}, report on progress.
@@ -59,7 +58,20 @@
 #' @importFrom BiocGenerics nrow
 #' @importFrom cli cli_abort
 #' @importFrom S4Vectors metadata
-.checkSEValidity <- function(se, verbose = FALSE) {
+#'
+#' @examples
+#' library(GenomicRanges)
+#' modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam",
+#'                                         "6mA_2_10reads.bam"),
+#'                            package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
+#'                  modbase = "a", verbose = FALSE,
+#'                  variantPositions = GPos(seqnames = "chr1",
+#'                                          pos = c(6940000, 6940500)),
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' checkSEValidity(se)
+#'
+checkSEValidity <- function(se, verbose = FALSE) {
     stopifnot(is(se, "SummarizedExperiment"))
 
     .message("Checking assay names")

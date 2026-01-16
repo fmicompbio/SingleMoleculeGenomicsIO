@@ -61,7 +61,7 @@ regroupReads <- function(se, readGroups) {
     .assertVector(x = se, type = "RangedSummarizedExperiment")
     .assertVector(x = readGroups, type = "list")
     .assertVector(x = names(readGroups), type = "character")
-    .checkSEValidity(se = se, verbose = FALSE)
+    checkSEValidity(se = se, verbose = FALSE)
 
     # list read-level assays and colData columns
     rlAssays <- intersect(metadata(se)$readLevelData$assayNames, assayNames(se))
@@ -138,7 +138,7 @@ regroupReads <- function(se, readGroups) {
         metadata = metadata(se)
     )
 
-    .checkSEValidity(se = sere, verbose = FALSE)
+    checkSEValidity(se = sere, verbose = FALSE)
     sere
 }
 

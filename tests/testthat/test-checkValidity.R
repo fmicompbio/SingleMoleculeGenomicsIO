@@ -24,16 +24,16 @@ test_that("validity checks work", {
     expect_identical(.getReadLevelAssayNames(rme_withreads), "mod_prob")
     expect_identical(.getReadLevelAssayNames(rme_withoutreads), character(0))
 
-    ## Test .checkSEValidity
-    expect_no_error(.checkSEValidity(rme_withreads))
-    expect_no_error(.checkSEValidity(rme_withoutreads))
+    ## Test checkSEValidity
+    expect_no_error(checkSEValidity(rme_withreads))
+    expect_no_error(checkSEValidity(rme_withoutreads))
 
     expect_message(expect_message(expect_message(
         expect_message(expect_message(expect_message(
             expect_message(expect_message(expect_message(
                 expect_message(expect_message(expect_message(
                     expect_message(expect_message(expect_message(
-                        .checkSEValidity(rme_withreads, verbose = TRUE),
+                        checkSEValidity(rme_withreads, verbose = TRUE),
                         "Checking assay names"), "Checking assay names")),
                     "Checking row names"), "Checking row names")),
                 "Checking consistency of sample names"), "Checking consistency of sample names")),
@@ -42,7 +42,7 @@ test_that("validity checks work", {
     expect_message(expect_message(expect_message(
         expect_message(expect_message(expect_message(
             expect_message(expect_message(expect_message(
-                .checkSEValidity(rme_withoutreads, verbose = TRUE),
+                checkSEValidity(rme_withoutreads, verbose = TRUE),
                 "Checking assay names"), "Checking assay names")),
             "Checking row names"), "Checking row names")),
         "Checking consistency of sample names"), "Checking consistency of sample names"))
@@ -57,7 +57,7 @@ test_that("validity checks work", {
                 expect_message(expect_message(expect_message(
                     expect_message(expect_message(expect_message(
                         expect_message(expect_message(expect_message(
-                            .checkSEValidity(rme1, verbose = TRUE),
+                            checkSEValidity(rme1, verbose = TRUE),
                             "Checking assay names"), "Checking assay names")),
                         "Checking row names"), "Checking row names")),
                     "Checking consistency of sample names"), "Checking consistency of sample names")),
@@ -68,12 +68,12 @@ test_that("validity checks work", {
     rme1 <- rme_withreads
     rownames(rme1) <- as.character(rowRanges(rme1))
     rownames(rme1)[2] <- rownames(rme1)[1]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "anyDuplicated(rownames(se)) == 0L is not TRUE", fixed = TRUE)
 
     rme1 <- rme_withreads
     SummarizedExperiment::assayNames(rme1) <- c("", "", "", "")
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  '!is.null(assayNames(se)) && all(assayNames(se) != "") && anyDuplicated(assayNames(se)) ==  .... is not TRUE', fixed = TRUE)
 
     rme1 <- rme_withreads
@@ -81,39 +81,39 @@ test_that("validity checks work", {
     assays(rme1) <- list(assays(rme1)[[1]], assays(rme1)[[2]], assays(rme1)[[3]],
                          assays(rme1)[[4]])
     expect_null(assayNames(rme1))
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  '!is.null(assayNames(se)) && all(assayNames(se) != "") && anyDuplicated(assayNames(se)) ==  .... is not TRUE', fixed = TRUE)
 
     rme1 <- rme_withreads
     rme1$QC <- rme1$QC[c(3, 1, 2)]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "colnames(se) are not all TRUE", fixed = TRUE)
 
     rme1 <- rme_withreads
     SummarizedExperiment::colData(rme1) <- SummarizedExperiment::colData(rme1)[c(3, 1, 2), ]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "colnames(assay(se, an, withDimnames = FALSE)) == colnames(se) are not all TRUE", fixed = TRUE)
 
     rme1 <- rme_withreads
     colnames(rme1) <- colnames(rme1)[c(3, 1, 2)]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "colnames(assay(se, an, withDimnames = FALSE)) == colnames(se) are not all TRUE", fixed = TRUE)
 
     rme1 <- rme_withreads
     SummarizedExperiment::assay(rme1, "mod_prob", withDimnames = FALSE) <-
         SummarizedExperiment::assay(rme1, "mod_prob")[, c(3, 1, 2)]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "colnames(assay(se, an, withDimnames = FALSE)) == colnames(se) are not all TRUE", fixed = TRUE)
 
     rme1 <- rme_withreads
     rme1$QC[[2]] <- rme1$QC[[2]][1:5, ]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "Mismatching reads for assay mod_prob and colData column QC, sample s2_5mC")
 
     rme1 <- rme_withreads
     SummarizedExperiment::assay(rme1, "mod_prob")[[1]] <-
         SummarizedExperiment::assay(rme1, "mod_prob")[[1]][, 1:5]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "Mismatching reads for assay mod_prob and colData column QC, sample s1_5mC")
 
     rme1 <- rme_withreads
@@ -122,7 +122,7 @@ test_that("validity checks work", {
                                                  "test")
     SummarizedExperiment::assay(rme1, "mod_prob")[[1]] <-
         SummarizedExperiment::assay(rme1, "mod_prob")[[1]][, 1:5]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "Mismatching reads for assays mod_prob and test, sample s1_5mC")
 
     rme1 <- rme_withreads
@@ -133,6 +133,6 @@ test_that("validity checks work", {
     set.seed(123L)
     SummarizedExperiment::assay(rme1, "mod_prob")[[1]] <-
         SummarizedExperiment::assay(rme1, "mod_prob")[[1]][, sample.int(N, N)]
-    expect_error(.checkSEValidity(rme1),
+    expect_error(checkSEValidity(rme1),
                  "Mismatching reads for assays mod_prob and test, sample s1_5mC")
 })

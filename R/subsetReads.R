@@ -77,7 +77,7 @@ subsetReads <- function(se,
                         assayNameNA = "mod_prob") {
     # digest arguments
     .assertVector(x = se, type = "SummarizedExperiment")
-    .checkSEValidity(se, verbose = FALSE)
+    checkSEValidity(se, verbose = FALSE)
     rlAssays <- .getReadLevelAssayNames(se)
     sampleNms <- colnames(se)
     if (length(rlAssays) == 0) {
@@ -213,6 +213,6 @@ subsetReads <- function(se,
         se <- .removeAllNAPositions(se, assayName = assayNameNA)
     }
 
-    .checkSEValidity(se, verbose = FALSE)
+    checkSEValidity(se, verbose = FALSE)
     return(se)
 }
