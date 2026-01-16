@@ -97,7 +97,8 @@
 #'     sum in this assay is retained.
 #' @param verbose Logical scalar. If \code{TRUE}, report on progress.
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 #'
 #' @author Charlotte Soneson
 #'
@@ -109,7 +110,7 @@
 #'                  modbase = "a", verbose = FALSE,
 #'                  BPPARAM = BiocParallel::SerialParam())
 #' se <- flattenReadLevelAssay(se)
-#' sefilt <- pruneAmbiguousStrandPositions(se)
+#' sefilt <- .pruneAmbiguousStrandPositions(se)
 #' dim(se)
 #' dim(sefilt)
 #'
@@ -118,7 +119,7 @@
 #' @importFrom Seqinfo seqnames
 #' @importFrom cli cli_warn
 #'
-pruneAmbiguousStrandPositions <- function(se, assayName = "Nvalid",
+.pruneAmbiguousStrandPositions <- function(se, assayName = "Nvalid",
                                            verbose = FALSE) {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertVector(x = rowRanges(se), type = "GPos")
@@ -284,7 +285,7 @@ filterPositions <- function(se,
                 minNbrSamples = minNbrSamples
             )
         } else if (f == "repeated.positions") {
-            se <- pruneAmbiguousStrandPositions(
+            se <- .pruneAmbiguousStrandPositions(
                 se, assayName = assayNameAmbig
             )
         } else if (f == "all.na") {
