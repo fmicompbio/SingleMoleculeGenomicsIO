@@ -100,8 +100,7 @@ se
 #> dim: 8344 1 
 #> metadata(3): modkit_threshold filter_threshold readLevelData
 #> assays(1): mod_prob
-#> rownames(8344): chr1:6925830:- chr1:6925834:- ... chr1:6941530:-
-#>   chr1:6941531:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(1): s1
 #> colData names(3): sample modbase readInfo
@@ -112,8 +111,7 @@ se_summary
 #> dim: 8344 1 
 #> metadata(3): modkit_threshold filter_threshold readLevelData
 #> assays(4): mod_prob Nmod Nvalid FracMod
-#> rownames(8344): chr1:6925830:- chr1:6925834:- ... chr1:6941530:-
-#>   chr1:6941531:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(1): s1
 #> colData names(3): sample modbase readInfo

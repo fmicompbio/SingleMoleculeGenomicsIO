@@ -72,6 +72,10 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ reading alignments overlapping 1 region
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙   1 done (105/s) | 10ms
+#> ⠙   1 done (61/s) | 17ms
+#> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ removed 1724 unaligned (e.g. soft-masked) of 25090 called bases
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ read 3 alignments
@@ -85,11 +89,11 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
 #> ℹ read 2 alignments
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [49ms]
+#> ✔ finding unique genomic positions... [23ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [360ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [177ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 # number of reads per sample
@@ -128,8 +132,7 @@ sere
 #> dim: 7967 2 
 #> metadata(3): readLevelData variantPositions filteredOutReads
 #> assays(1): mod_prob
-#> rownames(7967): chr1:6925830:- chr1:6925834:- ... chr1:6941622:-
-#>   chr1:6941631:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(2): G- GT
 #> colData names(4): sample modbase n_reads readInfo
@@ -148,8 +151,7 @@ sere
 #> dim: 7967 3 
 #> metadata(3): readLevelData variantPositions filteredOutReads
 #> assays(1): mod_prob
-#> rownames(7967): chr1:6925830:- chr1:6925834:- ... chr1:6941622:-
-#>   chr1:6941631:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(3): s1-G- s1-GT s2-G-
 #> colData names(4): sample modbase n_reads readInfo

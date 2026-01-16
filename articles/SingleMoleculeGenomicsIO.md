@@ -77,18 +77,17 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [126ms]
+#> ✔ finding unique genomic positions... [54ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [535ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [303ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
 #> metadata(3): readLevelData variantPositions filteredOutReads
 #> assays(1): mod_prob
-#> rownames(7967): chr1:6925830:- chr1:6925834:- ... chr1:6941622:-
-#>   chr1:6941631:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(2): sample1 sample2
 #> colData names(4): sample modbase n_reads readInfo
@@ -101,19 +100,19 @@ rows:
 # rows are positions...
 rowRanges(se)
 #> UnstitchedGPos object with 7967 positions and 0 metadata columns:
-#>                  seqnames       pos strand
-#>                     <Rle> <integer>  <Rle>
-#>   chr1:6925830:-     chr1   6925830      -
-#>   chr1:6925834:-     chr1   6925834      -
-#>   chr1:6925836:-     chr1   6925836      -
-#>   chr1:6925837:-     chr1   6925837      -
-#>   chr1:6925841:-     chr1   6925841      -
-#>              ...      ...       ...    ...
-#>   chr1:6941611:-     chr1   6941611      -
-#>   chr1:6941614:-     chr1   6941614      -
-#>   chr1:6941620:-     chr1   6941620      -
-#>   chr1:6941622:-     chr1   6941622      -
-#>   chr1:6941631:-     chr1   6941631      -
+#>          seqnames       pos strand
+#>             <Rle> <integer>  <Rle>
+#>      [1]     chr1   6925830      -
+#>      [2]     chr1   6925834      -
+#>      [3]     chr1   6925836      -
+#>      [4]     chr1   6925837      -
+#>      [5]     chr1   6925841      -
+#>      ...      ...       ...    ...
+#>   [7963]     chr1   6941611      -
+#>   [7964]     chr1   6941614      -
+#>   [7965]     chr1   6941620      -
+#>   [7966]     chr1   6941622      -
+#>   [7967]     chr1   6941631      -
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
@@ -183,19 +182,19 @@ assayNames(se)
 m <- assay(se, "mod_prob")
 m
 #> DataFrame with 7967 rows and 2 columns
-#>                          sample1    sample2
-#>                       <NaMatrix> <NaMatrix>
-#> chr1:6925830:-           0:NA:NA      NA:NA
-#> chr1:6925834:-           0:NA:NA      NA:NA
-#> chr1:6925836:-           0:NA:NA      NA:NA
-#> chr1:6925837:-           0:NA:NA      NA:NA
-#> chr1:6925841:- 0.275390625:NA:NA      NA:NA
-#> ...                          ...        ...
-#> chr1:6941611:- NA:NA:0.052734375      NA:NA
-#> chr1:6941614:- NA:NA:0.130859375      NA:NA
-#> chr1:6941620:- NA:NA:0.068359375      NA:NA
-#> chr1:6941622:- NA:NA:0.060546875      NA:NA
-#> chr1:6941631:- NA:NA:0.056640625      NA:NA
+#>                sample1    sample2
+#>             <NaMatrix> <NaMatrix>
+#> 1              0:NA:NA      NA:NA
+#> 2              0:NA:NA      NA:NA
+#> 3              0:NA:NA      NA:NA
+#> 4              0:NA:NA      NA:NA
+#> 5    0.275390625:NA:NA      NA:NA
+#> ...                ...        ...
+#> 7963 NA:NA:0.052734375      NA:NA
+#> 7964 NA:NA:0.130859375      NA:NA
+#> 7965 NA:NA:0.068359375      NA:NA
+#> 7966 NA:NA:0.060546875      NA:NA
+#> 7967 NA:NA:0.056640625      NA:NA
 ```
 
 In order to store read-level data for variable numbers of reads per
@@ -297,14 +296,17 @@ incompletely covered positions:
 
 ``` r
 # modification probabilities at position "chr1:6928850:-"
-m["chr1:6928850:-", ]
+(idx <- which(seqnames(se) == "chr1" & start(se) == 6928850 & strand(se) == "-"))
+#> [1] 828
+
+m[idx, ]
 #> DataFrame with 1 row and 2 columns
-#>                                   sample1    sample2
-#>                                <NaMatrix> <NaMatrix>
-#> chr1:6928850:- 0.623046875:0.099609375:NA      NA:NA
+#>                      sample1    sample2
+#>                   <NaMatrix> <NaMatrix>
+#> 1 0.623046875:0.099609375:NA      NA:NA
 
 # WRONG: take the mean of all values (including NAs)
-lapply(m["chr1:6928850:-", ], mean)
+lapply(m[idx, ], mean)
 #> $sample1
 #> [1] NA
 #> 
@@ -312,7 +314,7 @@ lapply(m["chr1:6928850:-", ], mean)
 #> [1] NA
 
 # CORRECT: exclude the NA values (na.rm = TRUE)
-lapply(m["chr1:6928850:-", ], mean, na.rm = TRUE)
+lapply(m[idx, ], mean, na.rm = TRUE)
 #> $sample1
 #> [1] 0.3613281
 #> 
@@ -346,7 +348,7 @@ positions without any observed data (see for example `"Pmod"` in
 `"sample2"`):
 
 ``` r
-assay(se_summary, "Pmod")["chr1:6928850:-", ]
+assay(se_summary, "Pmod")[idx, ]
 #>   sample1   sample2 
 #> 0.3613281       NaN
 ```
@@ -359,13 +361,13 @@ each position and sample, and calculate the fraction of modified bases
 from the two (`FracMod`).
 
 ``` r
-assay(se_summary, "Nmod")["chr1:6928850:-", ]
+assay(se_summary, "Nmod")[idx, ]
 #> sample1 sample2 
 #>       1       0
-assay(se_summary, "Nvalid")["chr1:6928850:-", ]
+assay(se_summary, "Nvalid")[idx, ]
 #> sample1 sample2 
 #>       2       0
-assay(se_summary, "FracMod")["chr1:6928850:-", ]
+assay(se_summary, "FracMod")[idx, ]
 #> sample1 sample2 
 #>     0.5     NaN
 ```
@@ -386,19 +388,19 @@ assayNames(se_summary)
 # ... which groups the reads by sample
 assay(se_summary, "mod_prob")
 #> DataFrame with 7967 rows and 2 columns
-#>                          sample1    sample2
-#>                       <NaMatrix> <NaMatrix>
-#> chr1:6925830:-           0:NA:NA      NA:NA
-#> chr1:6925834:-           0:NA:NA      NA:NA
-#> chr1:6925836:-           0:NA:NA      NA:NA
-#> chr1:6925837:-           0:NA:NA      NA:NA
-#> chr1:6925841:- 0.275390625:NA:NA      NA:NA
-#> ...                          ...        ...
-#> chr1:6941611:- NA:NA:0.052734375      NA:NA
-#> chr1:6941614:- NA:NA:0.130859375      NA:NA
-#> chr1:6941620:- NA:NA:0.068359375      NA:NA
-#> chr1:6941622:- NA:NA:0.060546875      NA:NA
-#> chr1:6941631:- NA:NA:0.056640625      NA:NA
+#>                sample1    sample2
+#>             <NaMatrix> <NaMatrix>
+#> 1              0:NA:NA      NA:NA
+#> 2              0:NA:NA      NA:NA
+#> 3              0:NA:NA      NA:NA
+#> 4              0:NA:NA      NA:NA
+#> 5    0.275390625:NA:NA      NA:NA
+#> ...                ...        ...
+#> 7963 NA:NA:0.052734375      NA:NA
+#> 7964 NA:NA:0.130859375      NA:NA
+#> 7965 NA:NA:0.068359375      NA:NA
+#> 7966 NA:NA:0.060546875      NA:NA
+#> 7967 NA:NA:0.056640625      NA:NA
 
 # the dimensions of  read-level `se` and summarized `se_summary` are identical
 dim(se)
@@ -432,18 +434,17 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [31ms]
+#> ✔ finding unique genomic positions... [24ms]
 #> 
 #> ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [87ms]
+#> ✔ collapsed 11211 positions to 7967 unique ones [41ms]
 #> 
 se_summary2
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
 #> metadata(1): readLevelData
 #> assays(3): Nmod Nvalid FracMod
-#> rownames(7967): chr1:6925830:- chr1:6925834:- ... chr1:6941622:-
-#>   chr1:6941631:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(2): sample1 sample2
 #> colData names(2): sample modbase
@@ -458,36 +459,36 @@ example it covers the same genomic positions:
 # rows are positions...
 rowRanges(se)
 #> UnstitchedGPos object with 7967 positions and 0 metadata columns:
-#>                  seqnames       pos strand
-#>                     <Rle> <integer>  <Rle>
-#>   chr1:6925830:-     chr1   6925830      -
-#>   chr1:6925834:-     chr1   6925834      -
-#>   chr1:6925836:-     chr1   6925836      -
-#>   chr1:6925837:-     chr1   6925837      -
-#>   chr1:6925841:-     chr1   6925841      -
-#>              ...      ...       ...    ...
-#>   chr1:6941611:-     chr1   6941611      -
-#>   chr1:6941614:-     chr1   6941614      -
-#>   chr1:6941620:-     chr1   6941620      -
-#>   chr1:6941622:-     chr1   6941622      -
-#>   chr1:6941631:-     chr1   6941631      -
+#>          seqnames       pos strand
+#>             <Rle> <integer>  <Rle>
+#>      [1]     chr1   6925830      -
+#>      [2]     chr1   6925834      -
+#>      [3]     chr1   6925836      -
+#>      [4]     chr1   6925837      -
+#>      [5]     chr1   6925841      -
+#>      ...      ...       ...    ...
+#>   [7963]     chr1   6941611      -
+#>   [7964]     chr1   6941614      -
+#>   [7965]     chr1   6941620      -
+#>   [7966]     chr1   6941622      -
+#>   [7967]     chr1   6941631      -
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 rowRanges(se_summary2)
 #> UnstitchedGPos object with 7967 positions and 0 metadata columns:
-#>                  seqnames       pos strand
-#>                     <Rle> <integer>  <Rle>
-#>   chr1:6925830:-     chr1   6925830      -
-#>   chr1:6925834:-     chr1   6925834      -
-#>   chr1:6925836:-     chr1   6925836      -
-#>   chr1:6925837:-     chr1   6925837      -
-#>   chr1:6925841:-     chr1   6925841      -
-#>              ...      ...       ...    ...
-#>   chr1:6941611:-     chr1   6941611      -
-#>   chr1:6941614:-     chr1   6941614      -
-#>   chr1:6941620:-     chr1   6941620      -
-#>   chr1:6941622:-     chr1   6941622      -
-#>   chr1:6941631:-     chr1   6941631      -
+#>          seqnames       pos strand
+#>             <Rle> <integer>  <Rle>
+#>      [1]     chr1   6925830      -
+#>      [2]     chr1   6925834      -
+#>      [3]     chr1   6925836      -
+#>      [4]     chr1   6925837      -
+#>      [5]     chr1   6925841      -
+#>      ...      ...       ...    ...
+#>   [7963]     chr1   6941611      -
+#>   [7964]     chr1   6941614      -
+#>   [7965]     chr1   6941620      -
+#>   [7966]     chr1   6941622      -
+#>   [7967]     chr1   6941631      -
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
@@ -644,9 +645,6 @@ se_sample <- readModBam(bamfiles = modbamfiles,
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
 #> ℹ sampling alignments with probability 0.5
 #> ℹ reading alignments overlapping 1 region
-#>  ■■■■■■■                           20% |  ETA:  0s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% |  ETA:  0s
-#> 
 #> ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
 #> ℹ read 5 alignments
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
@@ -655,10 +653,10 @@ se_sample <- readModBam(bamfiles = modbamfiles,
 #> ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
 #> ℹ read 7 alignments
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [32ms]
+#> ✔ finding unique genomic positions... [25ms]
 #> 
 #> ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [412ms]
+#> ✔ collapsed 31912 positions to 7238 unique ones [187ms]
 #> 
 se_sample$n_reads
 #> [1] 5 7
@@ -1038,7 +1036,7 @@ sp
 sessioninfo::session_info()
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value
-#>  version  R Under development (unstable) (2026-01-12 r89299)
+#>  version  R Under development (unstable) (2026-01-15 r89304)
 #>  os       macOS Sequoia 15.7.3
 #>  system   aarch64, darwin20
 #>  ui       X11
@@ -1046,7 +1044,7 @@ sessioninfo::session_info()
 #>  collate  en_US.UTF-8
 #>  ctype    en_US.UTF-8
 #>  tz       UTC
-#>  date     2026-01-15
+#>  date     2026-01-16
 #>  pandoc   3.1.11 @ /usr/local/bin/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -1113,15 +1111,15 @@ sessioninfo::session_info()
 #>  rmarkdown                  2.30       2025-09-28 [1] CRAN (R 4.6.0)
 #>  Rsamtools                  2.27.0     2025-10-31 [1] Bioconductor 3.23 (R 4.6.0)
 #>  rtracklayer                1.71.3     2025-12-14 [1] Bioconductor 3.23 (R 4.6.0)
-#>  S4Arrays                 * 1.11.1     2026-01-15 [1] Github (Bioconductor/S4Arrays@b7ddb8c)
+#>  S4Arrays                 * 1.11.1     2026-01-16 [1] Github (Bioconductor/S4Arrays@b7ddb8c)
 #>  S4Vectors                * 0.49.0     2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  S7                         0.2.1      2025-11-14 [1] CRAN (R 4.6.0)
 #>  sass                       0.4.10     2025-04-11 [1] CRAN (R 4.6.0)
 #>  scales                     1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
 #>  Seqinfo                  * 1.1.0      2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  sessioninfo                1.2.3      2025-02-05 [1] CRAN (R 4.6.0)
-#>  SingleMoleculeGenomicsIO * 0.1.0      2026-01-15 [1] Bioconductor
-#>  SparseArray              * 1.11.10    2026-01-15 [1] Github (Bioconductor/SparseArray@fa5a507)
+#>  SingleMoleculeGenomicsIO * 0.1.0      2026-01-16 [1] Bioconductor
+#>  SparseArray              * 1.11.10    2026-01-16 [1] Github (Bioconductor/SparseArray@fa5a507)
 #>  SummarizedExperiment     * 1.41.0     2025-10-31 [1] Bioconductor 3.23 (R 4.6.0)
 #>  systemfonts                1.3.1      2025-10-01 [1] CRAN (R 4.6.0)
 #>  textshaping                1.0.4      2025-10-10 [1] CRAN (R 4.6.0)

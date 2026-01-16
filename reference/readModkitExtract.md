@@ -125,8 +125,7 @@ readModkitExtract(extrfile, modbase = "m", filter = NULL,
 #> dim: 6432 1 
 #> metadata(3): modkit_threshold filter_threshold readLevelData
 #> assays(1): mod_prob
-#> rownames(6432): chr1:6928983:- chr1:6928995:- ... chr1:6949455:+
-#>   chr1:6949461:+
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(1): s1
 #> colData names(3): sample modbase readInfo
@@ -137,8 +136,7 @@ readModkitExtract(extrfile, modbase = "m", filter = "modkit",
 #> dim: 5893 1 
 #> metadata(3): modkit_threshold filter_threshold readLevelData
 #> assays(1): mod_prob
-#> rownames(5893): chr1:6928983:- chr1:6928995:- ... chr1:6949455:+
-#>   chr1:6949461:+
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(1): s1
 #> colData names(3): sample modbase readInfo

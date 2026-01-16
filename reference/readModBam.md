@@ -198,19 +198,18 @@ readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
 #> ℹ extracting base modifications from modBAM files
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [27ms]
+#> ✔ finding unique genomic positions... [19ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [236ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [131ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> class: RangedSummarizedExperiment 
 #> dim: 4772 1 
 #> metadata(3): readLevelData variantPositions filteredOutReads
 #> assays(1): mod_prob
-#> rownames(4772): chr1:6925830:- chr1:6925834:- ... chr1:6941622:-
-#>   chr1:6941631:-
+#> rownames: NULL
 #> rowData names(0):
 #> colnames(1): s1
 #> colData names(4): sample modbase n_reads readInfo
