@@ -149,6 +149,7 @@ test_that("readModBam works", {
     # expected results
     se0 <- readModkitExtract(fnames = extractfiles, modbase = "a",
                              BPPARAM = BiocParallel::SerialParam())
+    rownames(se0) <- as.character(rowRanges(se0))
     reg1 <- c("chr1:6940000-6955000", "chr1:6929000-6929500")
     reg2 <- GRanges("chr1", IRanges(start = 6940000, end = 6955000))
     reg3 <- rep("chr1:6940000-6955000", 3)
@@ -163,6 +164,8 @@ test_that("readModBam works", {
                               BPPARAM = BiocParallel::SerialParam())
         )
     })
+    se1wr <- se1
+    rownames(se1wr) <- as.character(rowRanges(se1wr))
     se1sum <- readModBam(bamfiles = modbamfiles, regions = reg1,
                          modbase = "a", level = "summary", nAlnsToSample = 0,
                          sequenceContextWidth = 1, sequenceReference = ref,
@@ -197,6 +200,8 @@ test_that("readModBam works", {
                       nAlnsToSample = 0, seqnamesToSampleFrom = "chr1",
                       BPPARAM = BiocParallel::SerialParam(),
                       verbose = FALSE)
+    se3wr <- se3
+    rownames(se3wr) <- as.character(rowRanges(se3wr))
     se3sum <- readModBam(bamfiles = modbamfiles,
                          regions = reg3,
                          modbase = "a", level = "summary",
@@ -291,6 +296,8 @@ test_that("readModBam works", {
                       modbase = "a",
                       BPPARAM = BiocParallel::SerialParam(RNGseed = 55L),
                       trim = TRUE, verbose = FALSE)
+    se8wr <- se8
+    rownames(se8wr) <- as.character(rowRanges(se8wr))
     se8sum <- readModBam(bamfiles = modbamfiles,
                          regions = reg1,
                          modbase = "a", level = "summary",
@@ -373,7 +380,7 @@ test_that("readModBam works", {
     expect_identical(unname(se1$n_reads), c(4L, 6L))
     expect_identical(dim(se1), c(8691L, 2L))
     modprob0 <- as.matrix(assay(se0, "mod_prob"))
-    modprob1 <- as.matrix(assay(se1, "mod_prob"))
+    modprob1 <- as.matrix(assay(se1wr, "mod_prob"))
     shared_rows <- intersect(rownames(modprob0), rownames(modprob1))
     shared_cols <- intersect(colnames(modprob0), colnames(modprob1))
     expect_length(shared_rows, 8615L)
@@ -470,7 +477,7 @@ test_that("readModBam works", {
     # ... content se3
     expect_identical(unname(se3$n_reads), c(3L, 2L))
     expect_identical(dim(se3), c(7967L, 2L))
-    modprob3 <- as.matrix(assay(se3, "mod_prob"))
+    modprob3 <- as.matrix(assay(se3wr, "mod_prob"))
     shared_rows <- intersect(rownames(modprob0), rownames(modprob3))
     shared_cols <- intersect(colnames(modprob0), colnames(modprob3))
     expect_length(shared_rows, 7924L)
@@ -616,8 +623,8 @@ test_that("readModBam works", {
     # ... content of se8 (like se1, but trimmed)
     expect_identical(unname(se8$n_reads), c(4L, 6L))
     expect_identical(dim(se8), c(1009L, 2L))
-    modprob1 <- as.matrix(assay(se1, "mod_prob"))
-    modprob8 <- as.matrix(assay(se8, "mod_prob"))
+    modprob1 <- as.matrix(assay(se1wr, "mod_prob"))
+    modprob8 <- as.matrix(assay(se8wr, "mod_prob"))
     shared_rows <- intersect(rownames(modprob8), rownames(modprob1))
     shared_cols <- intersect(colnames(modprob8), colnames(modprob1))
     expect_length(shared_rows, 1009L)

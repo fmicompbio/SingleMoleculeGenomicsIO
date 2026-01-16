@@ -401,8 +401,6 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'                              n_threads = 1,
 #'                              verbose = TRUE)
 #' str(res1)
-NULL
-
 #'
 #' @author Charlotte Soneson, Michael Stadler
 #'

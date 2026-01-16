@@ -455,37 +455,6 @@ int process_mismatch_bam_record(
 //'                              n_threads = 1,
 //'                              verbose = TRUE)
 //' str(res1)
-/*
- bamfile <- system.file("extdata", "BisSeq_quasr_single.bam", package = "SingleMoleculeGenomicsIO")
- ref <- readDNAStringSet(system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO"))
- posContext <- vmatchPattern(pattern = "NCG", subject = ref, max.mismatch = 0,
-                         with.indels = FALSE, fixed = "subject", algorithm = "auto")
- posContextRev <- vmatchPattern(pattern = "CGN", subject = ref, max.mismatch = 0,
-                           with.indels = FALSE, fixed = "subject", algorithm = "auto")
- posContextList <- lapply(posContext, function(x) {
-     start(resize(x = x, width = 1, fix = "center")) - 1L
- })
- posContextRevList <- lapply(posContextRev, function(x) {
-     start(resize(x = x, width = 1, fix = "center")) - 1L
- })
- res1 <- read_mismatchbam_cpp(inname_str = bamfile,
-                               bam_format = "QuasR",
-                               regions = "chr1:6940000-6955000",
-                               pos_context_list = posContextList,
-                               pos_context_rev_list = posContextRevList,
-                               unmod_integer = 8,
-                               unmod_integer_rev = 1,
-                               mod_integer = 2,
-                               mod_integer_rev = 4,
-                               level = "summary",
-                               n_alns_to_sample = 0,
-                               tnames_for_sampling = character(0),
-                               variantRefNames = character(0),
-                               variantRefPositions = integer(0),
-                               n_threads = 1,
-                               verbose = TRUE)
-
- */
 //'
 //' @author Charlotte Soneson, Michael Stadler
 //'

@@ -69,8 +69,9 @@
 
     if (nrow(se) > 0) {
         .message("Checking row names")
-        stopifnot(!is.null(rownames(se)) &&
-                      anyDuplicated(rownames(se)) == 0L)
+        if (!is.null(rownames(se))) {
+            stopifnot(anyDuplicated(rownames(se)) == 0L)
+        }
     }
 
     stopifnot(!is.null(metadata(se)$readLevelData) &&

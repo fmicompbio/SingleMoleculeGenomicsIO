@@ -100,6 +100,5 @@ expandSEToBaseSpace <- function(se,
                                 rowRanges = rr,
                                 colData = colData(se),
                                 metadata = md)
-    rownames(res) <- as.character(rr)
     return(res)
 }

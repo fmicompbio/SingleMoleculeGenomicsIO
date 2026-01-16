@@ -96,31 +96,31 @@
     .assertVector(x = rowRanges(se), type = "GPos")
     .assertScalar(x = assayName, type = "character",
                   validValues = assayNames(se))
-    .assertVector(x = rownames(se), type = "character")
     .assertScalar(x = verbose, type = "logical")
 
     # Group positions by chromosome and position
-    pGroup <- split(x = rownames(se),
+    pGroup <- split(x = seq_len(nrow(se)),
                     f = paste0(seqnames(rowRanges(se)),
                                ":", pos(rowRanges(se))))
     pGroup <- pGroup[lengths(pGroup) > 1]
+    upGroup <- unlist(pGroup, use.names = FALSE)
 
     # For all groups of >1 row, find the one with lowest total count and
     # record the row name for later removal
-    tmpmat <- as.matrix(assay(se, assayName)[
-        unlist(pGroup, use.names = FALSE), ])
+    tmpmat <- as.matrix(assay(se, assayName)[upGroup, ])
+    rownames(tmpmat) <- as.character(upGroup)
     if (assayName %in% .getReadLevelAssayNames(se)) {
         rs <- rowSums(tmpmat >= 0, na.rm = TRUE)
     } else {
         rs <- rowSums(tmpmat, na.rm = TRUE)
     }
     posToRemove <- unlist(lapply(pGroup, function(pg) {
-        pg[-which.max(rs[pg])]
+        pg[-which.max(rs[as.character(pg)])]
     }))
 
     # Remove the recorded positions
     if (length(posToRemove) > 0) {
-        se <- se[!rownames(se) %in% posToRemove, ]
+        se <- se[!seq_len(nrow(se)) %in% posToRemove, ]
         .message(
             paste0("{length(posToRemove)} row{?s} removed to ensure that each ",
                    "genomic position is represented by at most one row"))

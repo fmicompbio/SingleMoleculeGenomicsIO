@@ -196,6 +196,7 @@ test_that(".pruneAmbiguousStrandPositions works", {
                      modbase = "a", verbose = FALSE,
                      BPPARAM = BiocParallel::SerialParam())
     se <- flattenReadLevelAssay(se)
+    rownames(se) <- as.character(rowRanges(se))
 
     expect_error(.pruneAmbiguousStrandPositions(se = "error"),
                  ".se. must be of class .SummarizedExperiment.")
