@@ -26,8 +26,13 @@
 //' }
 //'
 //'
-//' @noRd
-//' @keywords internal
+//' @export
+//'
+//' @examples
+//' estimateNoise(
+//'     c(0.1, 0.25, 0.3, 0.45, 0.5, 0.7, 0.7),
+//'     c(1L, 2L, 3L ,4L, 6L, 8L, 11L),
+//'     2L, 1)
 // [[Rcpp::export]]
 Rcpp::NumericVector estimateNoise(const Rcpp::NumericVector& probs,
                                   const Rcpp::IntegerVector& read_pos,
