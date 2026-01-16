@@ -78,7 +78,7 @@ subsetReads <- function(se,
     # digest arguments
     .assertVector(x = se, type = "SummarizedExperiment")
     checkSEValidity(se, verbose = FALSE)
-    rlAssays <- .getReadLevelAssayNames(se)
+    rlAssays <- getReadLevelAssayNames(se)
     sampleNms <- colnames(se)
     if (length(rlAssays) == 0) {
         cli_warn("'se' contains no read-level assays - no subsetting done")
@@ -194,7 +194,7 @@ subsetReads <- function(se,
             assay(se, anm) <- dframe
         )
     }
-    for (cn in .getReadLevelColDataNames(se)) {
+    for (cn in getReadLevelColDataNames(se)) {
         for (snm in names(reads)) {
             se[[cn]][[snm]] <- se[[cn]][[snm]][reads[[snm]], , drop = FALSE]
         }

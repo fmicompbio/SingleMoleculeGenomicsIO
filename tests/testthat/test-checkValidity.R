@@ -20,9 +20,9 @@ test_that("validity checks work", {
     rme_withreads <- flattenReadLevelAssay(rme)
     rme_withoutreads <- flattenReadLevelAssay(rme, keepReads = FALSE)
 
-    ## Test .getReadLevelAssayNames
-    expect_identical(.getReadLevelAssayNames(rme_withreads), "mod_prob")
-    expect_identical(.getReadLevelAssayNames(rme_withoutreads), character(0))
+    ## Test getReadLevelAssayNames
+    expect_identical(getReadLevelAssayNames(rme_withreads), "mod_prob")
+    expect_identical(getReadLevelAssayNames(rme_withoutreads), character(0))
 
     ## Test checkSEValidity
     expect_no_error(checkSEValidity(rme_withreads))

@@ -12,7 +12,7 @@
 
     # If assayName is a read-level assay, first calculate the number of
     # non-NA values in each row
-    if (assayName %in% .getReadLevelAssayNames(se)) {
+    if (assayName %in% getReadLevelAssayNames(se)) {
         mat <- assay(flattenReadLevelAssay(se, assayName = assayName,
                                            statistics = "Nvalid", keepReads = FALSE,
                                            verbose = FALSE),
@@ -73,7 +73,7 @@
 .removeAllNAPositions <- function(se, assayName = "mod_prob") {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = assayName, type = "character",
-                  validValues = .getReadLevelAssayNames(se))
+                  validValues = getReadLevelAssayNames(se))
 
     # Get requested assay and convert to a single NaMatrix
     mat <- as.matrix(assay(se, assayName))
@@ -137,7 +137,7 @@ pruneAmbiguousStrandPositions <- function(se, assayName = "Nvalid",
     # record the row name for later removal
     tmpmat <- as.matrix(assay(se, assayName)[upGroup, ])
     rownames(tmpmat) <- as.character(upGroup)
-    if (assayName %in% .getReadLevelAssayNames(se)) {
+    if (assayName %in% getReadLevelAssayNames(se)) {
         rs <- rowSums(tmpmat >= 0, na.rm = TRUE)
     } else {
         rs <- rowSums(tmpmat, na.rm = TRUE)
@@ -267,7 +267,7 @@ filterPositions <- function(se,
                                   "repeated.positions", "all.na",
                                   "regions"))
     .assertScalar(x = assayNameNA, type = "character",
-                  validValues = .getReadLevelAssayNames(se),
+                  validValues = getReadLevelAssayNames(se),
                   allowNULL = TRUE)
     if (is.null(seqinfo)) {
         seqinfo <- seqinfo(se)

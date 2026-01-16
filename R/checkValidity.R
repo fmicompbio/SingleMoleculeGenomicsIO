@@ -1,7 +1,9 @@
 #' Get names of assays containing read-level data
 #'
-#' @keywords internal
-#' @noRd
+#' The names of assays designated as containing read-level data are
+#' extracted from \code{metadata(se)$readLevelData$assayNames}.
+#'
+#' @export
 #'
 #' @param se A \code{SummarizedExperiment} object.
 #'
@@ -10,16 +12,28 @@
 #' @return A (possibly empty) character vector with the names of the assays of
 #' se containing read-level data.
 #'
+#' @examples
+#' modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam",
+#'                                         "6mA_2_10reads.bam"),
+#'                            package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
+#'                  modbase = "a", verbose = FALSE,
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' se <- addReadStats(se, BPPARAM = BiocParallel::SerialParam())
+#' getReadLevelAssayNames(se)
+#'
 #' @importFrom SummarizedExperiment assayNames
-.getReadLevelAssayNames <- function(se) {
+getReadLevelAssayNames <- function(se) {
     intersect(metadata(se)$readLevelData$assayNames,
               assayNames(se))
 }
 
 #' Get names of colData columns containing read-level data
 #'
-#' @keywords internal
-#' @noRd
+#' The names of \code{colData} column designated as containing read-level
+#' annotations are extracted from \code{metadata(se)$readLevelData$colDataColumns}.
+#'
+#' @export
 #'
 #' @param se A \code{SummarizedExperiment} object.
 #'
@@ -28,10 +42,20 @@
 #' @return A (possibly empty) character vector with the names of the columns of
 #' colData(se) containing read-level data.
 #'
+#' @examples
+#' modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam",
+#'                                         "6mA_2_10reads.bam"),
+#'                            package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
+#'                  modbase = "a", verbose = FALSE,
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' se <- addReadStats(se, BPPARAM = BiocParallel::SerialParam())
+#' getReadLevelColDataNames(se)
+#'
 #' @importFrom SummarizedExperiment colData
 #' @importFrom BiocGenerics colnames
 #' @importFrom S4Vectors metadata
-.getReadLevelColDataNames <- function(se) {
+getReadLevelColDataNames <- function(se) {
     intersect(metadata(se)$readLevelData$colDataColumns,
               colnames(colData(se)))
 }
@@ -98,11 +122,11 @@ checkSEValidity <- function(se, verbose = FALSE) {
         stopifnot(colnames(assay(
             se, an, withDimnames = FALSE)) == colnames(se))
     }
-    for (cn in .getReadLevelColDataNames(se)) {
+    for (cn in getReadLevelColDataNames(se)) {
         stopifnot(names(se[[cn]]) == colnames(se))
     }
 
-    rlAssays <- .getReadLevelAssayNames(se)
+    rlAssays <- getReadLevelAssayNames(se)
     if (length(rlAssays) > 0) {
         .message("Read-level assay found")
         ## Choose one assay as the reference to compare to
@@ -118,7 +142,7 @@ checkSEValidity <- function(se, verbose = FALSE) {
                 }
             }
         }
-        for (cn in .getReadLevelColDataNames(se)) {
+        for (cn in getReadLevelColDataNames(se)) {
             .message("Read-level column data found, checking consistency")
             for (sn in colnames(se)) {
                 if (!all(rownames(se[[cn]][[sn]]) == refReads[[sn]])) {

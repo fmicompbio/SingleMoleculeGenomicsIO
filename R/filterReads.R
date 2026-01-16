@@ -151,7 +151,7 @@ filterReads <- function(se, assayName = "mod_prob",
     .assertVector(x = se, type = "SummarizedExperiment")
     checkSEValidity(se)
     .assertScalar(x = assayName, type = "character",
-                  validValues = .getReadLevelAssayNames(se))
+                  validValues = getReadLevelAssayNames(se))
     .assertScalar(x = readInfoCol, type = "character", allowNULL = TRUE,
                   validValues = colnames(colData(se)))
     .assertScalar(x = qcCol, type = "character", allowNULL = TRUE,
