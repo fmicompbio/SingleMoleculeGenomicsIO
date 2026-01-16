@@ -2,16 +2,16 @@
 % Please edit documentation in R/RcppExports.R
 \name{estimateNoise}
 \alias{estimateNoise}
-\title{Estimation of noise variance for Time Series.}
+\title{Estimation of noise variance for time series.}
 \usage{
 estimateNoise(probs, read_pos, k, min_diffs)
 }
 \arguments{
-\item{probs}{Numeric vector of (observed) Time Series measurements.}
+\item{probs}{Numeric vector of (observed) time series measurements.}
 
-\item{read_pos}{Integer vector of measurement positions in the Time Series (same length as probs).}
+\item{read_pos}{Integer vector of measurement positions in the time series (same length as probs).}
 
-\item{k}{Integer, maximum gap size tolerated when computing Δx.}
+\item{k}{Integer, maximum gap size tolerated when computing Dx.}
 
 \item{min_diffs}{Integer, minimum number of lag-1 differences required to produce an estimate (default -1 = auto).}
 }
@@ -25,12 +25,12 @@ A vector with the following items:
 }
 }
 \description{
-Given a Time Series signal, potentially with missing/unobserved values,
+Given a time series signal, potentially with missing/unobserved values,
 this function estimates the level of noise under the assumption of
-local continuity/smoothness
+local continuity/smoothness.
 }
 \details{
-\strong{Noise variance} ≈ \code{0.5 * Var(Δx)} where Δx are lag-1 differences that may skip
+\strong{Noise variance} ≈ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
 up to \emph{k} missing values. This follows from error propagation and the assumption
 of low varying x in adjacent measurements.
 }
