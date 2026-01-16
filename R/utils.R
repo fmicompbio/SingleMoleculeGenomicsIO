@@ -311,11 +311,15 @@
 #' @importFrom utils strcapture
 #' @importFrom stats setNames
 #'
-#' @noRd
-#' @keywords internal
-.regionStringToGRanges <- function(regions,
-                                   seqinfo = NULL,
-                                   maxend = .Machine$integer.max) {
+#' @export
+#'
+#' @examples
+#' regionStringToGRanges("chr1:6940000-6955000")
+#' regionStringToGRanges("chr1", seqinfo = c(chr1 = 999))
+#' regionStringToGRanges("chr1")
+regionStringToGRanges <- function(regions,
+                                  seqinfo = NULL,
+                                  maxend = .Machine$integer.max) {
     # check arguments
     .assertVector(x = regions, type = "character")
     if (is.null(seqinfo)) {

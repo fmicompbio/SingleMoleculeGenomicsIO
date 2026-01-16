@@ -170,8 +170,8 @@ readMismatchBam <- function(bamfiles,
         }
     }
     if (is.character(regions)) {
-        regions <- .regionStringToGRanges(regions = regions,
-                                          seqinfo = seqinfo)
+        regions <- regionStringToGRanges(regions = regions,
+                                         seqinfo = seqinfo)
     }
     .assertVector(x = regions, type = "GRanges", allowNULL = TRUE)
     .assertScalar(x = nAlnsToSample, type = "numeric", rngIncl = c(0, Inf))

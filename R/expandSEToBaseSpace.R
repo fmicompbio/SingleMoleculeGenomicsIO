@@ -50,8 +50,8 @@ expandSEToBaseSpace <- function(se,
     # check arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")
     if (is.character(region)) {
-        region <- .regionStringToGRanges(regions = region,
-                                         seqinfo = seqinfo)
+        region <- regionStringToGRanges(regions = region,
+                                        seqinfo = seqinfo)
     }
     if (is.null(region)) {
         region <- range(rowRanges(se), ignore.strand = TRUE)

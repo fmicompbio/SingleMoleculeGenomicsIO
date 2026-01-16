@@ -271,9 +271,9 @@ test_that(".assertValidModbase works", {
 })
 
 ## -------------------------------------------------------------------------- ##
-## Checks, .regionStringToGRanges
+## Checks, regionStringToGRanges
 ## -------------------------------------------------------------------------- ##
-test_that(".regionStringToGRanges works", {
+test_that("regionStringToGRanges works", {
     # supported formats:
     # "REF"
     # "REF:"
@@ -282,13 +282,13 @@ test_that(".regionStringToGRanges works", {
     # "REF:START-END"
     # "."
 
-    expect_error(.regionStringToGRanges("chr1", "error"),
+    expect_error(regionStringToGRanges("chr1", "error"),
                  "or a named .numeric. vector")
-    expect_error(.regionStringToGRanges(c(".")),
+    expect_error(regionStringToGRanges(c(".")),
                  ".seqinfo. argument is required")
-    expect_error(.regionStringToGRanges(c(".", "chr1"), c("chr1" = 100)),
+    expect_error(regionStringToGRanges(c(".", "chr1"), c("chr1" = 100)),
                  "can only be given as a single region")
-    expect_error(.regionStringToGRanges(c("chr1:1-10:+", "chr1:-", "")),
+    expect_error(regionStringToGRanges(c("chr1:1-10:+", "chr1:-", "")),
                  "unrecognized format in 2 regions")
 
     slens <- c(chr1 = 100, chr2 = 200, chr4 = 400)
@@ -298,9 +298,9 @@ test_that(".regionStringToGRanges works", {
               "chr3:-100",
               "chr4:20-70")
 
-    gr1 <- .regionStringToGRanges(regions = reg1, seqinfo = slens)
-    gr2 <- .regionStringToGRanges(regions = reg1, seqinfo = si)
-    gr3 <- .regionStringToGRanges(regions = reg1, seqinfo = NULL)
+    gr1 <- regionStringToGRanges(regions = reg1, seqinfo = slens)
+    gr2 <- regionStringToGRanges(regions = reg1, seqinfo = si)
+    gr3 <- regionStringToGRanges(regions = reg1, seqinfo = NULL)
 
     intmax <- .Machine$integer.max
 
@@ -318,7 +318,7 @@ test_that(".regionStringToGRanges works", {
         seqlengths = stats::setNames(rep(intmax, 4), paste0("chr", 1:4))
     ))
 
-    grall <- .regionStringToGRanges(regions = ".", seqinfo = slens)
+    grall <- regionStringToGRanges(regions = ".", seqinfo = slens)
     expect_identical(grall, GenomicRanges::GRanges(
         seqnames = c("chr1", "chr2", "chr4"),
         ranges = IRanges::IRanges(start = c(1, 1, 1),
@@ -326,10 +326,10 @@ test_that(".regionStringToGRanges works", {
         seqlengths = slens)
     )
 
-    expect_warning(grtrim <- .regionStringToGRanges(regions = c("chr1:10-101",
-                                                                "chr3:1-2",
-                                                                "chr4:300-500"),
-                                                    seqinfo = slens))
+    expect_warning(grtrim <- regionStringToGRanges(regions = c("chr1:10-101",
+                                                               "chr3:1-2",
+                                                               "chr4:300-500"),
+                                                   seqinfo = slens))
     expect_identical(grtrim, GenomicRanges::GRanges(
         seqnames = c("chr1", "chr3", "chr4"),
         ranges = IRanges::IRanges(start = c(10, 1, 300),

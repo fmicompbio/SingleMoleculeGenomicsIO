@@ -168,8 +168,8 @@ readModBam <- function(bamfiles,
         }
     }
     if (is.character(regions)) {
-        regions <- .regionStringToGRanges(regions = regions,
-                                          seqinfo = seqinfo)
+        regions <- regionStringToGRanges(regions = regions,
+                                         seqinfo = seqinfo)
     }
     .assertVector(x = regions, type = "GRanges", allowNULL = TRUE)
     if (length(modbase) == 1) {

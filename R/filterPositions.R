@@ -149,8 +149,8 @@
 #'
 .keepPositionsInRegions <- function(se, regions, seqinfo) {
     if (is.character(regions)) {
-        regions <- .regionStringToGRanges(regions = regions,
-                                          seqinfo = seqinfo)
+        regions <- regionStringToGRanges(regions = regions,
+                                         seqinfo = seqinfo)
     }
     .assertVector(x = regions, type = "GRanges")
     # regions can be stranded or not - leave the choice to the user
