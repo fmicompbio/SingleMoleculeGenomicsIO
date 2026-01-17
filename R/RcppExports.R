@@ -35,19 +35,19 @@ estimateNoise <- function(probs, read_pos, k, min_diffs) {
     .Call(`_SingleMoleculeGenomicsIO_estimateNoise`, probs, read_pos, k, min_diffs)
 }
 
-#' @title Estimate a Time Series Signal to Noise Ratio (SNR) given
-#' total and noise variance components and (optionally) a background Noise model.
+#' @title Estimate a time series Signal to Noise Ratio (SNR) given
+#' total and noise variance components and (optionally) a background noise model.
 #'
 #' @description
-#' Given Time series variance components (total variance, raw noise variance),
+#' Given time series variance components (total variance, raw noise variance),
 #' compute the final noise, signal, and SNR. For noise
 #' estimation use one of:
 #' \enumerate{
-#'   \item **A Raw noise variance** e.g the result of \code{estimateNoise}
-#'   \item **A Background noise model** based on linear predictors
-#'   \item **A Flooring rule**: final noise = max(raw, background)
+#'   \item **A raw noise variance** e.g the result of \code{estimateNoise}
+#'   \item **A background noise model** based on linear predictors
+#'   \item **A flooring rule**: final noise = max(raw, background)
 #' }
-#' The Background noise model is a *general* linear noise baseline:
+#' The background noise model is a *general* linear noise baseline:
 #' \code{baseline = sum_i beta[i] * feat[i]}.
 #'
 #' @param totalVar Total time series variance. Typically calculated with \code{estimateNoise}
@@ -71,8 +71,11 @@ estimateNoise <- function(probs, read_pos, k, min_diffs) {
 #'         - noise baseline (sum(betas * features); NA if not applied)
 #'         - noise raw
 #'
-#' @noRd
-#' @keywords internal
+#' @examples
+#' estimateSNR(totalVar = 1.0, noiseRaw = 1.0, eps = 0.01,
+#'             betas = c(0.5, 2.0), features = c(2.0, 4.5),
+#'             noise_mode = "model")
+#' @export
 estimateSNR <- function(totalVar, noiseRaw, eps, betas, features, noise_mode = "floor") {
     .Call(`_SingleMoleculeGenomicsIO_estimateSNR`, totalVar, noiseRaw, eps, betas, features, noise_mode)
 }
