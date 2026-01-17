@@ -7,7 +7,7 @@
 #' local continuity/smoothness.
 #'
 #' @details
-#' **Noise variance** ≈ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
+#' **Noise variance** $\approx$ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
 #'  up to *k* missing values. This follows from error propagation and the assumption
 #'  of low varying x in adjacent measurements.
 #'
@@ -60,9 +60,9 @@ estimateNoise <- function(probs, read_pos, k, min_diffs) {
 #'   For example, for \eqn{baseline = b0 + b1 * mean}, use
 #'   \code{betas = c(b0, b1)}, \code{features = c(1, mean)}.
 #' @param noise_mode Character scalar: one of \code{"raw"}, \code{"model"}, \code{"floor"}.
-#'        - \code{"raw"}   → use \code{noise_raw}
-#'        - \code{"model"} → use \code{baseline = sum(betas * features)}
-#'        - \code{"floor"} → use \code{max(noise_raw, baseline)}
+#'        - \code{"raw"} -> use \code{noise_raw}
+#'        - \code{"model"} -> use \code{baseline = sum(betas * features)}
+#'        - \code{"floor"} -> use \code{max(noise_raw, baseline)}
 #'
 #' @return Named numeric vector with elements:
 #'         - snr (log2 scale)

@@ -30,7 +30,7 @@ this function estimates the level of noise under the assumption of
 local continuity/smoothness.
 }
 \details{
-\strong{Noise variance} ≈ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
+\strong{Noise variance} $\approx$ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
 up to \emph{k} missing values. This follows from error propagation and the assumption
 of low varying x in adjacent measurements.
 }

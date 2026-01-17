@@ -8,7 +8,7 @@
 //' local continuity/smoothness.
 //'
 //' @details
-//' **Noise variance** ≈ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
+//' **Noise variance** $\approx$ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
 //'  up to *k* missing values. This follows from error propagation and the assumption
 //'  of low varying x in adjacent measurements.
 //'
