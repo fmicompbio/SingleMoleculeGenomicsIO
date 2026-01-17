@@ -464,7 +464,7 @@ calcReadStats <- function(se,
     # digest arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")
     .assertScalar(x = assayName, type = "character",
-                  validValues = .getReadLevelAssayNames(se))
+                  validValues = getReadLevelAssayNames(se))
     .assertVector(x = stats, type = "character", allowNULL = TRUE,
                   validValues = allReadStats)
     if (is.character(regions)) {

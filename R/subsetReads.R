@@ -77,8 +77,8 @@ subsetReads <- function(se,
                         assayNameNA = "mod_prob") {
     # digest arguments
     .assertVector(x = se, type = "SummarizedExperiment")
-    .checkSEValidity(se, verbose = FALSE)
-    rlAssays <- .getReadLevelAssayNames(se)
+    checkSEValidity(se, verbose = FALSE)
+    rlAssays <- getReadLevelAssayNames(se)
     sampleNms <- colnames(se)
     if (length(rlAssays) == 0) {
         cli_warn("'se' contains no read-level assays - no subsetting done")
@@ -194,7 +194,7 @@ subsetReads <- function(se,
             assay(se, anm) <- dframe
         )
     }
-    for (cn in .getReadLevelColDataNames(se)) {
+    for (cn in getReadLevelColDataNames(se)) {
         for (snm in names(reads)) {
             se[[cn]][[snm]] <- se[[cn]][[snm]][reads[[snm]], , drop = FALSE]
         }
@@ -213,6 +213,6 @@ subsetReads <- function(se,
         se <- .removeAllNAPositions(se, assayName = assayNameNA)
     }
 
-    .checkSEValidity(se, verbose = FALSE)
+    checkSEValidity(se, verbose = FALSE)
     return(se)
 }

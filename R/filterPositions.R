@@ -12,7 +12,7 @@
 
     # If assayName is a read-level assay, first calculate the number of
     # non-NA values in each row
-    if (assayName %in% .getReadLevelAssayNames(se)) {
+    if (assayName %in% getReadLevelAssayNames(se)) {
         mat <- assay(flattenReadLevelAssay(se, assayName = assayName,
                                            statistics = "Nvalid", keepReads = FALSE,
                                            verbose = FALSE),
@@ -73,7 +73,7 @@
 .removeAllNAPositions <- function(se, assayName = "mod_prob") {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = assayName, type = "character",
-                  validValues = .getReadLevelAssayNames(se))
+                  validValues = getReadLevelAssayNames(se))
 
     # Get requested assay and convert to a single NaMatrix
     mat <- as.matrix(assay(se, assayName))
@@ -83,8 +83,37 @@
     se[keep, ]
 }
 
+#' Prune positions with ambiguous strand information
+#'
+#' Filter a \code{\link[SummarizedExperiment]{SummarizedExperiment}} object
+#' so that each position (row) appears at most once. If the same position
+#' appears multiple times (once for each strand), keep the entry with the
+#' highest read coverage (the largest row sum of the \code{assayName} assay).
+#'
+#' @param se A \code{SummarizedExperiment} object.
+#' @param assayName A character scalar indicating the assay to use to
+#'     decide which row to retain if multiple rows represent the same
+#'     genomic position (on different strands). The row with the largest row
+#'     sum in this assay is retained.
+#' @param verbose Logical scalar. If \code{TRUE}, report on progress.
+#'
 #' @keywords internal
 #' @noRd
+#'
+#' @author Charlotte Soneson
+#'
+#' @examples
+#' modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam",
+#'                                         "6mA_2_10reads.bam"),
+#'                            package = "SingleMoleculeGenomicsIO")
+#' se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6920000-6940000",
+#'                  modbase = "a", verbose = FALSE,
+#'                  BPPARAM = BiocParallel::SerialParam())
+#' se <- flattenReadLevelAssay(se)
+#' sefilt <- .pruneAmbiguousStrandPositions(se)
+#' dim(se)
+#' dim(sefilt)
+#'
 #' @importFrom SummarizedExperiment rowRanges assayNames assay
 #' @importFrom BiocGenerics pos
 #' @importFrom Seqinfo seqnames
@@ -109,7 +138,7 @@
     # record the row name for later removal
     tmpmat <- as.matrix(assay(se, assayName)[upGroup, ])
     rownames(tmpmat) <- as.character(upGroup)
-    if (assayName %in% .getReadLevelAssayNames(se)) {
+    if (assayName %in% getReadLevelAssayNames(se)) {
         rs <- rowSums(tmpmat >= 0, na.rm = TRUE)
     } else {
         rs <- rowSums(tmpmat, na.rm = TRUE)
@@ -239,7 +268,7 @@ filterPositions <- function(se,
                                   "repeated.positions", "all.na",
                                   "regions"))
     .assertScalar(x = assayNameNA, type = "character",
-                  validValues = .getReadLevelAssayNames(se),
+                  validValues = getReadLevelAssayNames(se),
                   allowNULL = TRUE)
     if (is.null(seqinfo)) {
         seqinfo <- seqinfo(se)

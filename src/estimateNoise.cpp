@@ -2,19 +2,20 @@
 #include <limits>
 #include <Rcpp.h>
 
-//' @title Estimation of noise variance for Time Series.
-//' @description Given a Time Series signal, potentially with missing/unobserved values,
+//' @title Estimation of noise variance for time series.
+//' @description Given a time series signal, potentially with missing/unobserved values,
 //' this function estimates the level of noise under the assumption of
-//' local continuity/smoothness
+//' local continuity/smoothness.
 //'
 //' @details
-//' **Noise variance** ≈ \code{0.5 * Var(Δx)} where Δx are lag-1 differences that may skip
-//'  up to *k* missing values. This follows from error propagation and the assumption
-//'  of low varying x in adjacent measurements.
+//' \eqn{\mathrm{Noise variance} \approx 0.5\,\mathrm{Var}(\Delta x)}
+//' where \eqn{\Delta x} are lag-1 differences that may skip
+//' up to *k* missing values. This follows from error propagation and the assumption
+//' of low varying x in adjacent measurements.
 //'
-//' @param probs Numeric vector of (observed) Time Series measurements.
-//' @param read_pos Integer vector of measurement positions in the Time Series (same length as probs).
-//' @param k Integer, maximum gap size tolerated when computing Δx.
+//' @param probs Numeric vector of (observed) time series measurements.
+//' @param read_pos Integer vector of measurement positions in the time series (same length as probs).
+//' @param k Integer, maximum gap size tolerated when computing \eqn{\Delta x}.
 //' @param min_diffs Integer, minimum number of lag-1 differences required to produce an estimate (default -1 = auto).
 //'
 //' @return A vector with the following items:
@@ -25,9 +26,13 @@
 //'   \item **Number of adjacent positions used for the estimate**
 //' }
 //'
+//' @export
 //'
-//' @noRd
-//' @keywords internal
+//' @examples
+//' estimateNoise(
+//'     c(0.1, 0.25, 0.3, 0.45, 0.5, 0.7, 0.7),
+//'     c(1L, 2L, 3L ,4L, 6L, 8L, 11L),
+//'     2L, 1)
 // [[Rcpp::export]]
 Rcpp::NumericVector estimateNoise(const Rcpp::NumericVector& probs,
                                   const Rcpp::IntegerVector& read_pos,

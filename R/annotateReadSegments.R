@@ -49,7 +49,7 @@ annotateReadSegments <- function(se, irlList, name) {
     }
     for (i in seq_along(irlList)) {
         .assertVector(x = irlList[[i]], type = "IRangesList")
-        rla <- .getReadLevelAssayNames(se)
+        rla <- getReadLevelAssayNames(se)
         if (length(rla) == 0) {
             cli_abort("{.arg se} must contain at least one read-level assay")
         }

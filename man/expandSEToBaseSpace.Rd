@@ -8,7 +8,7 @@ expandSEToBaseSpace(
   se,
   region = NULL,
   seqinfo = NULL,
-  keepAssays = .getReadLevelAssayNames(se),
+  keepAssays = getReadLevelAssayNames(se),
   ignore.strand = TRUE
 )
 }

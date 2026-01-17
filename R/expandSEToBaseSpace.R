@@ -45,7 +45,7 @@
 expandSEToBaseSpace <- function(se,
                                 region = NULL,
                                 seqinfo = NULL,
-                                keepAssays = .getReadLevelAssayNames(se),
+                                keepAssays = getReadLevelAssayNames(se),
                                 ignore.strand = TRUE) {
     # check arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")
@@ -62,7 +62,7 @@ expandSEToBaseSpace <- function(se,
         cli_abort("Not all positions in {.arg se} are within {.arg region}")
     }
     .assertVector(x = keepAssays, type = "character",
-                  validValues = .getReadLevelAssayNames(se))
+                  validValues = getReadLevelAssayNames(se))
     .assertScalar(x = ignore.strand, type = "logical", validValues = TRUE)
 
     # clean-up metadata

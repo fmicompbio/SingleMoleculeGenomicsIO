@@ -26,7 +26,7 @@ test_that("expandSEToBaseSpace works", {
                                    ignore.strand = TRUE)),
                        ncol(se)))
     expect_identical(SummarizedExperiment::assayNames(seExp1),
-                     .getReadLevelAssayNames(se))
+                     getReadLevelAssayNames(se))
     expect_identical(lapply(assay(se, "mod_prob"), colnames),
                      lapply(assay(seExp1, "mod_prob"), colnames))
     for (s in colnames(se)) {
@@ -49,7 +49,7 @@ test_that("expandSEToBaseSpace works", {
     expect_s4_class(seExp2, "RangedSummarizedExperiment")
     expect_identical(dim(seExp2), c(width(reg2), ncol(se)))
     expect_identical(SummarizedExperiment::assayNames(seExp2),
-                     .getReadLevelAssayNames(se))
+                     getReadLevelAssayNames(se))
     expect_identical(lapply(assay(se, "mod_prob"), colnames),
                      lapply(assay(seExp2, "mod_prob"), colnames))
     for (s in colnames(se)) {
