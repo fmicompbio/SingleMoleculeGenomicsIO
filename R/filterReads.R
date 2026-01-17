@@ -17,6 +17,7 @@
 #' @export
 #'
 #' @examples
+#' library(SummarizedExperiment)
 #' modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
 #'                           package = "SingleMoleculeGenomicsIO")
 #' se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
