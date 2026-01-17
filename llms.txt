@@ -42,12 +42,22 @@ Current contributors include:
   : Calculate or add summary statistics for read-level base modification
   data
 
+- [`checkSEValidity()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/checkSEValidity.md)
+  : Check internal consistency of SummarizedExperiment object
+
 - [`countMismatchStatePairs()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countMismatchStatePairs.md)
   : Count pairs of modified bases by distance and modification state for
   bam files where modifications are indicated by sequence mismatches
 
 - [`countStatePairs()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countStatePairs.md)
   : Count pairs of modified bases by distance and modification state
+
+- [`estimateNoise()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/estimateNoise.md)
+  : Estimation of noise variance for time series.
+
+- [`estimateSNR()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/estimateSNR.md)
+  : Estimate a time series Signal to Noise Ratio (SNR) given total and
+  noise variance components and (optionally) a background noise model.
 
 - [`expandSEToBaseSpace()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/expandSEToBaseSpace.md)
   :
@@ -72,6 +82,12 @@ Current contributors include:
 
 - [`flattenReadLevelAssay()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/flattenReadLevelAssay.md)
   : Summarize a read-level object to sample-level
+
+- [`getReadLevelAssayNames()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelAssayNames.md)
+  : Get names of assays containing read-level data
+
+- [`getReadLevelColDataNames()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelColDataNames.md)
+  : Get names of colData columns containing read-level data
 
 - [`plotReadStats()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/plotReadStats.md)
   : Plot distribution of QC statistics
@@ -102,6 +118,9 @@ Current contributors include:
 - [`regroupReads()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)
   [`regroupReadsByColData()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)
   : Regroup reads
+
+- [`removeAllNAReads()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/removeAllNAReads.md)
+  : Remove all-NA reads
 
 - [`sampleEntropy()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/sampleEntropy.md)
   : Sample Entropy of Time series signal
