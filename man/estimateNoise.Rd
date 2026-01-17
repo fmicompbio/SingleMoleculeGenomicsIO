@@ -11,7 +11,7 @@ estimateNoise(probs, read_pos, k, min_diffs)
 
 \item{read_pos}{Integer vector of measurement positions in the time series (same length as probs).}
 
-\item{k}{Integer, maximum gap size tolerated when computing Dx.}
+\item{k}{Integer, maximum gap size tolerated when computing \eqn{\Delta x}.}
 
 \item{min_diffs}{Integer, minimum number of lag-1 differences required to produce an estimate (default -1 = auto).}
 }
@@ -30,7 +30,8 @@ this function estimates the level of noise under the assumption of
 local continuity/smoothness.
 }
 \details{
-\strong{Noise variance} $\approx$ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
+\eqn{\mathrm{Noise variance} \approx 0.5\,\mathrm{Var}(\Delta x)}
+where \eqn{\Delta x} are lag-1 differences that may skip
 up to \emph{k} missing values. This follows from error propagation and the assumption
 of low varying x in adjacent measurements.
 }

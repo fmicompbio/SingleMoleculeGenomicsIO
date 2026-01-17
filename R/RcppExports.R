@@ -7,13 +7,14 @@
 #' local continuity/smoothness.
 #'
 #' @details
-#' **Noise variance** $\approx$ \code{0.5 * Var(Dx)} where Dx are lag-1 differences that may skip
-#'  up to *k* missing values. This follows from error propagation and the assumption
-#'  of low varying x in adjacent measurements.
+#' \eqn{\mathrm{Noise variance} \approx 0.5\,\mathrm{Var}(\Delta x)}
+#' where \eqn{\Delta x} are lag-1 differences that may skip
+#' up to *k* missing values. This follows from error propagation and the assumption
+#' of low varying x in adjacent measurements.
 #'
 #' @param probs Numeric vector of (observed) time series measurements.
 #' @param read_pos Integer vector of measurement positions in the time series (same length as probs).
-#' @param k Integer, maximum gap size tolerated when computing Dx.
+#' @param k Integer, maximum gap size tolerated when computing \eqn{\Delta x}.
 #' @param min_diffs Integer, minimum number of lag-1 differences required to produce an estimate (default -1 = auto).
 #'
 #' @return A vector with the following items:
