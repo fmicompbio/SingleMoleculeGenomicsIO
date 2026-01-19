@@ -1,21 +1,21 @@
-test_that("filterReadsBam works", {
+test_that("filterReadsModBam works", {
     modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam",
                                             "6mA_2_10reads.bam"),
                                package = "SingleMoleculeGenomicsIO")
     filtbamfiles <- tempfile(fileext = rep(".bam", length(modbamfiles)))
 
     # non-existing input files
-    expect_error(filterReadsBam(infiles = filtbamfiles,
-                                outfiles = filtbamfiles,
-                                modbase = "a"),
+    expect_error(filterReadsModBam(infiles = filtbamfiles,
+                                   outfiles = filtbamfiles,
+                                   modbase = "a"),
                  "not all .infiles. exist")
 
     # non-existing bam index
     tmpin <- tempfile(fileext = ".bam")
     expect_true(file.copy(from = modbamfiles[1], to = tmpin))
-    expect_error(filterReadsBam(infiles = tmpin, outfiles = filtbamfiles[1],
-                                modbase = "a",
-                                BPPARAM = BiocParallel::SerialParam()),
+    expect_error(filterReadsModBam(infiles = tmpin, outfiles = filtbamfiles[1],
+                                   modbase = "a",
+                                   BPPARAM = BiocParallel::SerialParam()),
                  "Failed to load the index")
     unlink(c(tmpin, filtbamfiles[1]))
 
@@ -56,11 +56,11 @@ test_that("filterReadsBam works", {
     # expected results (filtering out exactly one read for each filter)
     suppressMessages(
         expect_message(
-            res <- filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles,
-                                  modbase = "a", indexOutfiles = TRUE, minReadLength = 6746,
-                                  minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768,
-                                  minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
-                                  BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
+            res <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
+                                     modbase = "a", indexOutfiles = TRUE, minReadLength = 6746,
+                                     minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768,
+                                     minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
+                                     BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
         )
     )
     expect_true(all(file.exists(filtbamfiles)))
@@ -94,24 +94,24 @@ test_that("filterReadsBam works", {
     expect_identical(res$filtered_maxEntropy, c(1, 0))
 
     # pre-existing output files
-    expect_error(filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles, modbase = "a"))
+    expect_error(filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles, modbase = "a"))
 
     # pre-existing output files (overwriteOutfiles = TRUE)
-    res0 <- filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles,
-                           modbase = "a", indexOutfiles = FALSE,
-                           overwriteOutfiles = TRUE, minReadLength = 6746,
-                           minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR = -0.768,
-                           minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
-                           BPPARAM = BiocParallel::SerialParam(), verbose = FALSE)
+    res0 <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
+                              modbase = "a", indexOutfiles = FALSE,
+                              overwriteOutfiles = TRUE, minReadLength = 6746,
+                              minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR = -0.768,
+                              minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
+                              BPPARAM = BiocParallel::SerialParam(), verbose = FALSE)
     expect_identical(res, res0)
     unlink(filtbamfiles)
     unlink(paste0(filtbamfiles, ".bai"))
 
     # expected results (using default parameters that deactivates all filters)
-    res2 <- filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles,
-                           modbase = "a", indexOutfiles = FALSE,
-                           BPPARAM = BiocParallel::MulticoreParam(workers = 2L),
-                           verbose = FALSE)
+    res2 <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
+                              modbase = "a", indexOutfiles = FALSE,
+                              BPPARAM = BiocParallel::MulticoreParam(workers = 2L),
+                              verbose = FALSE)
     expect_true(all(file.exists(filtbamfiles)))
     expect_false(any(file.exists(paste0(filtbamfiles, ".bai"))))
     expect_s3_class(res2, "data.frame")
@@ -138,21 +138,21 @@ test_that("filterReadsBam works", {
                          package = "SingleMoleculeGenomicsIO")
     outbam <- tempfile(fileext = ".bam")
     # ... keeping them
-    res3 <- filterReadsBam(infiles = inbam, outfiles = outbam,
-                           modbase = "a", indexOutfiles = FALSE,
-                           BPPARAM = BiocParallel::SerialParam(),
-                           verbose = FALSE)
+    res3 <- filterReadsModBam(infiles = inbam, outfiles = outbam,
+                              modbase = "a", indexOutfiles = FALSE,
+                              BPPARAM = BiocParallel::SerialParam(),
+                              verbose = FALSE)
     expect_identical(res3[, c("total", "retained")], data.frame(total = 3, retained = 3))
     tmp3 <- Rsamtools::scanBam(file = outbam)
     expect_length(tmp3[[1]]$qname, 3L)
     unlink(outbam)
     # ... dropping them
-    res4 <- filterReadsBam(infiles = inbam, outfiles = outbam,
-                           modbase = "a", indexOutfiles = FALSE,
-                           keepUnmapped = FALSE, keepSecondary = FALSE,
-                           keepSupplementary = FALSE,
-                           BPPARAM = BiocParallel::SerialParam(),
-                           verbose = FALSE)
+    res4 <- filterReadsModBam(infiles = inbam, outfiles = outbam,
+                              modbase = "a", indexOutfiles = FALSE,
+                              keepUnmapped = FALSE, keepSecondary = FALSE,
+                              keepSupplementary = FALSE,
+                              BPPARAM = BiocParallel::SerialParam(),
+                              verbose = FALSE)
     expect_identical(res4[, c("total", "retained", "filtered_unmapped",
                               "filtered_secondary", "filtered_supplementary")],
                      data.frame(total = 3, retained = 0, filtered_unmapped = 1,
@@ -165,11 +165,11 @@ test_that("filterReadsBam works", {
     # expected results (passing precalculated noiseCoefs that result in stricter filtering)
     suppressMessages(
         expect_message(
-            res5 <- filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles,
-                                  modbase = "a", indexOutfiles = TRUE, minReadLength = 6746,
-                                  minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768, noiseCoef=c(0,0.29),
-                                  minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
-                                  BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
+            res5 <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
+                                      modbase = "a", indexOutfiles = TRUE, minReadLength = 6746,
+                                      minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768, noiseCoef=c(0,0.29),
+                                      minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
+                                      BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
         )
     )
     expect_true(all(file.exists(filtbamfiles)))
@@ -230,23 +230,23 @@ test_that("estimateNoise and estimateSNR work", {
                                  betas = 1.0, features = c(1, 0.2),
                                  noise_mode = "floor"),
                      stats::setNames(rep(NA_real_, 5),
-                              c("snr","signal","noise","baseline","raw")))
+                                     c("snr","signal","noise","baseline","raw")))
     expect_identical(estimateSNR(totalVar = 1.0, noiseRaw = Inf, eps = 0.01,
                                  betas = 1.0, features = c(1, 0.2),
                                  noise_mode = "raw"),
                      stats::setNames(rep(NA_real_, 5),
-                              c("snr","signal","noise","baseline","raw")))
+                                     c("snr","signal","noise","baseline","raw")))
     expect_identical(estimateSNR(totalVar = 1.0, noiseRaw = 1.0, eps = 0.01,
                                  betas = 2.0, features = .Machine$double.xmax,
                                  noise_mode = "floor"),
                      stats::setNames(rep(NA_real_, 5),
-                              c("snr","signal","noise","baseline","raw")))
+                                     c("snr","signal","noise","baseline","raw")))
     expect_identical(estimateSNR(totalVar = -.Machine$double.xmax,
                                  noiseRaw = .Machine$double.xmax, eps = 0.01,
                                  betas = 2.0, features = .Machine$double.xmax,
                                  noise_mode = "raw"),
                      stats::setNames(rep(NA_real_, 5),
-                              c("snr","signal","noise","baseline","raw")))
+                                     c("snr","signal","noise","baseline","raw")))
 
     # betas, features length mismatch
     expect_error(
@@ -272,8 +272,8 @@ test_that("estimateNoise and estimateSNR work", {
     # Baseline needed but not finite betas:
     expect_error(
         estimateSNR(1, 0.05, 1e-3,
-                        betas = c(0.01, NA), features = c(1, NA_real_),
-                        noise_mode = "floor"),
+                    betas = c(0.01, NA), features = c(1, NA_real_),
+                    noise_mode = "floor"),
         "Non-finite value"
     )
 
@@ -298,6 +298,3 @@ test_that("estimateNoise and estimateSNR work", {
     )
 
 })
-
-
-

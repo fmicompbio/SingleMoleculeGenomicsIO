@@ -46,13 +46,13 @@
 #'     calls are considered "low confidence".
 #' @param BPPARAM A \code{\link[BiocParallel]{BiocParallelParam}} object that
 #'     controls the number of parallel CPU threads to use for some of the steps
-#'     in \code{filterReadsBam()}. The default value is
+#'     in \code{filterReadsModBam()}. The default value is
 #'     (\code{\link[BiocParallel]{MulticoreParam}(4L, RNGseed = 42L)}).
 #' @param verbose Logical scalar. If \code{TRUE}, report on progress.
 #'
-#' @return \code{filterReadsBam} is called for its side effect of generating
-#'     new bam files containing the subset of bam records from input bam files
-#'     that pass all filtering criteria. In addition, it returns a
+#' @return \code{filterReadsModBam} is called for its side effect of generating
+#'     new modBam files containing the subset of bam records from input modBam
+#'     files that pass all filtering criteria. In addition, it returns a
 #'     \code{data.frame} with one row per \code{infiles} giving the numbers of
 #'     bam records that were read in \code{total}, that were \code{retained} in
 #'     the \code{outfiles} and that were filtered-out by reason of exclusion.
@@ -61,11 +61,11 @@
 #' modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam", "6mA_2_10reads.bam"),
 #'                            package = "SingleMoleculeGenomicsIO")
 #' filtbamfiles <- tempfile(fileext = rep(".bam", length(modbamfiles)))
-#' res <- filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles,
-#'                       modbase = "a", indexOutfiles = FALSE, minReadLength = 6746,
-#'                       minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768,
-#'                       minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
-#'                       BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
+#' res <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
+#'                          modbase = "a", indexOutfiles = FALSE, minReadLength = 6746,
+#'                          minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768,
+#'                          minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
+#'                          BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
 #' res
 #' unlink(filtbamfiles)
 #'
@@ -75,25 +75,25 @@
 #' @importFrom cli cli_abort cli_alert_info
 #'
 #' @export
-filterReadsBam <- function(infiles,
-                           outfiles,
-                           modbase,
-                           indexOutfiles = TRUE,
-                           overwriteOutfiles = FALSE,
-                           keepUnmapped = TRUE,
-                           keepSecondary = TRUE,
-                           keepSupplementary = TRUE,
-                           minReadLength = 0,
-                           minAlignedLength = 0,
-                           minAlignedFraction = 0,
-                           minQscore = 0.0,
-                           minSNR = -Inf,
-                           maxFracLowConf = 1.0,
-                           maxEntropy = Inf,
-                           noiseCoef = c(NA_real_, NA_real_),
-                           LowConf = 0.7,
-                           BPPARAM = MulticoreParam(4L, RNGseed = 42L),
-                           verbose = FALSE) {
+filterReadsModBam <- function(infiles,
+                              outfiles,
+                              modbase,
+                              indexOutfiles = TRUE,
+                              overwriteOutfiles = FALSE,
+                              keepUnmapped = TRUE,
+                              keepSecondary = TRUE,
+                              keepSupplementary = TRUE,
+                              minReadLength = 0,
+                              minAlignedLength = 0,
+                              minAlignedFraction = 0,
+                              minQscore = 0.0,
+                              minSNR = -Inf,
+                              maxFracLowConf = 1.0,
+                              maxEntropy = Inf,
+                              noiseCoef = c(NA_real_, NA_real_),
+                              LowConf = 0.7,
+                              BPPARAM = MulticoreParam(4L, RNGseed = 42L),
+                              verbose = FALSE) {
     # validate arguments
     .assertVector(x = infiles, type = "character")
     i <- !file.exists(infiles)

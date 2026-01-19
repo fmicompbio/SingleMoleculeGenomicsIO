@@ -11,7 +11,7 @@
 
 //' Write records from \code{infile} to \code{outfile} if they pass filter criteria.
 //'
-//' Workhorse function for filterReadsBam. Parses records from a single
+//' Workhorse function for filterReadsModBam. Parses records from a single
 //' \code{infile}, calculate read statistics and writes the record to
 //' a single \code{outfile} if the record passes all criteria defined by
 //' the filtering arguments.
