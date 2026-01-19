@@ -19,7 +19,7 @@
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractSeqContext.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterPositions.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReads.html</loc></url>
-<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReadsBam.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReadsModBam.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/flattenReadLevelAssay.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelAssayNames.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelColDataNames.html</loc></url>

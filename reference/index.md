@@ -46,7 +46,7 @@
 - [`filterReads()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReads.md)
   : Filter reads
 
-- [`filterReadsBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReadsBam.md)
+- [`filterReadsModBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReadsModBam.md)
   :
 
   Write bam records from `infile` to `outfile` if they pass filter

@@ -13,7 +13,7 @@ this order: `keepUnmapped`, `keepSecondary`, `keepSupplementary`,
 ## Usage
 
 ``` r
-filterReadsBam(
+filterReadsModBam(
   infiles,
   outfiles,
   modbase,
@@ -131,7 +131,7 @@ filterReadsBam(
   A
   [`BiocParallelParam`](https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html)
   object that controls the number of parallel CPU threads to use for
-  some of the steps in `filterReadsBam()`. The default value is
+  some of the steps in `filterReadsModBam()`. The default value is
   ([`MulticoreParam`](https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html)`(4L, RNGseed = 42L)`).
 
 - verbose:
@@ -140,12 +140,12 @@ filterReadsBam(
 
 ## Value
 
-`filterReadsBam` is called for its side effect of generating new bam
-files containing the subset of bam records from input bam files that
-pass all filtering criteria. In addition, it returns a `data.frame` with
-one row per `infiles` giving the numbers of bam records that were read
-in `total`, that were `retained` in the `outfiles` and that were
-filtered-out by reason of exclusion.
+`filterReadsModBam` is called for its side effect of generating new
+modBam files containing the subset of bam records from input modBam
+files that pass all filtering criteria. In addition, it returns a
+`data.frame` with one row per `infiles` giving the numbers of bam
+records that were read in `total`, that were `retained` in the
+`outfiles` and that were filtered-out by reason of exclusion.
 
 ## Author
 
@@ -157,23 +157,23 @@ Michael Stadler
 modbamfiles <- system.file("extdata", c("6mA_1_10reads.bam", "6mA_2_10reads.bam"),
                            package = "SingleMoleculeGenomicsIO")
 filtbamfiles <- tempfile(fileext = rep(".bam", length(modbamfiles)))
-res <- filterReadsBam(infiles = modbamfiles, outfiles = filtbamfiles,
-                      modbase = "a", indexOutfiles = FALSE, minReadLength = 6746,
-                      minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768,
-                      minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
-                      BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
+res <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
+                         modbase = "a", indexOutfiles = FALSE, minReadLength = 6746,
+                         minAlignedLength = 6896, minAlignedFraction = 0.56, minSNR=-0.768,
+                         minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
+                         BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ merging 1 filtered chunks
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ done filtering: retained 6 of 10 records (60%)
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ merging 1 filtered chunks
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ done filtering: retained 7 of 10 records (70%)
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 res
 #>   sample
 #> 1     s1
@@ -182,8 +182,8 @@ res
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #> 2 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpdMG89u/file65bb4b0cdd32.bam
-#> 2 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpdMG89u/file65bb398e241c.bam
+#> 1  /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpjKCSNB/file5163721583e.bam
+#> 2 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpjKCSNB/file51631e28521a.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        6                 0                  0                      0
 #> 2    10        7                 0                  0                      0
