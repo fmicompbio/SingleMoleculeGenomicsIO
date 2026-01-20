@@ -413,6 +413,39 @@ with the total number of alignments to calculate the fraction of reads to be
 sampled (in this small case, 0.5), and each alignment will be retained with 
 this probability. 
 
+## Label reads by sequence variants
+
+The `readModBam` and `readMismatchBam` functions allow to automatically label
+reads using variant positions (`variantPositions` argument):
+
+```{r read-varpositions}
+# create GPos object with reference sequence variant positions
+varpos <- GPos(seqnames = "chr1", pos = c(6937731, 6937788, 6937843, 6937857,
+                                          6937873, 6937931, 6938932, 6939070))
+
+# load and label reads at varpos
+se_varpos <- readModBam(bamfiles = modbamfiles, 
+                        modbase = "a", 
+                        regions = "chr1:6925000-69500000",
+                        variantPositions = varpos,
+                        verbose = FALSE, 
+                        BPPARAM = BiocParallel::SerialParam(RNGseed = 1327828L))
+```
+
+Read bases at `variantPositions` will be extracted and concatenated to create
+a variant label for each read, using `'-'` for non-overlapping positions.
+The resulting labels are stored for each sample in the `variant_label` column
+of `readInfo`:
+
+```{r readlabels-sample1}
+se_varpos$readInfo$sample1$variant_label
+```
+
+In a diploid experimental system with known heterozygous positions, this allows
+for example to measure allele specific signals by grouping reads based on these
+variant labels. A step-by-step example illustrating this procedure is
+available in the [footprintR book](https://fmicompbio.github.io/footprintR_book/grouping-reads.html#sec-group-by-sequence).
+
 # Load data from other file types {#other-formats}
 
 In the previous sections we illustrated how to read data from `modBam` files
