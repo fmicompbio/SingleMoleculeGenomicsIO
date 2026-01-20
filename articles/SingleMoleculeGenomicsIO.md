@@ -77,10 +77,10 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [121ms]
+#> ✔ finding unique genomic positions... [84ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [404ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [238ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -433,14 +433,12 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           verbose = TRUE, 
                           BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [33ms]
+#> ✔ finding unique genomic positions... [22ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [57ms]
+#> ℹ collapsed 11211 positions to 7967 unique ones
+#> ✔ collapsed 11211 positions to 7967 unique ones [38ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 se_summary2
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
@@ -644,23 +642,22 @@ se_sample <- readModBam(bamfiles = modbamfiles,
                         verbose = TRUE, 
                         BPPARAM = BiocParallel::SerialParam(RNGseed = 1327828L))
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ sampling alignments with probability 0.5
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ reading alignments overlapping 1 region
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ read 5 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ sampling alignments with probability 0.5
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ reading alignments overlapping 1 region
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ read 7 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [54ms]
+#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
+#> ℹ sampling alignments with probability 0.5
+#> ℹ reading alignments overlapping 1 region
+#> ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
+#> ℹ read 5 alignments
+#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
+#> ℹ sampling alignments with probability 0.5
+#> ℹ reading alignments overlapping 1 region
+#> ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
+#> ℹ read 7 alignments
+#> ℹ finding unique genomic positions...
+#> ✔ finding unique genomic positions... [25ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [327ms]
+#> ℹ collapsed 31912 positions to 7238 unique ones
+#> ✔ collapsed 31912 positions to 7238 unique ones [166ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 se_sample$n_reads
 #> [1] 5 7
 ```
@@ -1039,7 +1036,7 @@ sp
 sessioninfo::session_info()
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value
-#>  version  R Under development (unstable) (2026-01-18 r89306)
+#>  version  R Under development (unstable) (2026-01-19 r89308)
 #>  os       macOS Sequoia 15.7.3
 #>  system   aarch64, darwin20
 #>  ui       X11
@@ -1047,7 +1044,7 @@ sessioninfo::session_info()
 #>  collate  en_US.UTF-8
 #>  ctype    en_US.UTF-8
 #>  tz       UTC
-#>  date     2026-01-19
+#>  date     2026-01-20
 #>  pandoc   3.1.11 @ /usr/local/bin/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -1114,15 +1111,15 @@ sessioninfo::session_info()
 #>  rmarkdown                  2.30       2025-09-28 [1] CRAN (R 4.6.0)
 #>  Rsamtools                  2.27.0     2025-10-31 [1] Bioconductor 3.23 (R 4.6.0)
 #>  rtracklayer                1.71.3     2025-12-14 [1] Bioconductor 3.23 (R 4.6.0)
-#>  S4Arrays                 * 1.11.1     2026-01-19 [1] Github (Bioconductor/S4Arrays@b7ddb8c)
+#>  S4Arrays                 * 1.11.1     2026-01-20 [1] Github (Bioconductor/S4Arrays@b7ddb8c)
 #>  S4Vectors                * 0.49.0     2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  S7                         0.2.1      2025-11-14 [1] CRAN (R 4.6.0)
 #>  sass                       0.4.10     2025-04-11 [1] CRAN (R 4.6.0)
 #>  scales                     1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
 #>  Seqinfo                  * 1.1.0      2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  sessioninfo                1.2.3      2025-02-05 [1] CRAN (R 4.6.0)
-#>  SingleMoleculeGenomicsIO * 0.1.0      2026-01-19 [1] Bioconductor
-#>  SparseArray              * 1.11.10    2026-01-19 [1] Github (Bioconductor/SparseArray@fa5a507)
+#>  SingleMoleculeGenomicsIO * 0.1.0      2026-01-20 [1] Bioconductor
+#>  SparseArray              * 1.11.10    2026-01-20 [1] Github (Bioconductor/SparseArray@fa5a507)
 #>  SummarizedExperiment     * 1.41.0     2025-10-31 [1] Bioconductor 3.23 (R 4.6.0)
 #>  systemfonts                1.3.1      2025-10-01 [1] CRAN (R 4.6.0)
 #>  textshaping                1.0.4      2025-10-10 [1] CRAN (R 4.6.0)

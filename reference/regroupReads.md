@@ -72,10 +72,6 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ reading alignments overlapping 1 region
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
-#> ⠙   1 done (88/s) | 12ms
-#> ⠙   1 done (53/s) | 20ms
-#> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ removed 1724 unaligned (e.g. soft-masked) of 25090 called bases
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ read 3 alignments
@@ -89,11 +85,11 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
 #> ℹ read 2 alignments
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [44ms]
+#> ✔ finding unique genomic positions... [27ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [220ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [192ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 # number of reads per sample

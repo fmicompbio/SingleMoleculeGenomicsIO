@@ -230,19 +230,19 @@ se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
 #> ℹ finding positions with NCG
 #> ℹ read 184 alignments
 #> ℹ finding positions with NCG
-#> ✔ finding positions with NCG [87ms]
+#> ✔ finding positions with NCG [127ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [64ms]
+#> ✔ finding unique genomic positions... [36ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ collapsed 50 positions to 38 unique ones
-#> ✔ collapsed 50 positions to 38 unique ones [26ms]
+#> ✔ collapsed 50 positions to 38 unique ones [19ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [250ms]
+#> ✔ extracting sequence contexts [218ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 ```

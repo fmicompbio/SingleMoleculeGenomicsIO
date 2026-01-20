@@ -96,8 +96,7 @@ object with the extracted sequences.
 ## See also
 
 [`modkit` software](https://nanoporetech.github.io/modkit), [`bedMethyl`
-format
-description](https://nanoporetech.github.io/modkit/intro_bedmethyl.html#description-of-bedmethyl-output),
+format description](https://www.encodeproject.org/data-standards/wgbs/),
 [`SummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
 for the returned object type,
 [`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html)
