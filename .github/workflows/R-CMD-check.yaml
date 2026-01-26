@@ -73,6 +73,16 @@ jobs:
           extra-packages: any::rcmdcheck
           pak-version: devel
 
+      - name: Install and expose gettext (macOS, data.table fails to find it)
+        if: runner.os == 'macOS'
+        run: |
+          brew install gettext
+          mkdir -p ~/.R
+          cat <<EOF >> ~/.R/Makevars
+          CPPFLAGS += -I$(brew --prefix gettext)/include
+          LDFLAGS  += -L$(brew --prefix gettext)/lib
+          EOF
+
       - name: Install R package dependencies
         run: |
           local_deps <- remotes::local_package_deps(dependencies = TRUE)
