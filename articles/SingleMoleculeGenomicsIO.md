@@ -125,13 +125,13 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [101ms]
+#> ✔ finding unique genomic positions... [124ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [19ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [24ms]
 #> 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [465ms]
+#> ✔ extracting sequence contexts [553ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -540,10 +540,10 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [24ms]
+#> ✔ finding unique genomic positions... [28ms]
 #> 
 #> ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [40ms]
+#> ✔ collapsed 11211 positions to 7967 unique ones [51ms]
 #> 
 se_summary2
 #> class: RangedSummarizedExperiment 
@@ -633,6 +633,9 @@ se_sample <- readModBam(bamfiles = modbamfiles,
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
 #> ℹ sampling alignments with probability 0.5
 #> ℹ reading alignments overlapping 1 region
+#>  ■■■■■■■                           20% |  ETA:  0s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% |  ETA:  0s
+#> 
 #> ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
 #> ℹ read 5 alignments
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
@@ -641,10 +644,10 @@ se_sample <- readModBam(bamfiles = modbamfiles,
 #> ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
 #> ℹ read 7 alignments
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [27ms]
+#> ✔ finding unique genomic positions... [30ms]
 #> 
 #> ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [157ms]
+#> ✔ collapsed 31912 positions to 7238 unique ones [250ms]
 #> 
 se_sample$n_reads
 #> [1] 5 7
@@ -1070,7 +1073,7 @@ res
 #>                                                                                infile
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpC3E5jf/file5e7344a10601.bam
+#> 1 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpMIlCq9/file5d9e2bdbc231.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        8                 0                  0                      0
 #>   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction

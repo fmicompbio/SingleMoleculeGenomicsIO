@@ -178,13 +178,13 @@ observations that are likely to represent sequencing error.</p>
 <span>                 BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[101ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[124ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 17739 positions to 7967 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[19ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[24ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting sequence contexts</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> extracting sequence contexts <span style="color: #B2B2B2;">[465ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> extracting sequence contexts <span style="color: #B2B2B2;">[553ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="va">se</span></span>
 <span><span class="co">#&gt; class: RangedSummarizedExperiment </span></span>
@@ -544,10 +544,10 @@ imported using <code>SingleMoleculeGenomicsIO</code> (see below).</p>
 <span>                          BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[24ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[28ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 11211 positions to 7967 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 11211 positions to 7967 unique ones <span style="color: #B2B2B2;">[40ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 11211 positions to 7967 unique ones <span style="color: #B2B2B2;">[51ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="va">se_summary2</span></span>
 <span><span class="co">#&gt; class: RangedSummarizedExperiment </span></span>
@@ -631,6 +631,9 @@ sequences to sample reads from.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
+<span><span class="co">#&gt;  <span style="color: #00BB00;">■■■■■■■                         </span>  20% |  ETA:  0s</span></span>
+<span><span class="co">#&gt;  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ </span> 100% |  ETA:  0s</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> removed 150 unaligned (e.g. soft-masked) of 41618 called bases</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> read 5 alignments</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span></span>
@@ -639,10 +642,10 @@ sequences to sample reads from.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> removed 1165 unaligned (e.g. soft-masked) of 80587 called bases</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> read 7 alignments</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[27ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[30ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 31912 positions to 7238 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 31912 positions to 7238 unique ones <span style="color: #B2B2B2;">[157ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 31912 positions to 7238 unique ones <span style="color: #B2B2B2;">[250ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="va">se_sample</span><span class="op">$</span><span class="va">n_reads</span></span>
 <span><span class="co">#&gt; [1] 5 7</span></span></code></pre></div>
@@ -1088,7 +1091,7 @@ the package.</p>
 <span><span class="co">#&gt;                                                                                infile</span></span>
 <span><span class="co">#&gt; 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span></span>
 <span><span class="co">#&gt;                                                                             outfile</span></span>
-<span><span class="co">#&gt; 1 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpC3E5jf/file5e7344a10601.bam</span></span>
+<span><span class="co">#&gt; 1 /var/folders/kg/7q73ww8s3llgyl61c9z_j5g40000gn/T//RtmpMIlCq9/file5d9e2bdbc231.bam</span></span>
 <span><span class="co">#&gt;   total retained filtered_unmapped filtered_secondary filtered_supplementary</span></span>
 <span><span class="co">#&gt; 1    10        8                 0                  0                      0</span></span>
 <span><span class="co">#&gt;   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction</span></span>

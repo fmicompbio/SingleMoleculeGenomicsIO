@@ -59,6 +59,11 @@ regionStringToGRanges(regions, seqinfo = NULL, maxend = .Machine$integer.max)
   not given in `regions` (for example "REF:START") and was also not
   provided through other parameters.
 
+## Value
+
+A [`GRanges`](https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html)
+object.
+
 ## Author
 
 Michael Stadler
