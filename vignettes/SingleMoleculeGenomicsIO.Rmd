@@ -65,7 +65,7 @@ BiocManager::install("fmicompbio/SingleMoleculeGenomicsIO")
 
 # Load required packages
 
-```{r, message=FALSE}
+```{r load-pkgs, message=FALSE}
 library(SingleMoleculeGenomicsIO)
 library(SummarizedExperiment)
 library(Biostrings)
@@ -153,7 +153,7 @@ rowRanges(se)
 The positions are stranded, as base modifications can be observed on either of 
 the two strands:
 
-```{r}
+```{r tabulate-strand}
 table(strand(se))
 ```
 
@@ -162,7 +162,7 @@ modification value indeed correspond to an 'A' in the genome sequence.
 Discrepancies here may arise from, e.g., sequencing errors or differences 
 between the genome sequence of the studied subjects and the reference sequence.
 
-```{r}
+```{r tabulate-seqcontext}
 table(rowRanges(se)$sequenceContext)
 ```
 
@@ -513,7 +513,7 @@ which bases represent modified and unmodified states, respectively, are
 determined based on the arguments `sequenceContext`, `readBaseUnmod` and 
 `readBaseMod`.
 
-```{r}
+```{r read-data-mismatchbam}
 # bisulfite sequencing bam file aligned with QuasR::qAlign
 quasrbisfile <- system.file("extdata", "BisSeq_quasr_paired.bam",
                             package = "SingleMoleculeGenomicsIO")
@@ -577,7 +577,7 @@ the data for downstream analyses.
 To illustrate the position-level filtering, let us consider the `se` object 
 obtained from the two `modBam` files above: 
 
-```{r}
+```{r show-se-before-filtering}
 se
 ```
 
@@ -592,7 +592,7 @@ trinucleotide contexts with a central C followed by a G (and preceded by any
 base).
 
 
-```{r}
+```{r filter-positions}
 se_filt <- filterPositions(
     se, 
     filters = c("sequenceContext", "coverage"),
@@ -670,7 +670,7 @@ which accepts the same filter criteria as `filterReads()` above. Here we
 illustrate the process using one of the example `modBam` files provided with 
 the package. 
 
-```{r}
+```{r filter-reads-modbam}
 # input file
 modbamfile <- system.file("extdata", "6mA_1_10reads.bam", 
                           package = "SingleMoleculeGenomicsIO")
