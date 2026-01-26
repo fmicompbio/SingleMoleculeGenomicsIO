@@ -106,8 +106,8 @@ column (sample) corresponding to a position-by-read
 [`modkit` software](https://nanoporetech.github.io/modkit),
 [`SummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
 for the returned object type,
-[`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html)
-for the function used to read the input files
+[`fread`](https://rdrr.io/pkg/data.table/man/fread.html) for the
+function used to read the input files
 
 ## Author
 

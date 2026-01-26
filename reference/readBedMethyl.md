@@ -99,8 +99,8 @@ object with the extracted sequences.
 format description](https://www.encodeproject.org/data-standards/wgbs/),
 [`SummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
 for the returned object type,
-[`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html)
-for the function used to read the input files,
+[`fread`](https://rdrr.io/pkg/data.table/man/fread.html) for the
+function used to read the input files,
 [`addSeqContext`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/addSeqContext.md)
 used to add the sequence context.
 
