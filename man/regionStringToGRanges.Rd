@@ -22,6 +22,9 @@ be used for "END".}
 where it is not given in \code{regions} (for example "REF:START")
 and was also not provided through other parameters.}
 }
+\value{
+A \code{\link[GenomicRanges]{GRanges}} object.
+}
 \description{
 This function takes a character vector with one or several strings
 corresponding to genomic regions and converts them to a
@@ -45,6 +48,7 @@ corresponding to the sequences in \code{seqinfo}.
 regionStringToGRanges("chr1:6940000-6955000")
 regionStringToGRanges("chr1", seqinfo = c(chr1 = 999))
 regionStringToGRanges("chr1")
+
 }
 \author{
 Michael Stadler

@@ -311,12 +311,14 @@
 #' @importFrom utils strcapture
 #' @importFrom stats setNames
 #'
-#' @export
+#' @returns A \code{\link[GenomicRanges]{GRanges}} object.
 #'
 #' @examples
 #' regionStringToGRanges("chr1:6940000-6955000")
 #' regionStringToGRanges("chr1", seqinfo = c(chr1 = 999))
 #' regionStringToGRanges("chr1")
+#'
+#' @export
 regionStringToGRanges <- function(regions,
                                   seqinfo = NULL,
                                   maxend = .Machine$integer.max) {
