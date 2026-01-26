@@ -138,7 +138,7 @@ se <- readModBam(bamfiles = modbamfiles,
                  verbose = TRUE, 
                  sequenceContextWidth = 1, 
                  sequenceReference = reffile,
-                 BPPARAM = BiocParallel::SerialParam())
+                 BPPARAM = SerialParam())
 se
 ```
 
@@ -363,7 +363,7 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           modbase = "a",
                           level = "summary",
                           verbose = TRUE, 
-                          BPPARAM = BiocParallel::SerialParam())
+                          BPPARAM = SerialParam())
 se_summary2
 ```
 
@@ -403,7 +403,7 @@ se_sample <- readModBam(bamfiles = modbamfiles,
                         nAlnsToSample = 5, 
                         seqnamesToSampleFrom = "chr1", 
                         verbose = TRUE, 
-                        BPPARAM = BiocParallel::SerialParam(RNGseed = 1327828L))
+                        BPPARAM = SerialParam(RNGseed = 1327828L))
 se_sample$n_reads
 ```
 
@@ -429,7 +429,7 @@ se_varpos <- readModBam(bamfiles = modbamfiles,
                         regions = "chr1:6925000-69500000",
                         variantPositions = varpos,
                         verbose = FALSE, 
-                        BPPARAM = BiocParallel::SerialParam(RNGseed = 1327828L))
+                        BPPARAM = SerialParam(RNGseed = 1327828L))
 ```
 
 Read bases at `variantPositions` will be extracted and concatenated to create
@@ -468,12 +468,12 @@ extrfile <- system.file("extdata", "modkit_extract_rc_5mC_1.tsv.gz",
 readModkitExtract(extrfile, modbase = "m", filter = NULL,
                   sequenceContextWidth = 3,
                   sequenceReference = reffile, 
-                  BPPARAM = BiocParallel::SerialParam())
+                  BPPARAM = SerialParam())
 # only read entries that are not suggested to be filtered out
 readModkitExtract(extrfile, modbase = "m", filter = "modkit",
                   sequenceContextWidth = 3,
                   sequenceReference = reffile, 
-                  BPPARAM = BiocParallel::SerialParam())
+                  BPPARAM = SerialParam())
 ```
 
 Summary-level data can also be provided as `bedMethyl` files (containing
@@ -494,7 +494,7 @@ readBedMethyl(bedmethylfiles,
               modbase = "m",
               sequenceContextWidth = 3,
               sequenceReference = reffile, 
-              BPPARAM = BiocParallel::SerialParam())
+              BPPARAM = SerialParam())
 ```
 
 In addition to the `modBam` files, where modification information is 
@@ -525,7 +525,8 @@ readMismatchBam(bamfiles = quasrbisfile,
                 sequenceContext = "C", 
                 sequenceReference = reffile,
                 readBaseUnmod = "T", 
-                readBaseMod = "C")
+                readBaseMod = "C", 
+                BPPARAM = SerialParam())
 
 # bisulfite sequencing bam file aligned with Bismark
 bismarkbisfile <- system.file("extdata", "BisSeq_bismark_paired.bam",
@@ -538,7 +539,8 @@ readMismatchBam(bamfiles = bismarkbisfile,
                 sequenceContext = "C", 
                 sequenceReference = reffile,
                 readBaseUnmod = "T", 
-                readBaseMod = "C")
+                readBaseMod = "C", 
+                BPPARAM = SerialParam())
 ```
 
 The table below compares the capabilities of the provided reading functions. 
