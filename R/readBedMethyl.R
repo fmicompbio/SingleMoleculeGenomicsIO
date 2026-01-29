@@ -56,7 +56,7 @@
 #'               BPPARAM = BiocParallel::SerialParam())
 #'
 #' @seealso [`modkit` software](https://nanoporetech.github.io/modkit),
-#'     [`bedMethyl` format description](https://nanoporetech.github.io/modkit/intro_bedmethyl.html#description-of-bedmethyl-output),
+#'     [`bedMethyl` format description](https://www.encodeproject.org/data-standards/wgbs/),
 #'     \code{\link[SummarizedExperiment]{SummarizedExperiment}} for the returned object type,
 #'     \code{\link[data.table]{fread}} for the function used to read the input files,
 #'     \code{\link{addSeqContext}} used to add the sequence context.

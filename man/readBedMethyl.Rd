@@ -81,7 +81,7 @@ readBedMethyl(bmfile, modbase = "m",
 }
 \seealso{
 \href{https://nanoporetech.github.io/modkit}{\code{modkit} software},
-\href{https://nanoporetech.github.io/modkit/intro_bedmethyl.html#description-of-bedmethyl-output}{\code{bedMethyl} format description},
+\href{https://www.encodeproject.org/data-standards/wgbs/}{\code{bedMethyl} format description},
 \code{\link[SummarizedExperiment]{SummarizedExperiment}} for the returned object type,
 \code{\link[data.table]{fread}} for the function used to read the input files,
 \code{\link{addSeqContext}} used to add the sequence context.
