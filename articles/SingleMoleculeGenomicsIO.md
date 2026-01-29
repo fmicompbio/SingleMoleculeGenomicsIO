@@ -125,13 +125,13 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [139ms]
+#> ✔ finding unique genomic positions... [159ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [27ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [33ms]
 #> 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [744ms]
+#> ✔ extracting sequence contexts [830ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -539,12 +539,14 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           verbose = TRUE, 
                           BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [52ms]
+#> ✔ finding unique genomic positions... [63ms]
 #> 
-#> ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [60ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ collapsed 11211 positions to 7967 unique ones
+#> ✔ collapsed 11211 positions to 7967 unique ones [81ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]
 se_summary2
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
@@ -630,22 +632,23 @@ se_sample <- readModBam(bamfiles = modbamfiles,
                         verbose = TRUE, 
                         BPPARAM = SerialParam(RNGseed = 1327828L))
 #> ℹ extracting base modifications from modBAM files
-#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ℹ sampling alignments with probability 0.5
-#> ℹ reading alignments overlapping 1 region
-#> ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
-#> ℹ read 5 alignments
-#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ℹ sampling alignments with probability 0.5
-#> ℹ reading alignments overlapping 1 region
-#> ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
-#> ℹ read 7 alignments
-#> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [37ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ sampling alignments with probability 0.5
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ reading alignments overlapping 1 region
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ read 5 alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ sampling alignments with probability 0.5
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ reading alignments overlapping 1 region
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ read 7 alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ finding unique genomic positions...
+#> ✔ finding unique genomic positions... [47ms]
 #> 
-#> ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [221ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ collapsed 31912 positions to 7238 unique ones
+#> ✔ collapsed 31912 positions to 7238 unique ones [278ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]
 se_sample$n_reads
 #> [1] 5 7
 ```
@@ -1062,15 +1065,16 @@ res <- filterReadsModBam(infiles = modbamfile,
                          BPPARAM = BiocParallel::SerialParam(),
                          verbose = TRUE)
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ℹ merging 1 filtered chunks
-#> ℹ done filtering: retained 8 of 10 records (80%)
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ merging 1 filtered chunks
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]ℹ done filtering: retained 8 of 10 records (80%)
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [7ms]
 res
 #>   sample
 #> 1     s1
 #>                                                                                infile
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/yz/zr09txvs5dn18vt4cn21kzl40000gn/T//RtmpWBJe91/file6c5c4a3662a3.bam
+#> 1 /var/folders/yz/zr09txvs5dn18vt4cn21kzl40000gn/T//RtmpizYCf1/file481f62a26dde.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        8                 0                  0                      0
 #>   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction

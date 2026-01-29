@@ -25,6 +25,7 @@ readModBam(
   variantPositions = NULL,
   modProbThreshold = 0.5,
   trim = FALSE,
+  maxCoverage = NULL,
   BPPARAM = MulticoreParam(4L, RNGseed = 42L),
   verbose = FALSE
 )
@@ -155,6 +156,15 @@ readModBam(
   positions covered by the reads overlapping `regions`. In both cases,
   only reads overlapping the specified `regions` are included.
 
+- maxCoverage:
+
+  Integer scalar used to increase the maximal coverage for which
+  samtools pileup will allocate cache memory. Ignored if `level="read"`.
+  A value of NULL will use the samtools default (at the time of writing
+  8000). Large values will increase memory consumption. If the actual
+  coverage is larger than this value, alignments may be silently
+  ignored.
+
 - BPPARAM:
 
   A
@@ -196,15 +206,15 @@ readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
            modbase = "a", verbose = TRUE,
            BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [23ms]
+#> ✔ finding unique genomic positions... [39ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [140ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [199ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> class: RangedSummarizedExperiment 
 #> dim: 4772 1 
 #> metadata(3): readLevelData variantPositions filteredOutReads

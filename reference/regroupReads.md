@@ -67,31 +67,31 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
                                          pos = c(6940000, 6940500)),
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ reading alignments overlapping 1 region
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ removed 1724 unaligned (e.g. soft-masked) of 25090 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ read 3 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ reading alignments overlapping 1 region
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ removed 320 unaligned (e.g. soft-masked) of 10174 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ read 2 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [33ms]
+#> ✔ finding unique genomic positions... [37ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [221ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [317ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 # number of reads per sample
 lapply(assay(se, "mod_prob"), ncol)
 #> $s1

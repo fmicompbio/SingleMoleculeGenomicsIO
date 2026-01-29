@@ -83,6 +83,7 @@ alignments are ignored.</p>
 <span>  sequenceReference <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  variantPositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  trim <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  maxCoverage <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  BPPARAM <span class="op">=</span> <span class="fu">MulticoreParam</span><span class="op">(</span><span class="fl">4L</span>, RNGseed <span class="op">=</span> <span class="fl">42L</span><span class="op">)</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -234,6 +235,15 @@ overlapping <code>regions</code>. In both cases, only reads overlapping
 the specified <code>regions</code> are included.</p></dd>
 
 
+<dt id="arg-maxcoverage">maxCoverage<a class="anchor" aria-label="anchor" href="#arg-maxcoverage"></a></dt>
+<dd><p>Integer scalar used to increase the maximal coverage for
+which samtools pileup will allocate cache memory. Ignored if
+<code>level="read"</code>. A value of NULL will use the samtools default (at
+the time of writing 8000). Large values will increase memory consumption.
+If the actual coverage is larger than this value, alignments may be
+silently ignored.</p></dd>
+
+
 <dt id="arg-bpparam">BPPARAM<a class="anchor" aria-label="anchor" href="#arg-bpparam"></a></dt>
 <dd><p>A <code><a href="https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html" class="external-link">BiocParallelParam</a></code> object that
 controls the number of parallel CPU threads to use for some of the steps
@@ -281,21 +291,21 @@ depend on the value of the <code>level</code> argument (see above).</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with NCG</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> read 184 alignments</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with NCG</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding positions with NCG <span style="color: #B2B2B2;">[109ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding positions with NCG <span style="color: #B2B2B2;">[102ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[38ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[43ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> collapsed 50 positions to 38 unique ones</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 50 positions to 38 unique ones <span style="color: #B2B2B2;">[20ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 50 positions to 38 unique ones <span style="color: #B2B2B2;">[37ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> extracting sequence contexts</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> extracting sequence contexts <span style="color: #B2B2B2;">[1.1s]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

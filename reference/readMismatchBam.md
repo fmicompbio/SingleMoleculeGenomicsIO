@@ -30,6 +30,7 @@ readMismatchBam(
   sequenceReference = NULL,
   variantPositions = NULL,
   trim = FALSE,
+  maxCoverage = NULL,
   BPPARAM = MulticoreParam(4L, RNGseed = 42L),
   verbose = FALSE
 )
@@ -179,6 +180,15 @@ readMismatchBam(
   positions covered by the reads overlapping `regions`. In both cases,
   only reads overlapping the specified `regions` are included.
 
+- maxCoverage:
+
+  Integer scalar used to increase the maximal coverage for which
+  samtools pileup will allocate cache memory. Ignored if `level="read"`.
+  A value of NULL will use the samtools default (at the time of writing
+  8000). Large values will increase memory consumption. If the actual
+  coverage is larger than this value, alignments may be silently
+  ignored.
+
 - BPPARAM:
 
   A
@@ -230,19 +240,19 @@ se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
 #> ℹ finding positions with NCG
 #> ℹ read 184 alignments
 #> ℹ finding positions with NCG
-#> ✔ finding positions with NCG [109ms]
+#> ✔ finding positions with NCG [102ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [38ms]
+#> ✔ finding unique genomic positions... [43ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ collapsed 50 positions to 38 unique ones
-#> ✔ collapsed 50 positions to 38 unique ones [20ms]
+#> ✔ collapsed 50 positions to 38 unique ones [37ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 #> ℹ extracting sequence contexts
 #> ✔ extracting sequence contexts [1.1s]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [3ms]
 ```
