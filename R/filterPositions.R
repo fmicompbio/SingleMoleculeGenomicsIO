@@ -36,13 +36,14 @@
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom Biostrings vcountPattern
 #' @importFrom IRanges width
+#' @importFrom BiocGenerics nrow
 #' @importFrom cli cli_abort
 #'
 .keepPositionsBySequenceContext <- function(se, sequenceContext = NULL) {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertVector(x = sequenceContext, type = "character", allowNULL = TRUE)
 
-    if (!is.null(sequenceContext)) {
+    if (!is.null(sequenceContext) && nrow(se) > 0) {
         if (is.null(rowData(se)$sequenceContext)) {
             cli_abort("No sequence context found in {.code rowData(se)$sequenceContext}")
         }
