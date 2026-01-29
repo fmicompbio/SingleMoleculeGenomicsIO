@@ -82,8 +82,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // pileup_mismatchbam_cpp
-Rcpp::List pileup_mismatchbam_cpp(std::string inname_str, std::string bam_format, std::vector<std::string> regions, Rcpp::List pos_context_list, Rcpp::List pos_context_rev_list, uint8_t unmod_integer, uint8_t unmod_integer_rev, uint8_t mod_integer, uint8_t mod_integer_rev, std::string level, int n_threads, bool verbose);
-RcppExport SEXP _SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp(SEXP inname_strSEXP, SEXP bam_formatSEXP, SEXP regionsSEXP, SEXP pos_context_listSEXP, SEXP pos_context_rev_listSEXP, SEXP unmod_integerSEXP, SEXP unmod_integer_revSEXP, SEXP mod_integerSEXP, SEXP mod_integer_revSEXP, SEXP levelSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
+Rcpp::List pileup_mismatchbam_cpp(std::string inname_str, std::string bam_format, std::vector<std::string> regions, Rcpp::List pos_context_list, Rcpp::List pos_context_rev_list, uint8_t unmod_integer, uint8_t unmod_integer_rev, uint8_t mod_integer, uint8_t mod_integer_rev, std::string level, int maxcnt, int n_threads, bool verbose);
+RcppExport SEXP _SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp(SEXP inname_strSEXP, SEXP bam_formatSEXP, SEXP regionsSEXP, SEXP pos_context_listSEXP, SEXP pos_context_rev_listSEXP, SEXP unmod_integerSEXP, SEXP unmod_integer_revSEXP, SEXP mod_integerSEXP, SEXP mod_integer_revSEXP, SEXP levelSEXP, SEXP maxcntSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -97,15 +97,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< uint8_t >::type mod_integer(mod_integerSEXP);
     Rcpp::traits::input_parameter< uint8_t >::type mod_integer_rev(mod_integer_revSEXP);
     Rcpp::traits::input_parameter< std::string >::type level(levelSEXP);
+    Rcpp::traits::input_parameter< int >::type maxcnt(maxcntSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(pileup_mismatchbam_cpp(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads, verbose));
+    rcpp_result_gen = Rcpp::wrap(pileup_mismatchbam_cpp(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, maxcnt, n_threads, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // pileup_modbam_cpp
-Rcpp::List pileup_modbam_cpp(std::string inname_str, std::vector<std::string> regions, char modbase, std::string level, double mod_prob_thresh, int n_threads, bool verbose);
-RcppExport SEXP _SingleMoleculeGenomicsIO_pileup_modbam_cpp(SEXP inname_strSEXP, SEXP regionsSEXP, SEXP modbaseSEXP, SEXP levelSEXP, SEXP mod_prob_threshSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
+Rcpp::List pileup_modbam_cpp(std::string inname_str, std::vector<std::string> regions, char modbase, std::string level, double mod_prob_thresh, int maxcnt, int n_threads, bool verbose);
+RcppExport SEXP _SingleMoleculeGenomicsIO_pileup_modbam_cpp(SEXP inname_strSEXP, SEXP regionsSEXP, SEXP modbaseSEXP, SEXP levelSEXP, SEXP mod_prob_threshSEXP, SEXP maxcntSEXP, SEXP n_threadsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -114,9 +115,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< char >::type modbase(modbaseSEXP);
     Rcpp::traits::input_parameter< std::string >::type level(levelSEXP);
     Rcpp::traits::input_parameter< double >::type mod_prob_thresh(mod_prob_threshSEXP);
+    Rcpp::traits::input_parameter< int >::type maxcnt(maxcntSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(pileup_modbam_cpp(inname_str, regions, modbase, level, mod_prob_thresh, n_threads, verbose));
+    rcpp_result_gen = Rcpp::wrap(pileup_modbam_cpp(inname_str, regions, modbase, level, mod_prob_thresh, maxcnt, n_threads, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -252,8 +254,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SingleMoleculeGenomicsIO_estimateSNR", (DL_FUNC) &_SingleMoleculeGenomicsIO_estimateSNR, 6},
     {"_SingleMoleculeGenomicsIO_filter_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_filter_modbam_cpp, 20},
     {"_SingleMoleculeGenomicsIO_index_bam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_index_bam_cpp, 1},
-    {"_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp, 12},
-    {"_SingleMoleculeGenomicsIO_pileup_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_pileup_modbam_cpp, 7},
+    {"_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp, 13},
+    {"_SingleMoleculeGenomicsIO_pileup_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_pileup_modbam_cpp, 8},
     {"_SingleMoleculeGenomicsIO_read_mismatchbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_read_mismatchbam_cpp, 19},
     {"_SingleMoleculeGenomicsIO_read_modbam_cpp", (DL_FUNC) &_SingleMoleculeGenomicsIO_read_modbam_cpp, 14},
     {"_SingleMoleculeGenomicsIO_sampleEntropy", (DL_FUNC) &_SingleMoleculeGenomicsIO_sampleEntropy, 5},

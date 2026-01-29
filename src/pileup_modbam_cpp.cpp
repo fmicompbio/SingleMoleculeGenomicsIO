@@ -64,6 +64,11 @@ DEALINGS IN THE SOFTWARE
 //'     returned by the latter.
 //' @param mod_prob_thresh Double scalar defining the minimal mod_prob
 //'     of a base to be considered modified.
+//' @param maxcnt Integer scalar used to set the maximal coverage for which
+//'     samtools pileup will allocate cache memory. A value of -1 will use the
+//'     samtools default (at the time of writing 8000). Large values will
+//'     increase memory consumption. If the actual coverage is larger than this
+//'     value, alignments may be silently ignored.
 //' @param n_threads Integer scalar defining the number of threads to
 //'     use for decompressing a sam record. Especially using in sampling mode
 //'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
@@ -103,6 +108,7 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
                              char modbase,
                              std::string level = "summary",
                              double mod_prob_thresh = 0.5,
+                             int maxcnt = -1,
                              int n_threads = 2,
                              bool verbose = false) {
     // turn htslib logging off -> handle via Rcpp::warning or Rcpp::stop
@@ -178,6 +184,9 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
         had_error = true; // # nocov start
         snprintf(buffer, buffer_len, "Failed to initialize pileup data\n");
         goto end; // # nocov end
+    }
+    if (maxcnt != -1) {
+        bam_plp_set_maxcnt(plpiter, maxcnt); // set the maximal pileup depth
     }
 
     // set constructor and destructor callbacks

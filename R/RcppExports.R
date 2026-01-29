@@ -197,6 +197,11 @@ index_bam_cpp <- function(infile) {
 #'     scheme corresponds to the one in bam1_seqi from htslib.
 #' @param level Character scalar selecting the level of the returned data
 #'     (\code{"read"} or \code{"summary"}).
+#' @param maxcnt Integer scalar used to set the maximal coverage for which
+#'     samtools pileup will allocate cache memory. A value of -1 will use the
+#'     samtools default (at the time of writing 8000). Large values will
+#'     increase memory consumption. If the actual coverage is larger than this
+#'     value, alignments may be silently ignored.
 #' @param n_threads Integer scalar defining the number of threads to
 #'     use for decompressing a sam record. Especially using in sampling mode
 #'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
@@ -238,8 +243,8 @@ index_bam_cpp <- function(infile) {
 #'
 #' @noRd
 #' @keywords internal
-pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads = 2L, verbose = FALSE) {
-    .Call(`_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_threads, verbose)
+pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, maxcnt = -1L, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_pileup_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, maxcnt, n_threads, verbose)
 }
 
 #' Read and pile-up base modifications from a bam file.
@@ -269,6 +274,11 @@ pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_
 #'     returned by the latter.
 #' @param mod_prob_thresh Double scalar defining the minimal mod_prob
 #'     of a base to be considered modified.
+#' @param maxcnt Integer scalar used to set the maximal coverage for which
+#'     samtools pileup will allocate cache memory. A value of -1 will use the
+#'     samtools default (at the time of writing 8000). Large values will
+#'     increase memory consumption. If the actual coverage is larger than this
+#'     value, alignments may be silently ignored.
 #' @param n_threads Integer scalar defining the number of threads to
 #'     use for decompressing a sam record. Especially using in sampling mode
 #'     (\code{n_alns_to_sample > 0}), where more time is spend reading and
@@ -302,8 +312,8 @@ pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_
 #'
 #' @noRd
 #' @keywords internal
-pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", mod_prob_thresh = 0.5, n_threads = 2L, verbose = FALSE) {
-    .Call(`_SingleMoleculeGenomicsIO_pileup_modbam_cpp`, inname_str, regions, modbase, level, mod_prob_thresh, n_threads, verbose)
+pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", mod_prob_thresh = 0.5, maxcnt = -1L, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_pileup_modbam_cpp`, inname_str, regions, modbase, level, mod_prob_thresh, maxcnt, n_threads, verbose)
 }
 
 #' Read base modifications from mismatch bam file(s) - C++ helper function

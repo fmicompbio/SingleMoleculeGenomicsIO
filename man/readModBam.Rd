@@ -18,6 +18,7 @@ readModBam(
   variantPositions = NULL,
   modProbThreshold = 0.5,
   trim = FALSE,
+  maxCoverage = NULL,
   BPPARAM = MulticoreParam(4L, RNGseed = 42L),
   verbose = FALSE
 )
@@ -114,6 +115,13 @@ overlapping the specified \code{regions}. If \code{FALSE} (default),
 the object will be extended to all positions covered by the reads
 overlapping \code{regions}. In both cases, only reads overlapping
 the specified \code{regions} are included.}
+
+\item{maxCoverage}{Integer scalar used to increase the maximal coverage for
+which samtools pileup will allocate cache memory. Ignored if
+\code{level="read"}. A value of NULL will use the samtools default (at
+the time of writing 8000). Large values will increase memory consumption.
+If the actual coverage is larger than this value, alignments may be
+silently ignored.}
 
 \item{BPPARAM}{A \code{\link[BiocParallel]{BiocParallelParam}} object that
 controls the number of parallel CPU threads to use for some of the steps

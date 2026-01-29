@@ -121,6 +121,7 @@ readMismatchBam <- function(bamfiles,
                             sequenceReference = NULL,
                             variantPositions = NULL,
                             trim = FALSE,
+                            maxCoverage = NULL,
                             BPPARAM = MulticoreParam(4L, RNGseed = 42L),
                             verbose = FALSE) {
     # digest arguments
@@ -206,6 +207,7 @@ readMismatchBam <- function(bamfiles,
     ref <- refargToDNAStringSet(sequenceReference)
     .assertVector(x = variantPositions, type = "GPos", allowNULL = TRUE)
     .assertScalar(x = trim, type = "logical")
+    .assertScalar(x = maxCoverage, type = "numeric", rngExcl = c(0, Inf), allowNULL = TRUE)
     .assertVector(x = BPPARAM, type = "BiocParallelParam")
     .assertScalar(x = verbose, type = "logical")
 
@@ -294,6 +296,7 @@ readMismatchBam <- function(bamfiles,
                  myvariantRefNames = variantRefNames,
                  myvariantRefPositions = variantRefPositions,
                  myncpuDecompression = ncpuDecompression,
+                 mymaxCoverage = if (is.null(maxCoverage)) -1L else as.integer(maxCoverage),
                  myverbose = if (ncpuTotal > 1) FALSE else verbose) {
 
             if (mylevel == "read") {
@@ -328,6 +331,7 @@ readMismatchBam <- function(bamfiles,
                     mod_integer = mymodInteger,
                     mod_integer_rev = mymodIntegerRev,
                     level = "summary",
+                    maxcnt = mymaxCoverage,
                     n_threads = as.integer(myncpuDecompression),
                     verbose = myverbose
                 )
@@ -343,6 +347,7 @@ readMismatchBam <- function(bamfiles,
                     mod_integer = mymodInteger,
                     mod_integer_rev = mymodIntegerRev,
                     level = "read",
+                    maxcnt = mymaxCoverage,
                     n_threads = as.integer(myncpuDecompression),
                     verbose = myverbose
                 )

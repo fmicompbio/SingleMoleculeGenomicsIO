@@ -162,6 +162,7 @@ test_that("readMismatchBam works", {
                                 regions = "chr1:1-10",
                                 sequenceReference = ref,
                                 level = "quickread", verbose = FALSE,
+                                maxCoverage = 10000,
                                 BPPARAM = BiocParallel::SerialParam()),
                 readMismatchBam(bamfiles = bamfiles[1], bamFormat = "QuasR",
                                 regions = "chr1:1-10",
@@ -191,6 +192,7 @@ test_that("readMismatchBam works", {
                               regions = reg1, level = "summary", nAlnsToSample = 0,
                               sequenceContext = "GCH", sequenceReference = ref,
                               seqnamesToSampleFrom = "chr1", verbose = FALSE,
+                              maxCoverage = 10000,
                               BPPARAM = BiocParallel::SerialParam())
     se1quick <- readMismatchBam(bamfiles = bamfiles[1], bamFormat = "QuasR",
                                 regions = reg1, level = "quickread", nAlnsToSample = 0,

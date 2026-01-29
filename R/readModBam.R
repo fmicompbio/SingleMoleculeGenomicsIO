@@ -86,6 +86,12 @@
 #'     the object will be extended to all positions covered by the reads
 #'     overlapping \code{regions}. In both cases, only reads overlapping
 #'     the specified \code{regions} are included.
+#' @param maxCoverage Integer scalar used to increase the maximal coverage for
+#'     which samtools pileup will allocate cache memory. Ignored if
+#'     \code{level="read"}. A value of NULL will use the samtools default (at
+#'     the time of writing 8000). Large values will increase memory consumption.
+#'     If the actual coverage is larger than this value, alignments may be
+#'     silently ignored.
 #' @param BPPARAM A \code{\link[BiocParallel]{BiocParallelParam}} object that
 #'     controls the number of parallel CPU threads to use for some of the steps
 #'     in \code{readModBam()}. The default value is
@@ -141,6 +147,7 @@ readModBam <- function(bamfiles,
                        variantPositions = NULL,
                        modProbThreshold = 0.5,
                        trim = FALSE,
+                       maxCoverage = NULL,
                        BPPARAM = MulticoreParam(4L, RNGseed = 42L),
                        verbose = FALSE) {
     # digest arguments
@@ -215,6 +222,7 @@ readModBam <- function(bamfiles,
     .assertScalar(x = sequenceContextWidth, type = "numeric", rngIncl = c(0, 1000))
     .assertVector(x = variantPositions, type = "GPos", allowNULL = TRUE)
     .assertScalar(x = trim, type = "logical")
+    .assertScalar(x = maxCoverage, type = "numeric", rngExcl = c(0, Inf), allowNULL = TRUE)
     .assertVector(x = BPPARAM, type = "BiocParallelParam")
     .assertScalar(x = verbose, type = "logical")
 
@@ -267,6 +275,7 @@ readModBam <- function(bamfiles,
                  myvariantRefNames = variantRefNames,
                  myvariantRefPositions = variantRefPositions,
                  myncpuDecompression = ncpuDecompression,
+                 mymaxCoverage = if (is.null(maxCoverage)) -1L else as.integer(maxCoverage),
                  myverbose = if (ncpuTotal > 1) FALSE else verbose) {
 
             if (mylevel == "read") {
@@ -293,6 +302,7 @@ readModBam <- function(bamfiles,
                                           modbase = mymodbase,
                                           level = "summary",
                                           mod_prob_thresh = mymodProbThreshold,
+                                          maxcnt = mymaxCoverage,
                                           n_threads = as.integer(myncpuDecompression),
                                           verbose = myverbose)
             } else if (mylevel == "quickread") {
@@ -301,6 +311,7 @@ readModBam <- function(bamfiles,
                                           modbase = mymodbase,
                                           level = "read",
                                           mod_prob_thresh = mymodProbThreshold,
+                                          maxcnt = mymaxCoverage,
                                           n_threads = as.integer(myncpuDecompression),
                                           verbose = myverbose)
                 resL$mod_prob[resL$mod_prob == -1] <- 0

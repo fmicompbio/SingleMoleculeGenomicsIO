@@ -139,6 +139,7 @@ test_that("readModBam works", {
                            BPPARAM = BiocParallel::SerialParam()),
                 readModBam(bamfiles = modbamfiles, regions = "chr1:1-10",
                            modbase = "a", level = "quickread", verbose = FALSE,
+                           maxCoverage = 10000,
                            BPPARAM = BiocParallel::SerialParam()),
                 readModBam(bamfiles = modbamfiles, regions = "chr1:1-10",
                            modbase = "a", level = "summary", verbose = FALSE,
@@ -170,6 +171,7 @@ test_that("readModBam works", {
                          modbase = "a", level = "summary", nAlnsToSample = 0,
                          sequenceContextWidth = 1, sequenceReference = ref,
                          seqnamesToSampleFrom = "chr1", verbose = FALSE,
+                         maxCoverage = 10000,
                          BPPARAM = BiocParallel::SerialParam())
     se1quick <- readModBam(bamfiles = modbamfiles, regions = reg1,
                            modbase = "a", level = "quickread", nAlnsToSample = 0,

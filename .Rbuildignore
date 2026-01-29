@@ -4,3 +4,4 @@
 ^.github$
 ^\.github$
 ^_pkgdown.yml$
+^sandbox$
