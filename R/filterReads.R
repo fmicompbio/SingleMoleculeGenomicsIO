@@ -26,7 +26,7 @@
 #' removeAllNAReads(assay(se[1:10, ], "mod_prob"))
 #'
 #' @importFrom S4Vectors endoapply
-#' @importFrom SparseArray colSums is_nonna
+#' @importFrom SparseArray nnawhich
 #' @importFrom BiocGenerics rownames rownames<-
 removeAllNAReads <- function(x, prune = TRUE) {
     .assertScalar(x = prune, type = "logical")
@@ -34,7 +34,8 @@ removeAllNAReads <- function(x, prune = TRUE) {
     rnms <- rownames(x)
     x <- endoapply(x, function(y) {
         if (!is.null(dim(y))) {
-            y <- y[, colSums(is_nonna(y)) > 0, drop = FALSE]
+            nna <- nnawhich(y, arr.ind = TRUE)
+            y <- y[, unique(nna[, 2]), drop = FALSE]
         }
         y
     })
