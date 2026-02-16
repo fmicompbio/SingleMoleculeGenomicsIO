@@ -512,6 +512,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     Rcpp::List res;
     std::map<std::string,bam1_t*> curr_records; // records waiting for their mate
     std::map<std::string,bam1_t*>::iterator curr_records_it;
+    double keep_aln_fraction = 0.0;
 
     // ... return values for mode 1 or 2
     // ... ... one per modification
@@ -748,151 +749,84 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         if (n_alns_to_sample > 0) {
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------
-
-            double rand_val = 0.0, keep_aln_fraction = 0.0;
-
             success = create_multi_region_iterator_for_sampling(
                 regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
                 keep_aln_fraction, iter, idx, in_samhdr, had_error,
                 buffer_len, buffer);
-            if (success != 0) {
-                goto end;
-            }
-
             if (verbose) {
                 snprintf(buffer, buffer_len, "sampling alignments with probability %g", keep_aln_fraction);
                 cli_alert_info(buffer);
             }
-
-            // iterate over regions
-            if (verbose) {
-                snprintf(buffer, buffer_len,
-                         "reading alignments overlapping {%u} region{?s}",
-                         regcnt);
-                cli_alert_info(buffer);
-                bar = cli_progress_bar(n_alns_to_sample,
-                                       Rcpp::List::create(Rcpp::_["clear"] = false,
-                                                          Rcpp::_["show_after"] = 0.25));
-            }
-
-            // read overlapping alignments using iterator
-            while ((c = sam_itr_next(infile, iter, bamdata)) >= 0) {
-                rand_val = R::runif(0, 1);
-                if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) &&
-                    rand_val < keep_aln_fraction) {
-                    success = process_mismatch_bam_record(
-                        MISMATCHBAM_MODE_READ, // run mode
-                        bamdata,          // bam record
-                        bam_format,       // format of bam file
-                        alncnt,           // alignment counter
-                        had_error,        // error flag
-                        buffer,           // buffer for message
-                        buffer_len,       // allocated length of message buffer
-                        pos_context_sets, // which positions to analyse (plus strand)
-                        pos_context_rev_sets, // which positions to analyse (minus strand)
-                        unmod_integer,    // what to count as unmodified
-                        unmod_integer_rev, // what to count as unmodified, opposite strand
-                        mod_integer,      // what to count as modified
-                        mod_integer_rev,  // what to count as modified, opposite strand
-                        in_samhdr,        // sam file header
-                        n_unaligned,      // number of unaligned positions
-                        n_total,          // total number of positions
-                        variantRefNames,  // seqnames of SNV sites
-                        variantRefPositions, // coordinates of SNV sites
-                        // vectors for return values (per modification)
-                        read_id,
-                        ref_strand,
-                        qscore,
-                        chrom,
-                        ref_position,
-                        mod_prob,
-                        pair_counts,
-                        // vectors for return values (per alignment)
-                        df_read_id,
-                        df_qscore,
-                        df_read_length,
-                        df_aligned_length,
-                        df_variant_label,
-                        df_ref_strand);
-                    if (verbose && CLI_SHOULD_TICK) { // # nocov start
-                        cli_progress_set(bar, (double)alncnt);
-                    } // # nocov end
-                    if (alncnt % 100 == 0) { // # nocov start
-                        Rcpp::checkUserInterrupt();
-                    } // # nocov end
-                    if (success != 0) { // # nocov start
-                        goto end;       // currently there are no failure points in process_mismatch_bam_record
-                    } // # nocov end
-                }
-            }
-
         } else {
             // Mode 1: region-based alignment reading
             // ---------------------------------------------------------------------
             success = create_multi_region_iterator(regions, regcnt, regions_c,
                                                    iter, idx, in_samhdr, had_error,
                                                    buffer_len, buffer);
-            if (success != 0) {
-                goto end;
-            }
+        }
 
-            // iterate over regions
-            if (verbose) {
-                snprintf(buffer, buffer_len,
-                         "reading alignments overlapping {%u} region{?s}",
-                         regcnt);
-                cli_alert_info(buffer);
-                bar = cli_progress_bar(NA_REAL,
-                                       Rcpp::List::create(Rcpp::_["clear"] = false,
-                                                          Rcpp::_["show_after"] = 0.25));
-            }
-            // read overlapping alignments using iterator
-            while ((c = sam_itr_next(infile, iter, bamdata)) >= 0) {
-                if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY))) {
-                    success = process_mismatch_bam_record(
-                        MISMATCHBAM_MODE_READ, // run mode
-                        bamdata,          // bam record
-                        bam_format,       // format of bam file
-                        alncnt,           // alignment counter
-                        had_error,        // error flag
-                        buffer,           // buffer for message
-                        buffer_len,       // allocated length of message buffer
-                        pos_context_sets, // which positions to analyse (plus strand)
-                        pos_context_rev_sets, // which positions to analyse (minus strand)
-                        unmod_integer,    // what to count as unmodified
-                        unmod_integer_rev, // what to count as unmodified, opposite strand
-                        mod_integer,      // what to count as modified
-                        mod_integer_rev,  // what to count as modified, opposite strand
-                        in_samhdr,        // sam file header
-                        n_unaligned,      // number of unaligned positions
-                        n_total,          // total number of positions
-                        variantRefNames,  // seqnames of SNV sites
-                        variantRefPositions, // coordinates of SNV sites
-                        // vectors for return values (per modification)
-                        read_id,
-                        ref_strand,
-                        qscore,
-                        chrom,
-                        ref_position,
-                        mod_prob,
-                        pair_counts,
-                        // vectors for return values (per alignment)
-                        df_read_id,
-                        df_qscore,
-                        df_read_length,
-                        df_aligned_length,
-                        df_variant_label,
-                        df_ref_strand);
-                    if (verbose && CLI_SHOULD_TICK) { // # nocov start
-                        cli_progress_set(bar, (double)alncnt);
-                    } // # nocov end
-                    if (alncnt % 100 == 0) { // # nocov start
-                        Rcpp::checkUserInterrupt();
-                    } // # nocov end
-                    if (success != 0) { // # nocov start
-                        goto end;       // currently there are no failure points in process_mismatch_bam_record
-                    } // # nocov end
-                }
+        if (success != 0) {
+            goto end;
+        }
+
+        // iterate over regions
+        if (verbose) {
+            snprintf(buffer, buffer_len,
+                     "reading alignments overlapping {%u} region{?s}",
+                     regcnt);
+            cli_alert_info(buffer);
+            bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
+                                   Rcpp::List::create(Rcpp::_["clear"] = false,
+                                                      Rcpp::_["show_after"] = 0.25));
+        }
+
+        // read overlapping alignments using iterator
+        while ((c = sam_itr_next(infile, iter, bamdata)) >= 0) {
+            if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) &&
+                ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction))) {
+                success = process_mismatch_bam_record(
+                    MISMATCHBAM_MODE_READ, // run mode
+                    bamdata,          // bam record
+                    bam_format,       // format of bam file
+                    alncnt,           // alignment counter
+                    had_error,        // error flag
+                    buffer,           // buffer for message
+                    buffer_len,       // allocated length of message buffer
+                    pos_context_sets, // which positions to analyse (plus strand)
+                    pos_context_rev_sets, // which positions to analyse (minus strand)
+                    unmod_integer,    // what to count as unmodified
+                    unmod_integer_rev, // what to count as unmodified, opposite strand
+                    mod_integer,      // what to count as modified
+                    mod_integer_rev,  // what to count as modified, opposite strand
+                    in_samhdr,        // sam file header
+                    n_unaligned,      // number of unaligned positions
+                    n_total,          // total number of positions
+                    variantRefNames,  // seqnames of SNV sites
+                    variantRefPositions, // coordinates of SNV sites
+                    // vectors for return values (per modification)
+                    read_id,
+                    ref_strand,
+                    qscore,
+                    chrom,
+                    ref_position,
+                    mod_prob,
+                    pair_counts,
+                    // vectors for return values (per alignment)
+                    df_read_id,
+                    df_qscore,
+                    df_read_length,
+                    df_aligned_length,
+                    df_variant_label,
+                    df_ref_strand);
+                if (verbose && CLI_SHOULD_TICK) { // # nocov start
+                    cli_progress_set(bar, (double)alncnt);
+                } // # nocov end
+                if (alncnt % 100 == 0) { // # nocov start
+                    Rcpp::checkUserInterrupt();
+                } // # nocov end
+                if (success != 0) { // # nocov start
+                    goto end;       // currently there are no failure points in process_mismatch_bam_record
+                } // # nocov end
             }
         }
     }
