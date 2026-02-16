@@ -14,7 +14,6 @@
 
 #define MISMATCHBAM_MODE_READ      1
 #define MISMATCHBAM_MODE_PAIR      3
-#define MISMATCHBAM_MODE_SUMMARY   4
 
 // process a pair of bam records (only for pairs mode):
 // - increase alignment counter (passed by reference)
@@ -208,7 +207,6 @@ int process_mismatch_bam_record(
         std::vector<double> &mod_prob,
         // ... mode == MISMATCHBAM_MODE_PAIR
         Rcpp::NumericMatrix &pair_counts,
-        // ... mode == MISMATCHBAM_MODE_SUMMARY
         // vectors for return values (per alignment)
         std::vector<std::string> &df_read_id,
         std::vector<double> &df_qscore,
@@ -286,8 +284,6 @@ int process_mismatch_bam_record(
                             modposref.push_back(ref_pos);
                             modstate.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
 
-                        } else if (mode == MISMATCHBAM_MODE_SUMMARY) {
-                            ;
                         }
                     }
                 }
@@ -366,9 +362,6 @@ int process_mismatch_bam_record(
 //'         if \code{n_alns_to_sample > 0} and \code{level = "read"}.}
 //'     \item{Counting of pairs of bases by distance and modification state.
 //'         This mode is selected if \code{windowSize > 0}.}
-//'     \item{Extraction of summary-level modification counts for alignments
-//'         overlapping provided regions. This mode is selected if
-//'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.} # TODO: remove summary mode here?
 //' }
 //'
 //' @param inname_str Character scalar with name of the input bam file.
@@ -380,8 +373,6 @@ int process_mismatch_bam_record(
 //' @param unmod_integer,mod_integer Integers encoding the read bases to be
 //'     interpreted as unmodified or modified, respectively. The encoding
 //'     scheme corresponds to the one in bam1_seqi from htslib.
-//' @param level Character scalar selecting the level of the returned data
-//'     (\code{"read"} or \code{"summary"}).
 //' @param n_alns_to_sample Integer defining the number of alignments
 //'     to randomly sample. Note that for paired-end bam files, individual
 //'     reads are sampled and pairs will not be complete.
@@ -439,21 +430,17 @@ int process_mismatch_bam_record(
 //' posContextRevList <- lapply(posContextRev, function(x) {
 //'     start(resize(x = x, width = 1, fix = "center")) - 1L
 //' })
-//' res1 <- read_mismatchbam_cpp(inname_str = bamfile,
+//' res1 <- read_mismatchbam_cpp(inname_str = bamfile, bam_format = "QuasR",
 //'                              regions = "chr1:6940000-6955000",
 //'                              pos_context_list = posContextList,
 //'                              pos_context_rev_list = posContextRevList,
-//'                              unmod_integer = 8,
-//'                              unmod_integer_rev = 1,
-//'                              mod_integer = 2,
-//'                              mod_integer_rev = 4,
-//'                              level = "summary",
+//'                              unmod_integer = 8, unmod_integer_rev = 1,
+//'                              mod_integer = 2, mod_integer_rev = 4,
 //'                              n_alns_to_sample = 0,
 //'                              tnames_for_sampling = character(0),
 //'                              variantRefNames = character(0),
 //'                              variantRefPositions = integer(0),
-//'                              n_threads = 1,
-//'                              verbose = TRUE)
+//'                              n_threads = 1, verbose = TRUE)
 //' str(res1)
 //'
 //' @author Charlotte Soneson, Michael Stadler
@@ -472,7 +459,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                                 uint8_t unmod_integer_rev,
                                 uint8_t mod_integer,
                                 uint8_t mod_integer_rev,
-                                std::string level,
                                 int n_alns_to_sample,
                                 std::vector<std::string> tnames_for_sampling,
                                 std::vector<std::string> variantRefNames,

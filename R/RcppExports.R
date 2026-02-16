@@ -330,9 +330,6 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'         if \code{n_alns_to_sample > 0} and \code{level = "read"}.}
 #'     \item{Counting of pairs of bases by distance and modification state.
 #'         This mode is selected if \code{windowSize > 0}.}
-#'     \item{Extraction of summary-level modification counts for alignments
-#'         overlapping provided regions. This mode is selected if
-#'         \code{n_alns_to_sample = 0} and \code{level = "summary"}.} # TODO: remove summary mode here?
 #' }
 #'
 #' @param inname_str Character scalar with name of the input bam file.
@@ -344,8 +341,6 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #' @param unmod_integer,mod_integer Integers encoding the read bases to be
 #'     interpreted as unmodified or modified, respectively. The encoding
 #'     scheme corresponds to the one in bam1_seqi from htslib.
-#' @param level Character scalar selecting the level of the returned data
-#'     (\code{"read"} or \code{"summary"}).
 #' @param n_alns_to_sample Integer defining the number of alignments
 #'     to randomly sample. Note that for paired-end bam files, individual
 #'     reads are sampled and pairs will not be complete.
@@ -403,21 +398,17 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #' posContextRevList <- lapply(posContextRev, function(x) {
 #'     start(resize(x = x, width = 1, fix = "center")) - 1L
 #' })
-#' res1 <- read_mismatchbam_cpp(inname_str = bamfile,
+#' res1 <- read_mismatchbam_cpp(inname_str = bamfile, bam_format = "QuasR",
 #'                              regions = "chr1:6940000-6955000",
 #'                              pos_context_list = posContextList,
 #'                              pos_context_rev_list = posContextRevList,
-#'                              unmod_integer = 8,
-#'                              unmod_integer_rev = 1,
-#'                              mod_integer = 2,
-#'                              mod_integer_rev = 4,
-#'                              level = "summary",
+#'                              unmod_integer = 8, unmod_integer_rev = 1,
+#'                              mod_integer = 2, mod_integer_rev = 4,
 #'                              n_alns_to_sample = 0,
 #'                              tnames_for_sampling = character(0),
 #'                              variantRefNames = character(0),
 #'                              variantRefPositions = integer(0),
-#'                              n_threads = 1,
-#'                              verbose = TRUE)
+#'                              n_threads = 1, verbose = TRUE)
 #' str(res1)
 #'
 #' @author Charlotte Soneson, Michael Stadler
@@ -426,8 +417,8 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'
 #' @noRd
 #' @keywords internal
-read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
-    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, level, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
+read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize = 0L, minMapQ = 0L, minAlignedLength = 0L, n_threads = 2L, verbose = FALSE) {
+    .Call(`_SingleMoleculeGenomicsIO_read_mismatchbam_cpp`, inname_str, bam_format, regions, pos_context_list, pos_context_rev_list, unmod_integer, unmod_integer_rev, mod_integer, mod_integer_rev, n_alns_to_sample, tnames_for_sampling, variantRefNames, variantRefPositions, windowSize, minMapQ, minAlignedLength, n_threads, verbose)
 }
 
 #' Read base modifications from a bam file.

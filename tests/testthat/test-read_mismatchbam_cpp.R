@@ -82,7 +82,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -99,7 +99,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -112,7 +112,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -126,7 +126,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 30,
+                                      n_alns_to_sample = 30,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -142,7 +142,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -155,7 +155,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -169,7 +169,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       windowSize = 30,
                                       variantRefNames = character(0),
@@ -184,7 +184,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       windowSize = 30,
                                       variantRefNames = character(0),
@@ -200,7 +200,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -213,7 +213,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -229,7 +229,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 3000,
+                                      n_alns_to_sample = 3000,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -244,7 +244,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -257,7 +257,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -282,7 +282,7 @@ test_that("read_mismatchbam_cpp works", {
                                       unmod_integer_rev = bisseqIntegers[2],
                                       mod_integer = bisseqIntegers[3],
                                       mod_integer_rev = bisseqIntegers[4],
-                                      level = "read", n_alns_to_sample = 0,
+                                      n_alns_to_sample = 0,
                                       tnames_for_sampling = "chr1",
                                       variantRefNames = character(0),
                                       variantRefPositions = integer(0),
@@ -299,7 +299,7 @@ test_that("read_mismatchbam_cpp works", {
             pos_context_rev_list = posContextRevL,
             unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
             mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-            level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+            n_alns_to_sample = 0, tnames_for_sampling = "chr1",
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
@@ -309,7 +309,7 @@ test_that("read_mismatchbam_cpp works", {
         pos_context_rev_list = posContextRevL,
         unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
         mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-        level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+        n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
     res3 <- read_mismatchbam_cpp(
@@ -318,7 +318,7 @@ test_that("read_mismatchbam_cpp works", {
         pos_context_rev_list = posContextRevL,
         unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
         mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-        level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+        n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
     # ... read level (sampling)
@@ -330,7 +330,7 @@ test_that("read_mismatchbam_cpp works", {
             pos_context_rev_list = posCpGRevL,
             unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
             mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-            level = "read", n_alns_to_sample = 30, tnames_for_sampling = c("chr1", "error"),
+            n_alns_to_sample = 30, tnames_for_sampling = c("chr1", "error"),
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = FALSE),
         "Ignoring unknown target name"
@@ -342,7 +342,7 @@ test_that("read_mismatchbam_cpp works", {
         pos_context_rev_list = posCpGRevL,
         unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
         mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-        level = "read", n_alns_to_sample = 30, tnames_for_sampling = "chr1",
+        n_alns_to_sample = 30, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
     suppressMessages(expect_message(
@@ -352,7 +352,7 @@ test_that("read_mismatchbam_cpp works", {
             pos_context_rev_list = posCpGRevL,
             unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
             mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-            level = "read", n_alns_to_sample = 30, tnames_for_sampling = "chr1",
+            n_alns_to_sample = 30, tnames_for_sampling = "chr1",
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
@@ -362,7 +362,7 @@ test_that("read_mismatchbam_cpp works", {
         pos_context_rev_list = posContextRevL,
         unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
         mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-        level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+        n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = rep("chr1", 3L), variantRefPositions = c(6925369L, 6925370L, 6925372L), # GAT
         n_threads = 2, verbose = FALSE)
     suppressMessages(expect_message(
@@ -372,7 +372,7 @@ test_that("read_mismatchbam_cpp works", {
             pos_context_rev_list = posContextRevL, windowSize = 30,
             unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
             mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-            level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+            n_alns_to_sample = 0, tnames_for_sampling = "chr1",
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
@@ -382,7 +382,7 @@ test_that("read_mismatchbam_cpp works", {
         pos_context_rev_list = posContextRevL, windowSize = 30,
         unmod_integer = bisseqIntegers[1], unmod_integer_rev = bisseqIntegers[2],
         mod_integer = bisseqIntegers[3], mod_integer_rev = bisseqIntegers[4],
-        level = "read", n_alns_to_sample = 0, tnames_for_sampling = "chr1",
+        n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
 
