@@ -8,6 +8,8 @@ countStatePairs(
   bamfile,
   regions = ".",
   modbase,
+  nAlnsToSample = 0,
+  seqnamesToSampleFrom = character(0),
   threshUnmod = 0.5,
   threshMod = 0.5,
   windowSize = 200,
@@ -29,6 +31,19 @@ specified as a character vector (e.g. "chr1:1200-1300", "chr2:-6000",
 
 \item{modbase}{Character scalar defining the modified base.}
 
+\item{nAlnsToSample}{A numeric scalar. If non-zero, \code{regions} is ignored
+and approximately \code{nAlnsToSample} randomly selected alignments on
+\code{seqnamesToSampleFrom} are read from the \code{bamfile}.
+In order to make the results reproducible, make sure to set the
+random number seed using \code{set.seed}. Please note that secondary and
+supplementary alignments in \code{bamfiles} contribute to the total
+number of alignments but will not be sampled, thus the number of used
+alignments may be lower than \code{nAlnsToSample}.}
+
+\item{seqnamesToSampleFrom}{A character vector with one or several sequence
+names (chromosomes) from which to sample alignments from (only used if
+\code{nAlnsToSample} is greater than zero).}
+
 \item{threshUnmod, threshMod}{Numeric scalars defining how to convert
 modification probabilities \code{p} to modification states. Bases with
 \code{p < threshUnmod} will be considered unmodified, and bases with
@@ -46,8 +61,13 @@ alignments in pair-counting mode.}
 to include alignments in pair-counting mode.}
 
 \item{BPPARAM}{A \code{\link[BiocParallel]{BiocParallelParam}} object that
-controls the number of parallel CPU threads to use for decompressing
-bam records.}
+controls the number of parallel CPU threads to use for some of the steps
+in \code{readModBam()}. The default value is
+(\code{\link[BiocParallel]{MulticoreParam}(4L, RNGseed = 42L)}).
+If randomly sampling reads (\code{nAlnsToSample > 0}), make sure to set
+the \code{RNGseed} argument when constructing the \code{BPPARAM} object
+for reproducible results (see also
+\code{vignette("Random_Numbers", package = "BiocParallel")}).}
 
 \item{verbose}{A logical scalar. If \code{TRUE}, report on progress.}
 }

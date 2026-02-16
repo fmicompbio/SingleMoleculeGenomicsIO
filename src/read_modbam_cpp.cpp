@@ -354,7 +354,12 @@ int count_pairs_bam_record(
 //'         randomly sampled from provided chromosomes. This is selected
 //'         if \code{n_alns_to_sample > 0} and \code{windowSize = 0}.}
 //'     \item{Counting of pairs of bases by distance and modification state.
-//'         This mode is selected if \code{windowSize > 0}.}
+//'         This mode is selected if \code{n_alns_to_sample = 0} and
+//'         \code{windowSize > 0}.}
+//'     \item{Counting of pairs of bases by distance and modification state
+//'         for alignments randomly sampled from provided chromosomes. This is
+//'         selected if \code{n_alns_to_sample > 0} and \code{windowSize > 0}.
+//'     }
 //' }
 //'
 //' @param inname_str Character scalar with name of the input bam file.
@@ -403,7 +408,7 @@ int count_pairs_bam_record(
 //'     total read length), and \code{"aligned_length"} (the number of
 //'     aligned bases), and \code{"ref_position"}, which is 0-based in
 //'     the output of \code{modkit extract}, but 1-based here.
-//'     For reading mode 3., a named list with a single element called
+//'     For reading modes 3. and 4., a named list with a single element called
 //'     \code{"pair_counts"}, corresponding to a \code{windowSize}-by-4
 //'     matrix with the numbers of pairs of bases at a given distance (row) and
 //'     in a given state (columns: 00, 01, 10 and 11).
@@ -537,13 +542,29 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
 
     // start reading according to analysis mode
     if (windowSize > 0) {
-        // Mode 3: counting of pairs of bases by distance and modification state
-        // ---------------------------------------------------------------------
         pair_counts = Rcpp::NumericMatrix(windowSize, 4);
 
-        success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                               iter, idx, in_samhdr, had_error,
-                                               buffer_len, buffer);
+        if (n_alns_to_sample > 0) {
+            // Mode 4: random-sampling-based counting of pairs of bases by distance and modification state
+            // -------------------------------------------------------------------------------------------
+            success = create_multi_region_iterator_for_sampling(
+                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                keep_aln_fraction, iter, idx, in_samhdr, had_error,
+                buffer_len, buffer);
+
+            if (verbose) {
+                snprintf(buffer, buffer_len, "sampling alignments with probability %g", keep_aln_fraction);
+                cli_alert_info(buffer);
+            }
+
+        } else {
+            // Mode 3: region-based counting of pairs of bases by distance and modification state
+            // ----------------------------------------------------------------------------------
+            success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                                   iter, idx, in_samhdr, had_error,
+                                                   buffer_len, buffer);
+        }
+
         if (success != 0) {
             goto end;
         }
@@ -554,7 +575,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                      "counting state-pairs for alignments overlapping {%u} region{?s}",
                      regcnt);
             cli_alert_info(buffer);
-            bar = cli_progress_bar(NA_REAL,
+            bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
                                    Rcpp::List::create(Rcpp::_["clear"] = false,
                                                       Rcpp::_["show_after"] = 0.25));
         }
@@ -563,7 +584,8 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
         while ((c = sam_itr_next(infile, iter, bamdata)) >= 0) {
             if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) &&
                 (bamdata->core.qual >= minMapQ) &&
-                (calculate_aligned_bases(bamdata) >= minAlignedLength)) {
+                (calculate_aligned_bases(bamdata) >= minAlignedLength) &&
+                ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction))) {
 
                 success = count_pairs_bam_record(
                     bamdata,            // bam record
@@ -595,7 +617,6 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
         if (n_alns_to_sample > 0) {
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------
-
             success = create_multi_region_iterator_for_sampling(
                 regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
                 keep_aln_fraction, iter, idx, in_samhdr, had_error,

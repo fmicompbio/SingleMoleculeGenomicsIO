@@ -443,7 +443,12 @@ read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_li
 #'         randomly sampled from provided chromosomes. This is selected
 #'         if \code{n_alns_to_sample > 0} and \code{windowSize = 0}.}
 #'     \item{Counting of pairs of bases by distance and modification state.
-#'         This mode is selected if \code{windowSize > 0}.}
+#'         This mode is selected if \code{n_alns_to_sample = 0} and
+#'         \code{windowSize > 0}.}
+#'     \item{Counting of pairs of bases by distance and modification state
+#'         for alignments randomly sampled from provided chromosomes. This is
+#'         selected if \code{n_alns_to_sample > 0} and \code{windowSize > 0}.
+#'     }
 #' }
 #'
 #' @param inname_str Character scalar with name of the input bam file.
@@ -492,7 +497,7 @@ read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_li
 #'     total read length), and \code{"aligned_length"} (the number of
 #'     aligned bases), and \code{"ref_position"}, which is 0-based in
 #'     the output of \code{modkit extract}, but 1-based here.
-#'     For reading mode 3., a named list with a single element called
+#'     For reading modes 3. and 4., a named list with a single element called
 #'     \code{"pair_counts"}, corresponding to a \code{windowSize}-by-4
 #'     matrix with the numbers of pairs of bases at a given distance (row) and
 #'     in a given state (columns: 00, 01, 10 and 11).

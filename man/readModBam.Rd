@@ -11,7 +11,7 @@ readModBam(
   level = ifelse(nAlnsToSample == 0 & is.null(variantPositions), "quickread", "read"),
   sampleAnnot = NULL,
   nAlnsToSample = 0,
-  seqnamesToSampleFrom = "chr19",
+  seqnamesToSampleFrom = character(0),
   seqinfo = NULL,
   sequenceContextWidth = 0,
   sequenceReference = NULL,

@@ -71,8 +71,13 @@ The sequence context (see \code{sequenceContextWidth} argument) will be
 extracted from these sequences.}
 
 \item{BPPARAM}{A \code{\link[BiocParallel]{BiocParallelParam}} object that
-controls the number of parallel CPU threads to use for decompressing
-bam records.}
+controls the number of parallel CPU threads to use for some of the steps
+in \code{readModBam()}. The default value is
+(\code{\link[BiocParallel]{MulticoreParam}(4L, RNGseed = 42L)}).
+If randomly sampling reads (\code{nAlnsToSample > 0}), make sure to set
+the \code{RNGseed} argument when constructing the \code{BPPARAM} object
+for reproducible results (see also
+\code{vignette("Random_Numbers", package = "BiocParallel")}).}
 
 \item{verbose}{A logical scalar. If \code{TRUE}, report on progress.}
 }

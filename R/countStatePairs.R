@@ -3,6 +3,7 @@
 #' For all pairs of bases with modification calls in a read, tabulate the
 #' number of pairs at a given distance with a given modification state.
 #'
+#' @inheritParams readModBam
 #' @param bamfile Character scalar with the path to a \code{modBAM}
 #'     file, containing information about base modifications in \code{MM} and
 #'     \code{ML} tags. The \code{bamfile} must have an index.
@@ -11,6 +12,14 @@
 #'     specified as a character vector (e.g. "chr1:1200-1300", "chr2:-6000",
 #'     "chr1:10-", "chrM" or ".").
 #' @param modbase Character scalar defining the modified base.
+#' @param nAlnsToSample A numeric scalar. If non-zero, \code{regions} is ignored
+#'     and approximately \code{nAlnsToSample} randomly selected alignments on
+#'     \code{seqnamesToSampleFrom} are read from the \code{bamfile}.
+#'     In order to make the results reproducible, make sure to set the
+#'     random number seed using \code{set.seed}. Please note that secondary and
+#'     supplementary alignments in \code{bamfiles} contribute to the total
+#'     number of alignments but will not be sampled, thus the number of used
+#'     alignments may be lower than \code{nAlnsToSample}.
 #' @param threshUnmod,threshMod Numeric scalars defining how to convert
 #'     modification probabilities \code{p} to modification states. Bases with
 #'     \code{p < threshUnmod} will be considered unmodified, and bases with
@@ -23,9 +32,6 @@
 #'     alignments in pair-counting mode.
 #' @param minAlignedLength Numeric scalar giving the minimal alignment length
 #'     to include alignments in pair-counting mode.
-#' @param BPPARAM A \code{\link[BiocParallel]{BiocParallelParam}} object that
-#'     controls the number of parallel CPU threads to use for decompressing
-#'     bam records.
 #' @param verbose A logical scalar. If \code{TRUE}, report on progress.
 #'
 #' @author Charlotte Soneson, Michael Stadler
@@ -49,6 +55,8 @@
 countStatePairs <- function(bamfile,
                             regions = ".",
                             modbase,
+                            nAlnsToSample = 0,
+                            seqnamesToSampleFrom = character(0),
                             threshUnmod = 0.5,
                             threshMod = 0.5,
                             windowSize = 200,
@@ -63,9 +71,21 @@ countStatePairs <- function(bamfile,
     if (is(regions, "GRanges")) {
         regions <- as.character(regions, ignore.strand = TRUE)
     }
-    .assertVector(x = regions, type = "character")
+    .assertVector(x = regions, type = "character", allowNULL = TRUE)
     .assertScalar(x = modbase, type = "character")
     .assertValidModbase(modbase)
+    .assertScalar(x = nAlnsToSample, type = "numeric", rngIncl = c(0, Inf))
+    if (nAlnsToSample > 0) {
+        if (length(regions) > 0) {
+            cli_warn("Ignoring {.arg regions} because {.arg nAlnsToSample} is greater than zero")
+        }
+        regions <- character(0)
+    } else {
+        if (length(regions) == 0) {
+            cli_abort("{.arg regions} must contain at least one genomic range if not in sampling mode")
+        }
+    }
+    .assertVector(x = seqnamesToSampleFrom, type = "character")
     .assertScalar(x = threshUnmod, type = "numeric", rngIncl = c(0, 1))
     .assertScalar(x = threshMod, type = "numeric", rngIncl = c(0, 1))
     if (threshUnmod > threshMod) {
@@ -84,8 +104,8 @@ countStatePairs <- function(bamfile,
     resL <- read_modbam_cpp(inname_str = bamfile,
                             regions = regions,
                             modbase = modbase,
-                            n_alns_to_sample = 0L,
-                            tnames_for_sampling = character(0),
+                            n_alns_to_sample = as.integer(nAlnsToSample),
+                            tnames_for_sampling = seqnamesToSampleFrom,
                             variantRefNames = character(0),
                             variantRefPositions = integer(0),
                             threshUnmod = threshUnmod,
