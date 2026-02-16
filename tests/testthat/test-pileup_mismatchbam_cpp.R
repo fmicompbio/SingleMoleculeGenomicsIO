@@ -138,7 +138,6 @@ test_that("pileup_mismatchbam_cpp works", {
                                      tnames_for_sampling = "chr1",
                                      variantRefNames = character(0),
                                      variantRefPositions = integer(0),
-                                     level = level,
                                      n_threads = 1, verbose = FALSE)
         tmp <- tmp0[c("chrom", "ref_position", "ref_strand", "mod_prob",
                       "read_id")]

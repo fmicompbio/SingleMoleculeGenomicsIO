@@ -16,6 +16,18 @@
 #'     comparing the genomic base in the middle of \code{sequenceContext} to
 #'     the aligned base in the read and interpreted according to
 #'     \code{readBaseUnmod} and \code{readBaseMod}.
+#' @param nAlnsToSample A numeric scalar. If non-zero, \code{regions} is ignored
+#'     and approximately \code{nAlnsToSample} randomly selected alignments on
+#'     \code{seqnamesToSampleFrom} are read from the \code{bamfile}.
+#'     If \code{bamfile} contains paired alignments, they are included or
+#'     excluded as pairs. Alignments are counted individually towards
+#'     \code{nAlnsToSample}, thus for paired-end data this parameter has to
+#'     be set to twice the number of pairs to be sampled.
+#'     In order to make the results reproducible, make sure to set the
+#'     random number seed using \code{set.seed}. Please note that secondary and
+#'     supplementary alignments in \code{bamfiles} contribute to the total
+#'     number of alignments but will not be sampled, thus the number of used
+#'     alignments may be lower than \code{nAlnsToSample}.
 #'
 #' @author Charlotte Soneson, Michael Stadler
 #'
@@ -50,6 +62,8 @@ countMismatchStatePairs <- function(bamfile,
                                     bamFormat = "QuasR",
                                     regions = ".",
                                     sequenceContext = "GCH",
+                                    nAlnsToSample = 0,
+                                    seqnamesToSampleFrom = character(0),
                                     readBaseUnmod = "T",
                                     readBaseMod = "C",
                                     windowSize = 200,
@@ -87,23 +101,25 @@ countMismatchStatePairs <- function(bamfile,
     unmodIntegerRev <- as.integer(sum(c(A = 8L, C = 4L, G = 2L, T = 1L)[unmodBases]))
     modInteger <- as.integer(sum(c(A = 1L, C = 2L, G = 4L, T = 8L)[modBases]))
     modIntegerRev <- as.integer(sum(c(A = 8L, C = 4L, G = 2L, T = 1L)[modBases]))
-    .assertScalar(x = windowSize, type = "numeric", rngIncl = c(1, Inf))
-    .assertScalar(x = minMapQ, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = minAlignedLength, type = "numeric", rngIncl = c(0, Inf))
-    .assertVector(x = BPPARAM, type = "BiocParallelParam")
-    .assertScalar(x = verbose, type = "logical")
-
-    ncpuDecompression <- bpnworkers(BPPARAM)
-
     if (is.character(regions)) {
         regions <- regionStringToGRanges(regions = regions,
                                          seqinfo = seqinfo)
     }
     .assertVector(x = regions, type = "GRanges", allowNULL = TRUE)
-    if (length(regions) == 0) {
-        cli_abort("{.arg regions} must contain at least one genomic range")
+    .assertScalar(x = nAlnsToSample, type = "numeric", rngIncl = c(0, Inf))
+    if (nAlnsToSample > 0) {
+        .assertVector(x = seqnamesToSampleFrom, type = "character")
+        seqLevelsUsed <- seqnamesToSampleFrom
+        if (length(regions) > 0) {
+            cli_warn("Ignoring {.arg regions} because {.arg nAlnsToSample} is greater than zero")
+        }
+        regions <- GRanges()
+    } else {
+        if (length(regions) == 0) {
+            cli_abort("{.arg regions} must contain at least one genomic range if not in sampling mode")
+        }
+        seqLevelsUsed <- seqlevelsInUse(regions)
     }
-    seqLevelsUsed <- seqlevelsInUse(regions)
     if (!is.null(seqinfo) &&
         (!is(seqinfo, "Seqinfo") &&
          (!is.numeric(seqinfo) || is.null(names(seqinfo))))) {
@@ -112,6 +128,13 @@ countMismatchStatePairs <- function(bamfile,
             "or a named {.cls numeric} vector with genomic sequence lengths."))
     }
     ref <- refargToDNAStringSet(sequenceReference)
+    .assertScalar(x = windowSize, type = "numeric", rngIncl = c(1, Inf))
+    .assertScalar(x = minMapQ, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = minAlignedLength, type = "numeric", rngIncl = c(0, Inf))
+    .assertVector(x = BPPARAM, type = "BiocParallelParam")
+    .assertScalar(x = verbose, type = "logical")
+
+    ncpuDecompression <- bpnworkers(BPPARAM)
 
     # obtain reference sequences
     .message("finding positions with {sequenceContext}")
@@ -154,9 +177,8 @@ countMismatchStatePairs <- function(bamfile,
                                  unmod_integer_rev = unmodIntegerRev,
                                  mod_integer = modInteger,
                                  mod_integer_rev = modIntegerRev,
-                                 level = "read",
-                                 n_alns_to_sample = 0L,
-                                 tnames_for_sampling = character(0),
+                                 n_alns_to_sample = as.integer(nAlnsToSample),
+                                 tnames_for_sampling = seqnamesToSampleFrom,
                                  variantRefNames = character(0),
                                  variantRefPositions = integer(0),
                                  windowSize = as.integer(windowSize),

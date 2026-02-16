@@ -324,12 +324,17 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #' \enumerate{
 #'     \item{Extraction of read-level modification probabilities for
 #'         alignments overlapping provided regions. This mode is selected
-#'         if \code{n_alns_to_sample = 0} and \code{level = "read"}.}
+#'         if \code{n_alns_to_sample = 0} and \code{windowSize = 0}.}
 #'     \item{Extraction of read-level modification probabilities for alignments
 #'         randomly sampled from provided chromosomes. This is selected
-#'         if \code{n_alns_to_sample > 0} and \code{level = "read"}.}
+#'         if \code{n_alns_to_sample > 0} and \code{windowSize = 0}.}
 #'     \item{Counting of pairs of bases by distance and modification state.
-#'         This mode is selected if \code{windowSize > 0}.}
+#'         This mode is selected if \code{n_alns_to_sample = 0} and
+#'         \code{windowSize > 0}.}
+#'     \item{Counting of pairs of bases by distance and modification state
+#'         for (pairs of) alignments randomly sampled from provided chromosomes.
+#'         This is selected if \code{n_alns_to_sample > 0} and
+#'         \code{windowSize > 0}.}
 #' }
 #'
 #' @param inname_str Character scalar with name of the input bam file.
@@ -379,10 +384,10 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'     (the read quality score recorded in the \code{qs} tag of each bam record),
 #'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
 #'     (the number of aligned bases), \code{"variant_label"} and
-#'     \code{"ref_strand"}. For reading mode 3., a named list with elements
-#'     \code{"read_id"}, \code{"ref_position"}, \code{"chrom"},
-#'     \code{"ref_strand"}, \code{"Nvalid"} and \code{"Nmod"}. For reading
-#'     mode 4., TODO
+#'     \code{"ref_strand"}. For reading modes 3. and 4., a named list with a
+#'     single element called \code{"pair_counts"}, corresponding to a
+#'     \code{windowSize}-by-4 matrix with the numbers of pairs of bases at a
+#'     given distance (row) and in a given state (columns: 00, 01, 10 and 11).
 #'
 #' @examples
 #' library(Biostrings)

@@ -13,7 +13,7 @@
 #include "utils.h"
 
 #define MISMATCHBAM_MODE_READ      1
-#define MISMATCHBAM_MODE_PAIR      3
+#define MISMATCHBAM_MODE_STATE     3
 
 // process a pair of bam records (only for pairs mode):
 // - increase alignment counter (passed by reference)
@@ -38,7 +38,7 @@ int process_mismatch_bam_record_pair(
         unsigned long long &n_unaligned, // number of unaligned modified bases
         unsigned long long &n_total,     // total number of modified bases
         // vectors for return values (per modification)
-        // ... mode == MISMATCHBAM_MODE_PAIR
+        // ... mode == MISMATCHBAM_MODE_STATE
         Rcpp::NumericMatrix &pair_counts) {
 
     // allocate variable only used inside process_mismatch_bam_record_pair()
@@ -49,7 +49,7 @@ int process_mismatch_bam_record_pair(
     uint8_t *hitseq = NULL, fwdbase = 0;
     const uint32_t *cigar;
     std::set<int> *pos_set = NULL;
-    // ... mode == MISMATCHBAM_MODE_PAIR
+    // ... mode == MISMATCHBAM_MODE_STATE
     std::vector<int> modposref; // reference position of modified bases
     std::vector<int> qscore;    // quality score of modified bases
     std::vector<int> modstate;  // modification states of the bases (0: unmod, 1: mod)
@@ -205,7 +205,7 @@ int process_mismatch_bam_record(
         std::vector<std::string> &chrom,
         std::vector<int> &ref_position,
         std::vector<double> &mod_prob,
-        // ... mode == MISMATCHBAM_MODE_PAIR
+        // ... mode == MISMATCHBAM_MODE_STATE
         Rcpp::NumericMatrix &pair_counts,
         // vectors for return values (per alignment)
         std::vector<std::string> &df_read_id,
@@ -225,7 +225,7 @@ int process_mismatch_bam_record(
     uint8_t *hitseq = NULL, fwdbase = 0;
     const uint32_t *cigar;
     std::set<int> *pos_set = NULL;
-    // ... mode == MISMATCHBAM_MODE_PAIR
+    // ... mode == MISMATCHBAM_MODE_STATE
     std::vector<int> modposref; // refernce position of modified bases
     std::vector<int> modstate;  // modification states of the bases (0: unmod, 1: mod)
 
@@ -280,7 +280,7 @@ int process_mismatch_bam_record(
                             ref_position.push_back(ref_pos);
                             mod_prob.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
 
-                        } else if (mode == MISMATCHBAM_MODE_PAIR) {
+                        } else if (mode == MISMATCHBAM_MODE_STATE) {
                             modposref.push_back(ref_pos);
                             modstate.push_back(fwdbase == unmod_int ? 0.0 : 1.0);
 
@@ -332,7 +332,7 @@ int process_mismatch_bam_record(
             df_variant_label.push_back(NA_STRING);
         }
 
-    } else if (mode == MISMATCHBAM_MODE_PAIR) {
+    } else if (mode == MISMATCHBAM_MODE_STATE) {
         // process modposref and modstate to update counter in pair_counts
         int maxdist = pair_counts.nrow() - 1, currdist = 0;
         for (i = 0; i < modposref.size(); i++) {
@@ -356,12 +356,17 @@ int process_mismatch_bam_record(
 //' \enumerate{
 //'     \item{Extraction of read-level modification probabilities for
 //'         alignments overlapping provided regions. This mode is selected
-//'         if \code{n_alns_to_sample = 0} and \code{level = "read"}.}
+//'         if \code{n_alns_to_sample = 0} and \code{windowSize = 0}.}
 //'     \item{Extraction of read-level modification probabilities for alignments
 //'         randomly sampled from provided chromosomes. This is selected
-//'         if \code{n_alns_to_sample > 0} and \code{level = "read"}.}
+//'         if \code{n_alns_to_sample > 0} and \code{windowSize = 0}.}
 //'     \item{Counting of pairs of bases by distance and modification state.
-//'         This mode is selected if \code{windowSize > 0}.}
+//'         This mode is selected if \code{n_alns_to_sample = 0} and
+//'         \code{windowSize > 0}.}
+//'     \item{Counting of pairs of bases by distance and modification state
+//'         for (pairs of) alignments randomly sampled from provided chromosomes.
+//'         This is selected if \code{n_alns_to_sample > 0} and
+//'         \code{windowSize > 0}.}
 //' }
 //'
 //' @param inname_str Character scalar with name of the input bam file.
@@ -411,10 +416,10 @@ int process_mismatch_bam_record(
 //'     (the read quality score recorded in the \code{qs} tag of each bam record),
 //'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
 //'     (the number of aligned bases), \code{"variant_label"} and
-//'     \code{"ref_strand"}. For reading mode 3., a named list with elements
-//'     \code{"read_id"}, \code{"ref_position"}, \code{"chrom"},
-//'     \code{"ref_strand"}, \code{"Nvalid"} and \code{"Nmod"}. For reading
-//'     mode 4., TODO
+//'     \code{"ref_strand"}. For reading modes 3. and 4., a named list with a
+//'     single element called \code{"pair_counts"}, corresponding to a
+//'     \code{windowSize}-by-4 matrix with the numbers of pairs of bases at a
+//'     given distance (row) and in a given state (columns: 00, 01, 10 and 11).
 //'
 //' @examples
 //' library(Biostrings)
@@ -556,13 +561,29 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
 
     // start reading according to analysis mode
     if (windowSize > 0) {
-        // Mode 3: counting of pairs of bases by distance and modification state
-        // ---------------------------------------------------------------------
+        // Modes 3 or 4 (state-pair counting)
         pair_counts = Rcpp::NumericMatrix(windowSize, 4);
 
-        success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                               iter, idx, in_samhdr, had_error,
-                                               buffer_len, buffer);
+        if (n_alns_to_sample > 0) {
+            // Mode 4: random-sampling-based counting of pairs of bases by distance and modification state
+            // -------------------------------------------------------------------------------------------
+            success = create_multi_region_iterator_for_sampling(
+                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                keep_aln_fraction, iter, idx, in_samhdr, had_error,
+                buffer_len, buffer);
+
+            if (verbose) {
+                snprintf(buffer, buffer_len, "sampling alignments with probability %g", keep_aln_fraction);
+                cli_alert_info(buffer);
+            }
+
+        } else {
+            // Mode 3: region-based counting of pairs of bases by distance and modification state
+            // ----------------------------------------------------------------------------------
+            success = create_multi_region_iterator(regions, regcnt, regions_c,
+                                                   iter, idx, in_samhdr, had_error,
+                                                   buffer_len, buffer);
+        }
         if (success != 0) {
             goto end;
         }
@@ -573,7 +594,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                      "counting state-pairs for alignments overlapping {%u} region{?s}",
                      regcnt);
             cli_alert_info(buffer);
-            bar = cli_progress_bar(NA_REAL,
+            bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
                                    Rcpp::List::create(Rcpp::_["clear"] = false,
                                                       Rcpp::_["show_after"] = 0.25));
         }
@@ -584,10 +605,11 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                 (bamdata->core.qual >= minMapQ) &&
                 (calculate_aligned_bases(bamdata) >= minAlignedLength)) {
 
-                if (!(bamdata->core.flag & BAM_FPAIRED)) {
+                if (!(bamdata->core.flag & BAM_FPAIRED) &&
+                    ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction))) {
                     // single-end - process directly
                     success = process_mismatch_bam_record(
-                        MISMATCHBAM_MODE_PAIR, // run mode
+                        MISMATCHBAM_MODE_STATE, // run mode
                         bamdata,          // bam record
                         bam_format,       // format of bam file
                         alncnt,           // alignment counter
@@ -643,29 +665,34 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     } else {
                         // mate seen - get it from the map and process the pair
                         bamdata2 = curr_records_it->second;
-                        success = process_mismatch_bam_record_pair(
-                            MISMATCHBAM_MODE_PAIR, // run mode
-                            bamdata2,         // bam record
-                            bamdata,
-                            bam_format,       // format of bam file
-                            alncnt,           // alignment counter
-                            had_error,        // error flag
-                            buffer,           // buffer for message
-                            buffer_len,       // allocated length of message buffer
-                            pos_context_sets, // which positions to analyse (plus strand)
-                            pos_context_rev_sets, // which positions to analyse (minus strand)
-                            unmod_integer,    // what to count as unmodified
-                            unmod_integer_rev, // what to count as unmodified, opposite strand
-                            mod_integer,      // what to count as modified
-                            mod_integer_rev,  // what to count as modified, opposite strand
-                            in_samhdr,        // sam file header
-                            n_unaligned,      // number of unaligned positions
-                            n_total,          // total number of positions
-                            // vectors for return values (per modification)
-                            pair_counts);
+
+                        if ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction)) {
+                            success = process_mismatch_bam_record_pair(
+                                MISMATCHBAM_MODE_STATE, // run mode
+                                bamdata2,         // bam record
+                                bamdata,
+                                bam_format,       // format of bam file
+                                alncnt,           // alignment counter
+                                had_error,        // error flag
+                                buffer,           // buffer for message
+                                buffer_len,       // allocated length of message buffer
+                                pos_context_sets, // which positions to analyse (plus strand)
+                                pos_context_rev_sets, // which positions to analyse (minus strand)
+                                unmod_integer,    // what to count as unmodified
+                                unmod_integer_rev, // what to count as unmodified, opposite strand
+                                mod_integer,      // what to count as modified
+                                mod_integer_rev,  // what to count as modified, opposite strand
+                                in_samhdr,        // sam file header
+                                n_unaligned,      // number of unaligned positions
+                                n_total,          // total number of positions
+                                // vectors for return values (per modification)
+                                pair_counts);
+                        }
+
                         // remove now processed record from map
                         if (bamdata2) {
                             bam_destroy1(bamdata2);
+                            bamdata2 = NULL;
                         }
                         curr_records.erase(curr_records_it);
                     }
@@ -687,40 +714,50 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
              curr_records_it != curr_records.end();
              curr_records_it++) {
             bamdata = curr_records_it->second;
-            success = process_mismatch_bam_record(
-                MISMATCHBAM_MODE_PAIR, // run mode
-                bamdata,          // bam record
-                bam_format,       // format of bam file
-                alncnt,           // alignment counter
-                had_error,        // error flag
-                buffer,           // buffer for message
-                buffer_len,       // allocated length of message buffer
-                pos_context_sets, // which positions to analyse (plus strand)
-                pos_context_rev_sets, // which positions to analyse (minus strand)
-                unmod_integer,    // what to count as unmodified
-                unmod_integer_rev, // what to count as unmodified, opposite strand
-                mod_integer,      // what to count as modified
-                mod_integer_rev,  // what to count as modified, opposite strand
-                in_samhdr,        // sam file header
-                n_unaligned,      // number of unaligned positions
-                n_total,          // total number of positions
-                variantRefNames,  // seqnames of SNV sites
-                variantRefPositions, // coordinates of SNV sites
-                // vectors for return values (per modification)
-                read_id,
-                ref_strand,
-                qscore,
-                chrom,
-                ref_position,
-                mod_prob,
-                pair_counts,
-                // vectors for return values (per alignment)
-                df_read_id,
-                df_qscore,
-                df_read_length,
-                df_aligned_length,
-                df_variant_label,
-                df_ref_strand);
+
+            if ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction)) {
+                success = process_mismatch_bam_record(
+                    MISMATCHBAM_MODE_STATE, // run mode
+                    bamdata,          // bam record
+                    bam_format,       // format of bam file
+                    alncnt,           // alignment counter
+                    had_error,        // error flag
+                    buffer,           // buffer for message
+                    buffer_len,       // allocated length of message buffer
+                    pos_context_sets, // which positions to analyse (plus strand)
+                    pos_context_rev_sets, // which positions to analyse (minus strand)
+                    unmod_integer,    // what to count as unmodified
+                    unmod_integer_rev, // what to count as unmodified, opposite strand
+                    mod_integer,      // what to count as modified
+                    mod_integer_rev,  // what to count as modified, opposite strand
+                    in_samhdr,        // sam file header
+                    n_unaligned,      // number of unaligned positions
+                    n_total,          // total number of positions
+                    variantRefNames,  // seqnames of SNV sites
+                    variantRefPositions, // coordinates of SNV sites
+                    // vectors for return values (per modification)
+                    read_id,
+                    ref_strand,
+                    qscore,
+                    chrom,
+                    ref_position,
+                    mod_prob,
+                    pair_counts,
+                    // vectors for return values (per alignment)
+                    df_read_id,
+                    df_qscore,
+                    df_read_length,
+                    df_aligned_length,
+                    df_variant_label,
+                    df_ref_strand);
+            }
+
+            // remove now processed record from map
+            if (bamdata) {
+                bam_destroy1(bamdata);
+                bamdata = NULL;
+            }
+
             if (verbose && CLI_SHOULD_TICK) { // # nocov start
                 cli_progress_set(bar, (double)alncnt);
             } // # nocov end
@@ -732,6 +769,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             } // # nocov end
         }
     } else {
+        // Modes 1 or 2 (reads)
         if (n_alns_to_sample > 0) {
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------

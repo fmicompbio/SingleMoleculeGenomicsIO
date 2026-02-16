@@ -9,6 +9,8 @@ countMismatchStatePairs(
   bamFormat = "QuasR",
   regions = ".",
   sequenceContext = "GCH",
+  nAlnsToSample = 0,
+  seqnamesToSampleFrom = character(0),
   readBaseUnmod = "T",
   readBaseMod = "C",
   windowSize = 200,
@@ -43,6 +45,23 @@ excluding C's that are in CpG dinucleotides. The call will be made by
 comparing the genomic base in the middle of \code{sequenceContext} to
 the aligned base in the read and interpreted according to
 \code{readBaseUnmod} and \code{readBaseMod}.}
+
+\item{nAlnsToSample}{A numeric scalar. If non-zero, \code{regions} is ignored
+and approximately \code{nAlnsToSample} randomly selected alignments on
+\code{seqnamesToSampleFrom} are read from the \code{bamfile}.
+If \code{bamfile} contains paired alignments, they are included or
+excluded as pairs. Alignments are counted individually towards
+\code{nAlnsToSample}, thus for paired-end data this parameter has to
+be set to twice the number of pairs to be sampled.
+In order to make the results reproducible, make sure to set the
+random number seed using \code{set.seed}. Please note that secondary and
+supplementary alignments in \code{bamfiles} contribute to the total
+number of alignments but will not be sampled, thus the number of used
+alignments may be lower than \code{nAlnsToSample}.}
+
+\item{seqnamesToSampleFrom}{A character vector with one or several sequence
+names (chromosomes) from which to sample alignments from (only used if
+\code{nAlnsToSample} is greater than zero).}
 
 \item{readBaseUnmod, readBaseMod}{Character scalars defining the read bases
 that are interpreted as unmodified or modified, respectively, when

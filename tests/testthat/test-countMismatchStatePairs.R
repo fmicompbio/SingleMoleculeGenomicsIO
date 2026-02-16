@@ -53,6 +53,34 @@ test_that("countMismatchStatePairs works", {
                  "needs to have an odd number of characters")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
+                                         nAlnsToSample = -1,
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
+                                         BPPARAM = BiocParallel::SerialParam()),
+                 ".nAlnsToSample. must be between 0 and Inf")
+    expect_error(
+        expect_warning(countMismatchStatePairs(bamfile = bamfiles[1],
+                                               bamFormat = "QuasR",
+                                               nAlnsToSample = 1000,
+                                               seqnamesToSampleFrom = "chr1",
+                                               seqinfo = c(chr1 = 1000000),
+                                               sequenceReference = ref,
+                                               BPPARAM = BiocParallel::SerialParam()),
+                       "Ignoring .regions. because .nAlnsToSample. is greater than zero"),
+                 "Cannot sample 1000 alignments from a total of ")
+    expect_error(
+        expect_warning(countMismatchStatePairs(bamfile = bamfiles[1],
+                                               regions = NULL,
+                                               bamFormat = "QuasR",
+                                               nAlnsToSample = 1000,
+                                               seqnamesToSampleFrom = "error",
+                                               seqinfo = c(chr1 = 1000000),
+                                               sequenceReference = ref,
+                                               BPPARAM = BiocParallel::SerialParam()),
+                       "Ignoring unknown target name: error"),
+        "Cannot sample 1000 alignments from a total of 0")
+    expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
+                                         bamFormat = "QuasR",
                                          readBaseUnmod = "N",
                                          BPPARAM = BiocParallel::SerialParam()),
                  "All values in .readBaseUnmod. must be one of")
@@ -70,31 +98,43 @@ test_that("countMismatchStatePairs works", {
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
                                          windowSize = "100",
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
                                          BPPARAM = BiocParallel::SerialParam()),
                  ".windowSize. must be of class .numeric.")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
                                          windowSize = -1,
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
                                          BPPARAM = BiocParallel::SerialParam()),
                  ".windowSize. must be between 1 and Inf")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
                                          minMapQ = "100",
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
                                          BPPARAM = BiocParallel::SerialParam()),
                  ".minMapQ. must be of class .numeric.")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
                                          minMapQ = c(1, 20),
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
                                          BPPARAM = BiocParallel::SerialParam()),
                  ".minMapQ. must have length 1")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
                                          minAlignedLength = "100",
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
                                          BPPARAM = BiocParallel::SerialParam()),
                  ".minAlignedLength. must be of class .numeric.")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
                                          bamFormat = "QuasR",
                                          minAlignedLength = c(1, 20),
+                                         seqinfo = c(chr1 = 1000000),
+                                         sequenceReference = ref,
                                          BPPARAM = BiocParallel::SerialParam()),
                  ".minAlignedLength. must have length 1")
     expect_error(countMismatchStatePairs(bamfile = bamfiles[1],
@@ -219,18 +259,65 @@ test_that("countMismatchStatePairs works", {
     expect_identical(unname(colSums(as.data.frame(res))), c(20100, 78, 32, 16, 10))
 
     # ... reads with indels
-    res <- countMismatchStatePairs(bamfile = bamfiles[5],
+    res1 <- countMismatchStatePairs(bamfile = bamfiles[5],
                                    bamFormat = "QuasR",
                                    regions = "chr1:1-7000000",
                                    sequenceContext = "C",
                                    windowSize = 200,
                                    sequenceReference = ref,
                                    BPPARAM = BiocParallel::SerialParam())
-    expect_s4_class(res, "DFrame")
-    expect_identical(dim(res), c(200L, 5L))
-    expect_named(res, c("S", "unmod_unmod", "unmod_mod", "mod_unmod", "mod_mod"))
+    expect_s4_class(res1, "DFrame")
+    expect_identical(dim(res1), c(200L, 5L))
+    expect_named(res1, c("S", "unmod_unmod", "unmod_mod", "mod_unmod", "mod_mod"))
     ## compare to e.g. nomeR::get_ctable_from_SE(readMismatchBam(bamfiles = bamfiles[5], bamFormat = "QuasR", regions = "chr1:6925411-6925964", sequenceReference = ref, sequenceContext = "C"), "mod_prob", 0.5, 0.5, 0, 0, 200, FALSE, 1, FALSE)
-    expect_identical(unname(unlist(res[1, ])), c(1, 68, 0, 0, 0))
-    expect_identical(res[2:12, 2], c(21, 17, 9, 15, 9, 18, 14, 8, 14, 15, 20))
-    expect_identical(unname(colSums(as.data.frame(res))), c(20100, 805, 0, 0, 0))
+    expect_identical(unname(unlist(res1[1, ])), c(1, 68, 0, 0, 0))
+    expect_identical(res1[2:12, 2], c(21, 17, 9, 15, 9, 18, 14, 8, 14, 15, 20))
+    expect_identical(unname(colSums(as.data.frame(res1))), c(20100, 805, 0, 0, 0))
+
+    # ... with sampling
+    # ... ... single-end QuasR (complete)
+    res2 <- countMismatchStatePairs(bamfile = bamfiles[5],
+                                    bamFormat = "QuasR",
+                                    regions = NULL,
+                                    sequenceContext = "C",
+                                    nAlnsToSample = 3,
+                                    seqnamesToSampleFrom = "chr1",
+                                    windowSize = 200,
+                                    sequenceReference = ref,
+                                    BPPARAM = BiocParallel::SerialParam())
+    expect_identical(res1, res2)
+    # ... ... paired-end Bismark (complete)
+    res3 <-  countMismatchStatePairs(bamfile = bamfiles[2],
+                                     bamFormat = "Bismark",
+                                     regions = "chr1",
+                                     sequenceContext = "GCH",
+                                     windowSize = 200,
+                                     sequenceReference = ref,
+                                     BPPARAM = BiocParallel::SerialParam())
+    suppressMessages(expect_message(
+        res4 <-  countMismatchStatePairs(bamfile = bamfiles[2],
+                                         bamFormat = "Bismark",
+                                         regions = NULL,
+                                         sequenceContext = "GCH",
+                                         nAlnsToSample = 788,
+                                         seqnamesToSampleFrom = "chr1",
+                                         windowSize = 200,
+                                         sequenceReference = ref,
+                                         BPPARAM = BiocParallel::SerialParam(),
+                                         verbose = TRUE)
+    ))
+    expect_identical(res3, res4)
+    # ... ... paired-end Bismark (subsample)
+    set.seed(43L)
+    res5 <-  countMismatchStatePairs(bamfile = bamfiles[2],
+                                     bamFormat = "Bismark",
+                                     regions = NULL,
+                                     sequenceContext = "GCH",
+                                     nAlnsToSample = 216,
+                                     seqnamesToSampleFrom = "chr1",
+                                     windowSize = 200,
+                                     sequenceReference = ref,
+                                     BPPARAM = BiocParallel::SerialParam())
+    expect_true(all(as.vector(as.matrix(res4[, -1]) - as.matrix(res5[, -1])) >= 0))
+    expect_true(any(as.vector(as.matrix(res4[, -1]) - as.matrix(res5[, -1])) > 0))
 })
