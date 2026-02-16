@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -178,13 +178,13 @@ observations that are likely to represent sequencing error.</p>
 <span>                 BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[120ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[112ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 17739 positions to 7967 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[28ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[17ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting sequence contexts</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> extracting sequence contexts <span style="color: #B2B2B2;">[549ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> extracting sequence contexts <span style="color: #B2B2B2;">[546ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="va">se</span></span>
 <span><span class="co">#&gt; class: RangedSummarizedExperiment </span></span>
@@ -543,14 +543,12 @@ imported using <code>SingleMoleculeGenomicsIO</code> (see below).</p>
 <span>                          verbose <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[30ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[33ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> collapsed 11211 positions to 7967 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 11211 positions to 7967 unique ones <span style="color: #B2B2B2;">[51ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 11211 positions to 7967 unique ones</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 11211 positions to 7967 unique ones <span style="color: #B2B2B2;">[61ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
 <span><span class="va">se_summary2</span></span>
 <span><span class="co">#&gt; class: RangedSummarizedExperiment </span></span>
 <span><span class="co">#&gt; dim: 7967 2 </span></span>
@@ -630,23 +628,22 @@ sequences to sample reads from.</p>
 <span>                        verbose <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                        BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span>RNGseed <span class="op">=</span> <span class="fl">1327828L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> removed 150 unaligned (e.g. soft-masked) of 41618 called bases</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> read 5 alignments</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> removed 1165 unaligned (e.g. soft-masked) of 80587 called bases</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> read 7 alignments</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[28ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> removed 150 unaligned (e.g. soft-masked) of 41618 called bases</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> read 5 alignments</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> sampling alignments with probability 0.5</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> reading alignments overlapping 1 region</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> removed 1165 unaligned (e.g. soft-masked) of 80587 called bases</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> read 7 alignments</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[39ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> collapsed 31912 positions to 7238 unique ones</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 31912 positions to 7238 unique ones <span style="color: #B2B2B2;">[206ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> collapsed 31912 positions to 7238 unique ones</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> collapsed 31912 positions to 7238 unique ones <span style="color: #B2B2B2;">[272ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
 <span><span class="va">se_sample</span><span class="op">$</span><span class="va">n_reads</span></span>
 <span><span class="co">#&gt; [1] 5 7</span></span></code></pre></div>
 <p>Note that the exact number of sampled reads may not be identical to
@@ -1083,16 +1080,15 @@ the package.</p>
 <span>                         BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>                         verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> start filtering of <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> merging 1 filtered chunks</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]<span style="color: #00BBBB;">ℹ</span> done filtering: retained 8 of 10 records (80%)</span></span>
-<span><span class="co">#&gt; ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> merging 1 filtered chunks</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> done filtering: retained 8 of 10 records (80%)</span></span>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt;   sample</span></span>
 <span><span class="co">#&gt; 1     s1</span></span>
 <span><span class="co">#&gt;                                                                                infile</span></span>
 <span><span class="co">#&gt; 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span></span>
 <span><span class="co">#&gt;                                                                             outfile</span></span>
-<span><span class="co">#&gt; 1 /var/folders/yz/zr09txvs5dn18vt4cn21kzl40000gn/T//Rtmp1YLLWK/file76b363441da6.bam</span></span>
+<span><span class="co">#&gt; 1 /var/folders/w0/cd8qgn052r16zsblrrxl1gxw0000gn/T//RtmpiDPPSp/file4b7e2e9fb35b.bam</span></span>
 <span><span class="co">#&gt;   total retained filtered_unmapped filtered_secondary filtered_supplementary</span></span>
 <span><span class="co">#&gt; 1    10        8                 0                  0                      0</span></span>
 <span><span class="co">#&gt;   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction</span></span>
@@ -1291,7 +1287,7 @@ states.</p>
 <code class="sourceCode R"><span><span class="fu">sessioninfo</span><span class="fu">::</span><span class="fu"><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">session_info</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">─ Session info ───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt;  <span style="color: #555555; font-style: italic;">setting </span> <span style="color: #555555; font-style: italic;">value</span></span></span>
-<span><span class="co">#&gt;  version  R Under development (unstable) (2026-02-03 r89374)</span></span>
+<span><span class="co">#&gt;  version  R Under development (unstable) (2026-02-14 r89420)</span></span>
 <span><span class="co">#&gt;  os       macOS Sequoia 15.7.3</span></span>
 <span><span class="co">#&gt;  system   aarch64, darwin20</span></span>
 <span><span class="co">#&gt;  ui       X11</span></span>
@@ -1299,7 +1295,7 @@ states.</p>
 <span><span class="co">#&gt;  collate  en_US.UTF-8</span></span>
 <span><span class="co">#&gt;  ctype    en_US.UTF-8</span></span>
 <span><span class="co">#&gt;  tz       UTC</span></span>
-<span><span class="co">#&gt;  date     2026-02-04</span></span>
+<span><span class="co">#&gt;  date     2026-02-16</span></span>
 <span><span class="co">#&gt;  pandoc   3.1.11 @ /usr/local/bin/ (via rmarkdown)</span></span>
 <span><span class="co">#&gt;  quarto   NA</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1313,18 +1309,18 @@ states.</p>
 <span><span class="co">#&gt;  Biostrings               * 2.79.4     <span style="color: #555555;">2026-01-07</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  bitops                     1.0-9      <span style="color: #555555;">2024-10-03</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  BSgenome                   1.79.1     <span style="color: #555555;">2025-12-10</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  bslib                      0.9.0      <span style="color: #555555;">2025-01-30</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  bslib                      0.10.0     <span style="color: #555555;">2026-01-26</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  cachem                     1.1.0      <span style="color: #555555;">2024-05-16</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  cigarillo                  1.1.0      <span style="color: #555555;">2025-11-12</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  cli                        3.6.5      <span style="color: #555555;">2025-04-23</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  codetools                  0.2-20     <span style="color: #555555;">2024-03-31</span> <span style="color: #555555;">[2]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  crayon                     1.5.3      <span style="color: #555555;">2024-06-20</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  curl                       7.0.0      <span style="color: #555555;">2025-08-19</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  data.table                 1.17.8     <span style="color: #555555;">2025-07-10</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  data.table                 1.18.2.1   <span style="color: #555555;">2026-01-27</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  DelayedArray               0.37.0     <span style="color: #555555;">2025-11-13</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  desc                       1.4.3      <span style="color: #555555;">2023-12-10</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  digest                     0.6.39     <span style="color: #555555;">2025-11-19</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  dplyr                      1.1.4      <span style="color: #555555;">2023-11-17</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  dplyr                      1.2.0      <span style="color: #555555;">2026-02-03</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  evaluate                   1.0.5      <span style="color: #555555;">2025-08-27</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  farver                     2.1.2      <span style="color: #555555;">2024-05-13</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  fastmap                    1.2.0      <span style="color: #555555;">2024-05-15</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
@@ -1332,17 +1328,17 @@ states.</p>
 <span><span class="co">#&gt;  generics                 * 0.1.4      <span style="color: #555555;">2025-05-09</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  GenomicAlignments          1.47.0     <span style="color: #555555;">2025-12-08</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  GenomicRanges            * 1.63.1     <span style="color: #555555;">2025-12-08</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  ggplot2                    4.0.0      <span style="color: #555555;">2025-09-11</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  ggplot2                    4.0.2      <span style="color: #555555;">2026-02-03</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  glue                       1.8.0      <span style="color: #555555;">2024-09-30</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  gtable                     0.3.6      <span style="color: #555555;">2024-10-25</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  htmltools                  0.5.9      <span style="color: #555555;">2025-12-04</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  httr                       1.4.7      <span style="color: #555555;">2023-08-15</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  httr                       1.4.8      <span style="color: #555555;">2026-02-13</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  IRanges                  * 2.45.0     <span style="color: #555555;">2025-11-12</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  jquerylib                  0.1.4      <span style="color: #555555;">2021-04-26</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  jsonlite                   2.0.0      <span style="color: #555555;">2025-03-27</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  knitr                      1.51       <span style="color: #555555;">2025-12-20</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  labeling                   0.4.3      <span style="color: #555555;">2023-08-29</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  lattice                    0.22-7     <span style="color: #555555;">2025-04-02</span> <span style="color: #555555;">[2]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  lattice                    0.22-9     <span style="color: #555555;">2026-02-09</span> <span style="color: #555555;">[2]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  lifecycle                  1.0.5      <span style="color: #555555;">2026-01-08</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  magrittr                   2.0.4      <span style="color: #555555;">2025-09-12</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  Matrix                   * 1.7-4      <span style="color: #555555;">2025-08-28</span> <span style="color: #555555;">[2]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
@@ -1373,9 +1369,9 @@ states.</p>
 <span><span class="co">#&gt;  scales                     1.4.0      <span style="color: #555555;">2025-04-24</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  Seqinfo                  * 1.1.0      <span style="color: #555555;">2025-11-12</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  sessioninfo                1.2.3      <span style="color: #555555;">2025-02-05</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  SingleMoleculeGenomicsIO * 0.1.0      <span style="color: #555555;">2026-02-04</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor</span></span></span>
+<span><span class="co">#&gt;  SingleMoleculeGenomicsIO * 0.1.1      <span style="color: #555555;">2026-02-16</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor</span></span></span>
 <span><span class="co">#&gt;  SparseArray              * 1.11.10    <span style="color: #555555;">2025-12-16</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  SummarizedExperiment     * 1.41.0     <span style="color: #555555;">2025-12-08</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  SummarizedExperiment     * 1.41.1     <span style="color: #555555;">2026-02-06</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  systemfonts                1.3.1      <span style="color: #555555;">2025-10-01</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  textshaping                1.0.4      <span style="color: #555555;">2025-10-10</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  tibble                     3.3.1      <span style="color: #555555;">2026-01-11</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
@@ -1384,7 +1380,7 @@ states.</p>
 <span><span class="co">#&gt;  vctrs                      0.7.1      <span style="color: #555555;">2026-01-23</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  withr                      3.0.2      <span style="color: #555555;">2024-10-28</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  xfun                       0.56       <span style="color: #555555;">2026-01-18</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
-<span><span class="co">#&gt;  XML                        3.99-0.20  <span style="color: #555555;">2025-11-08</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
+<span><span class="co">#&gt;  XML                        3.99-0.22  <span style="color: #555555;">2026-02-10</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  XVector                  * 0.51.0     <span style="color: #555555;">2025-11-12</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">Bioconductor 3.23 (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt;  yaml                       2.3.12     <span style="color: #555555;">2025-12-10</span> <span style="color: #555555;">[1]</span> <span style="color: #555555;">CRAN (R 4.6.0)</span></span></span>
 <span><span class="co">#&gt; </span></span>

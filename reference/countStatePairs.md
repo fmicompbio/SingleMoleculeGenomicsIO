@@ -10,6 +10,8 @@ countStatePairs(
   bamfile,
   regions = ".",
   modbase,
+  nAlnsToSample = 0,
+  seqnamesToSampleFrom = character(0),
   threshUnmod = 0.5,
   threshMod = 0.5,
   windowSize = 200,
@@ -40,6 +42,23 @@ countStatePairs(
 
   Character scalar defining the modified base.
 
+- nAlnsToSample:
+
+  A numeric scalar. If non-zero, `regions` is ignored and approximately
+  `nAlnsToSample` randomly selected alignments on `seqnamesToSampleFrom`
+  are read from the `bamfile`. In order to make the results
+  reproducible, make sure to set the random number seed using
+  `set.seed`. Please note that secondary and supplementary alignments in
+  `bamfiles` contribute to the total number of alignments but will not
+  be sampled, thus the number of used alignments may be lower than
+  `nAlnsToSample`.
+
+- seqnamesToSampleFrom:
+
+  A character vector with one or several sequence names (chromosomes)
+  from which to sample alignments from (only used if `nAlnsToSample` is
+  greater than zero).
+
 - threshUnmod, threshMod:
 
   Numeric scalars defining how to convert modification probabilities `p`
@@ -69,7 +88,14 @@ countStatePairs(
   A
   [`BiocParallelParam`](https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html)
   object that controls the number of parallel CPU threads to use for
-  decompressing bam records.
+  some of the steps in
+  [`readModBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.md).
+  The default value is
+  ([`MulticoreParam`](https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html)`(4L, RNGseed = 42L)`).
+  If randomly sampling reads (`nAlnsToSample > 0`), make sure to set the
+  `RNGseed` argument when constructing the `BPPARAM` object for
+  reproducible results (see also
+  [`vignette("Random_Numbers", package = "BiocParallel")`](https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Random_Numbers.html)).
 
 - verbose:
 

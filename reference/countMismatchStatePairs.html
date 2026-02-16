@@ -9,7 +9,7 @@ number of pairs at a given distance with a given modification state."></head><bo
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,8 @@ number of pairs at a given distance with a given modification state.</p>
 <span>  bamFormat <span class="op">=</span> <span class="st">"QuasR"</span>,</span>
 <span>  regions <span class="op">=</span> <span class="st">"."</span>,</span>
 <span>  sequenceContext <span class="op">=</span> <span class="st">"GCH"</span>,</span>
+<span>  nAlnsToSample <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  seqnamesToSampleFrom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  readBaseUnmod <span class="op">=</span> <span class="st">"T"</span>,</span>
 <span>  readBaseMod <span class="op">=</span> <span class="st">"C"</span>,</span>
 <span>  windowSize <span class="op">=</span> <span class="fl">200</span>,</span>
@@ -95,6 +97,27 @@ the aligned base in the read and interpreted according to
 <code>readBaseUnmod</code> and <code>readBaseMod</code>.</p></dd>
 
 
+<dt id="arg-nalnstosample">nAlnsToSample<a class="anchor" aria-label="anchor" href="#arg-nalnstosample"></a></dt>
+<dd><p>A numeric scalar. If non-zero, <code>regions</code> is ignored
+and approximately <code>nAlnsToSample</code> randomly selected alignments on
+<code>seqnamesToSampleFrom</code> are read from the <code>bamfile</code>.
+If <code>bamfile</code> contains paired alignments, they are included or
+excluded as pairs. Alignments are counted individually towards
+<code>nAlnsToSample</code>, thus for paired-end data this parameter has to
+be set to twice the number of pairs to be sampled.
+In order to make the results reproducible, make sure to set the
+random number seed using <code>set.seed</code>. Please note that secondary and
+supplementary alignments in <code>bamfiles</code> contribute to the total
+number of alignments but will not be sampled, thus the number of used
+alignments may be lower than <code>nAlnsToSample</code>.</p></dd>
+
+
+<dt id="arg-seqnamestosamplefrom">seqnamesToSampleFrom<a class="anchor" aria-label="anchor" href="#arg-seqnamestosamplefrom"></a></dt>
+<dd><p>A character vector with one or several sequence
+names (chromosomes) from which to sample alignments from (only used if
+<code>nAlnsToSample</code> is greater than zero).</p></dd>
+
+
 <dt id="arg-readbaseunmod-readbasemod">readBaseUnmod, readBaseMod<a class="anchor" aria-label="anchor" href="#arg-readbaseunmod-readbasemod"></a></dt>
 <dd><p>Character scalars defining the read bases
 that are interpreted as unmodified or modified, respectively, when
@@ -135,8 +158,13 @@ extracted from these sequences.</p></dd>
 
 <dt id="arg-bpparam">BPPARAM<a class="anchor" aria-label="anchor" href="#arg-bpparam"></a></dt>
 <dd><p>A <code><a href="https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html" class="external-link">BiocParallelParam</a></code> object that
-controls the number of parallel CPU threads to use for decompressing
-bam records.</p></dd>
+controls the number of parallel CPU threads to use for some of the steps
+in <code><a href="readModBam.html">readModBam()</a></code>. The default value is
+(<code><a href="https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html" class="external-link">MulticoreParam</a>(4L, RNGseed = 42L)</code>).
+If randomly sampling reads (<code>nAlnsToSample &gt; 0</code>), make sure to set
+the <code>RNGseed</code> argument when constructing the <code>BPPARAM</code> object
+for reproducible results (see also
+<code><a href="https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Random_Numbers.html" class="external-link">vignette("Random_Numbers", package = "BiocParallel")</a></code>).</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -168,14 +196,18 @@ bam records.</p></dd>
 <span class="r-in"><span>                               verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/BisSeq_quasr_single.bam</span> using 1 thread</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C
+</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> counting state-pairs for alignments overlapping 1 region</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C
+</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> removed 0 unaligned (e.g. soft-masked) of 0 called bases</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C
+</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> read 184 alignments</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding positions with C <span style="color: #B2B2B2;">[96ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C
+</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding positions with C <span style="color: #B2B2B2;">[142ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">tbl</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 200 rows and 5 columns</span>

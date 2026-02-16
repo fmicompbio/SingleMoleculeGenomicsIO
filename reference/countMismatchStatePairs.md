@@ -12,6 +12,8 @@ countMismatchStatePairs(
   bamFormat = "QuasR",
   regions = ".",
   sequenceContext = "GCH",
+  nAlnsToSample = 0,
+  seqnamesToSampleFrom = character(0),
   readBaseUnmod = "T",
   readBaseMod = "C",
   windowSize = 200,
@@ -56,6 +58,26 @@ countMismatchStatePairs(
   comparing the genomic base in the middle of `sequenceContext` to the
   aligned base in the read and interpreted according to `readBaseUnmod`
   and `readBaseMod`.
+
+- nAlnsToSample:
+
+  A numeric scalar. If non-zero, `regions` is ignored and approximately
+  `nAlnsToSample` randomly selected alignments on `seqnamesToSampleFrom`
+  are read from the `bamfile`. If `bamfile` contains paired alignments,
+  they are included or excluded as pairs. Alignments are counted
+  individually towards `nAlnsToSample`, thus for paired-end data this
+  parameter has to be set to twice the number of pairs to be sampled. In
+  order to make the results reproducible, make sure to set the random
+  number seed using `set.seed`. Please note that secondary and
+  supplementary alignments in `bamfiles` contribute to the total number
+  of alignments but will not be sampled, thus the number of used
+  alignments may be lower than `nAlnsToSample`.
+
+- seqnamesToSampleFrom:
+
+  A character vector with one or several sequence names (chromosomes)
+  from which to sample alignments from (only used if `nAlnsToSample` is
+  greater than zero).
 
 - readBaseUnmod, readBaseMod:
 
@@ -103,7 +125,14 @@ countMismatchStatePairs(
   A
   [`BiocParallelParam`](https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html)
   object that controls the number of parallel CPU threads to use for
-  decompressing bam records.
+  some of the steps in
+  [`readModBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readModBam.md).
+  The default value is
+  ([`MulticoreParam`](https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html)`(4L, RNGseed = 42L)`).
+  If randomly sampling reads (`nAlnsToSample > 0`), make sure to set the
+  `RNGseed` argument when constructing the `BPPARAM` object for
+  reproducible results (see also
+  [`vignette("Random_Numbers", package = "BiocParallel")`](https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Random_Numbers.html)).
 
 - verbose:
 
@@ -135,13 +164,17 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ finding positions with C
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/BisSeq_quasr_single.bam using 1 thread
 #> ℹ finding positions with C
+
 #> ℹ counting state-pairs for alignments overlapping 1 region
 #> ℹ finding positions with C
+
 #> ℹ removed 0 unaligned (e.g. soft-masked) of 0 called bases
 #> ℹ finding positions with C
+
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
-#> ✔ finding positions with C [96ms]
+
+#> ✔ finding positions with C [142ms]
 #> 
 tbl
 #> DataFrame with 200 rows and 5 columns

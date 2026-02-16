@@ -1,5 +1,9 @@
 # Changelog
 
+## SingleMoleculeGenomicsIO 0.1.1
+
+- Add sampling mode to `countStatePairs` and `countMismatchStatePairs`
+
 ## SingleMoleculeGenomicsIO 0.1.0
 
 - Add `readMismatchBam` and `countMismatchStatePairs` supporting BAM

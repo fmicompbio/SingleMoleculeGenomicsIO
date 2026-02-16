@@ -9,7 +9,7 @@ number of pairs at a given distance with a given modification state."></head><bo
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,8 @@ number of pairs at a given distance with a given modification state.</p>
 <span>  <span class="va">bamfile</span>,</span>
 <span>  regions <span class="op">=</span> <span class="st">"."</span>,</span>
 <span>  <span class="va">modbase</span>,</span>
+<span>  nAlnsToSample <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  seqnamesToSampleFrom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  threshUnmod <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  threshMod <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  windowSize <span class="op">=</span> <span class="fl">200</span>,</span>
@@ -78,6 +80,23 @@ specified as a character vector (e.g. "chr1:1200-1300", "chr2:-6000",
 <dd><p>Character scalar defining the modified base.</p></dd>
 
 
+<dt id="arg-nalnstosample">nAlnsToSample<a class="anchor" aria-label="anchor" href="#arg-nalnstosample"></a></dt>
+<dd><p>A numeric scalar. If non-zero, <code>regions</code> is ignored
+and approximately <code>nAlnsToSample</code> randomly selected alignments on
+<code>seqnamesToSampleFrom</code> are read from the <code>bamfile</code>.
+In order to make the results reproducible, make sure to set the
+random number seed using <code>set.seed</code>. Please note that secondary and
+supplementary alignments in <code>bamfiles</code> contribute to the total
+number of alignments but will not be sampled, thus the number of used
+alignments may be lower than <code>nAlnsToSample</code>.</p></dd>
+
+
+<dt id="arg-seqnamestosamplefrom">seqnamesToSampleFrom<a class="anchor" aria-label="anchor" href="#arg-seqnamestosamplefrom"></a></dt>
+<dd><p>A character vector with one or several sequence
+names (chromosomes) from which to sample alignments from (only used if
+<code>nAlnsToSample</code> is greater than zero).</p></dd>
+
+
 <dt id="arg-threshunmod-threshmod">threshUnmod, threshMod<a class="anchor" aria-label="anchor" href="#arg-threshunmod-threshmod"></a></dt>
 <dd><p>Numeric scalars defining how to convert
 modification probabilities <code>p</code> to modification states. Bases with
@@ -104,8 +123,13 @@ to include alignments in pair-counting mode.</p></dd>
 
 <dt id="arg-bpparam">BPPARAM<a class="anchor" aria-label="anchor" href="#arg-bpparam"></a></dt>
 <dd><p>A <code><a href="https://rdrr.io/pkg/BiocParallel/man/BiocParallelParam-class.html" class="external-link">BiocParallelParam</a></code> object that
-controls the number of parallel CPU threads to use for decompressing
-bam records.</p></dd>
+controls the number of parallel CPU threads to use for some of the steps
+in <code><a href="readModBam.html">readModBam()</a></code>. The default value is
+(<code><a href="https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html" class="external-link">MulticoreParam</a>(4L, RNGseed = 42L)</code>).
+If randomly sampling reads (<code>nAlnsToSample &gt; 0</code>), make sure to set
+the <code>RNGseed</code> argument when constructing the <code>BPPARAM</code> object
+for reproducible results (see also
+<code><a href="https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Random_Numbers.html" class="external-link">vignette("Random_Numbers", package = "BiocParallel")</a></code>).</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
