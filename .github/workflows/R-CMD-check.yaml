@@ -166,21 +166,21 @@ jobs:
       - name: Run Valgrind
         if: matrix.config.valgrind == 'yes'
         run: |
-          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full" \
+          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full --show-leak-kinds=all" \
               --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-countMismatchStatePairs.R")' | \
               tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt
 
       - name: Run Valgrind (2)
         if: matrix.config.valgrind == 'yes'
         run: |
-          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full" \
+          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full --show-leak-kinds=all" \
               --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-readModBam.R")' | \
               tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out-2.txt
 
       - name: Run Valgrind (3)
         if: matrix.config.valgrind == 'yes'
         run: |
-          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full" \
+          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full --show-leak-kinds=all" \
               --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-readMismatchBam.R")' | \
               tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out-3.txt
 
