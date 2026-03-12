@@ -137,8 +137,6 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     int buffer_len = 2000;
     char buffer[2000];
     uint64_t refposcount = 0;
-    unsigned int regcnt = 0;
-    char **regions_c = NULL;
     bool isRC = false;
     int unmod_int = 0, mod_int = 0;
     uint8_t fwdbase = 0;
@@ -186,9 +184,9 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
         goto end;
     }
 
-    success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                           conf.iter, conf.idx, conf.in_samhdr,
-                                           had_error, buffer_len, buffer);
+    success = create_multi_region_iterator(regions, conf.iter, conf.idx,
+                                           conf.in_samhdr, had_error,
+                                           buffer_len, buffer);
     if (success != 0) {
         goto end;
     }

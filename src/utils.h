@@ -41,8 +41,6 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
                                        int buffer_len,
                                        char *buffer);
 int create_multi_region_iterator(std::vector<std::string> &regions,
-                                 unsigned int &regcnt,
-                                 char **&regions_c,
                                  hts_itr_t *&iter,
                                  hts_idx_t *idx,
                                  sam_hdr_t *in_samhdr,
@@ -50,8 +48,6 @@ int create_multi_region_iterator(std::vector<std::string> &regions,
                                  int buffer_len,
                                  char *buffer);
 int create_multi_region_iterator_for_sampling(
-        unsigned int &regcnt,
-        char **&regions_c,
         int &n_alns_to_sample,
         std::vector<std::string> &tnames_for_sampling,
         double &keep_aln_fraction,

@@ -775,18 +775,14 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
 
 // Create a multi-region iterator
 //
-// This is a convenice function that bundles multiple steps required to
+// This is a convenience function that bundles multiple steps required to
 // create an htslib bam file iterator for multiple regions. Specifically it
-//   - set `regcnt`
-//   - allocate an array of char* in `regions_c`
 //   - convert `regions` from std::vector<std::string> to char** in `regions_c`
 //   - create multi-region htslib iterator in `iter` (uses also  `idx` and `in_samhdr`)
 //
 // The function returns 0 on success, and a non-zero error code on failure
 // (with an error message written to `buffer` and `had_error` set to true).
 int create_multi_region_iterator(std::vector<std::string> &regions,
-                                 unsigned int &regcnt,
-                                 char **&regions_c,
                                  hts_itr_t *&iter,
                                  hts_idx_t *idx,
                                  sam_hdr_t *in_samhdr,
@@ -794,8 +790,8 @@ int create_multi_region_iterator(std::vector<std::string> &regions,
                                  int buffer_len,
                                  char *buffer) {
     // convert regions to C arrays
-    regcnt = (unsigned int) regions.size();
-    regions_c = (char**) calloc(regcnt, sizeof(char*));
+    unsigned int regcnt = (unsigned int) regions.size();
+    char **regions_c = (char**) calloc(regcnt, sizeof(char*));
     for (unsigned int i = 0; i < regcnt; i++) {
         regions_c[i] = (char*) regions[i].c_str();
     }
@@ -804,15 +800,19 @@ int create_multi_region_iterator(std::vector<std::string> &regions,
     if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
         had_error = true;
         snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
-        return -1;
+    }
+    if (regions_c) {
+        free(regions_c);
+        regions_c = NULL;
     }
 
-    return 0;
+    return (had_error ? -1 : 0);
 }
+
 
 // Create a multi-region iterator for sampling
 //
-// This is a convenicence function that bundles multiple steps required to
+// This is a convenience function that bundles multiple steps required to
 // randomly sample records from specified target sequences. Specifically it
 //   - set `regcnt` (intersection of )
 //   - allocate an array of char* in `regions_c`
@@ -824,8 +824,6 @@ int create_multi_region_iterator(std::vector<std::string> &regions,
 // The function returns 0 on success, and a non-zero error code on failure
 // (with an error message written to `buffer` and `had_error` set to true).
 int create_multi_region_iterator_for_sampling(
-        unsigned int &regcnt,
-        char **&regions_c,
         int &n_alns_to_sample,
         std::vector<std::string> &tnames_for_sampling,
         double &keep_aln_fraction,
@@ -841,9 +839,9 @@ int create_multi_region_iterator_for_sampling(
     std::set<std::string> tnames_for_sampling_set(tnames_for_sampling.begin(), tnames_for_sampling.end());
     std::set<std::string> tnames_existing;
 
-    regcnt = 0;
-    regions_c = (char**) calloc((unsigned int) tnames_for_sampling.size(),
-                 sizeof(char*));
+    unsigned int regcnt = 0;
+    char **regions_c = (char**) calloc((unsigned int) tnames_for_sampling.size(),
+                        sizeof(char*));
     for (i = 0; i < in_samhdr->n_targets; i++) {
         tnames_existing.insert(in_samhdr->target_name[i]);
 
@@ -871,20 +869,23 @@ int create_multi_region_iterator_for_sampling(
         snprintf(buffer, buffer_len,
                  "Cannot sample %d alignments from a total of %" PRIu64 "\n",
                  n_alns_to_sample, total_for_sampling);
-        return -1;
+    } else {
+        // calculate fraction of alignments to keep
+        keep_aln_fraction = (double) n_alns_to_sample / total_for_sampling;
+
+        // create multi-region iterator
+        if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len, "Failed to get bam iterator\n"); // # nocov end
+        }
     }
 
-    // calculate fraction of alignments to keep
-    keep_aln_fraction = (double) n_alns_to_sample / total_for_sampling;
-
-    // create multi-region iterator
-    if (!(iter = sam_itr_regarray(idx, in_samhdr, regions_c, regcnt))) {
-        had_error = true; // # nocov start
-        snprintf(buffer, buffer_len, "Failed to get bam iterator\n");
-        return -2; // # nocov end
+    if (regions_c) {
+        free(regions_c);
+        regions_c = NULL;
     }
 
-    return 0;
+    return (had_error ? -1 : 0);
 }
 
 // convert a named Rcpp::List with IntegerVector elements

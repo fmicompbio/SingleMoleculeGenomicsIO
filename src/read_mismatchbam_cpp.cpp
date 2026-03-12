@@ -494,8 +494,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     std::pair<std::map<std::string,bam1_t*>::iterator, bool> inserted;
     hts_idx_t *idx = NULL;
     hts_itr_t *iter = NULL;
-    unsigned int regcnt = 0, alncnt = 0;
-    char **regions_c = NULL;
+    unsigned int alncnt = 0;
     int buffer_len = 2000;
     char buffer[2000];
     const char* inname = inname_str.c_str();
@@ -568,7 +567,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             // Mode 4: random-sampling-based counting of pairs of bases by distance and modification state
             // -------------------------------------------------------------------------------------------
             success = create_multi_region_iterator_for_sampling(
-                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                n_alns_to_sample, tnames_for_sampling,
                 keep_aln_fraction, iter, idx, in_samhdr, had_error,
                 buffer_len, buffer);
 
@@ -580,9 +579,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         } else {
             // Mode 3: region-based counting of pairs of bases by distance and modification state
             // ----------------------------------------------------------------------------------
-            success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                                   iter, idx, in_samhdr, had_error,
-                                                   buffer_len, buffer);
+            success = create_multi_region_iterator(regions, iter, idx, in_samhdr,
+                                                   had_error, buffer_len, buffer);
         }
         if (success != 0) {
             goto end;
@@ -591,8 +589,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         // iterate over regions
         if (verbose) {
             snprintf(buffer, buffer_len,
-                     "counting state-pairs for alignments overlapping {%u} region{?s}",
-                     regcnt);
+                     "counting state-pairs for alignments");
             cli_alert_info(buffer);
             bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
                                    Rcpp::List::create(Rcpp::_["clear"] = false,
@@ -774,7 +771,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------
             success = create_multi_region_iterator_for_sampling(
-                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                n_alns_to_sample, tnames_for_sampling,
                 keep_aln_fraction, iter, idx, in_samhdr, had_error,
                 buffer_len, buffer);
             if (verbose) {
@@ -784,9 +781,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         } else {
             // Mode 1: region-based alignment reading
             // ---------------------------------------------------------------------
-            success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                                   iter, idx, in_samhdr, had_error,
-                                                   buffer_len, buffer);
+            success = create_multi_region_iterator(regions, iter, idx, in_samhdr,
+                                                   had_error, buffer_len, buffer);
         }
 
         if (success != 0) {
@@ -796,8 +792,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         // iterate over regions
         if (verbose) {
             snprintf(buffer, buffer_len,
-                     "reading alignments overlapping {%u} region{?s}",
-                     regcnt);
+                     "reading alignments");
             cli_alert_info(buffer);
             bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
                                    Rcpp::List::create(Rcpp::_["clear"] = false,
@@ -876,10 +871,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
 
     end:
         //cleanup
-        if (regions_c) {
-            free((void*) regions_c);
-            regions_c = NULL;
-        }
         if (in_samhdr) {
             sam_hdr_destroy(in_samhdr);
         }

@@ -129,8 +129,6 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
     char buffer[2000];
     char readbase = '0';
     uint64_t refposcount = 0;
-    unsigned int regcnt = 0;
-    char **regions_c = NULL;
     int strand = 0, impl = 0;
     char canonical = '0';
     Rcpp::List res;
@@ -171,7 +169,7 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
         goto end;
     }
 
-    success = create_multi_region_iterator(regions, regcnt, regions_c,
+    success = create_multi_region_iterator(regions,
                                            conf.iter, conf.idx, conf.in_samhdr,
                                            had_error, buffer_len, buffer);
     if (success != 0) {
