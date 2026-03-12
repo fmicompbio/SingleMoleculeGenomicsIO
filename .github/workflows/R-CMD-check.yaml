@@ -19,11 +19,11 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: windows-latest, bioc: 'devel', deploy: 'no'}
-          - { os: macos-15-intel, bioc: 'devel', deploy: 'no'}
-          - { os: macos-latest, bioc: 'devel', deploy: 'yes'}
+          - { os: windows-latest, bioc: 'devel', deploy: 'no', valgrind: 'no'}
+          - { os: macos-15-intel, bioc: 'devel', deploy: 'no', valgrind: 'no'}
+          - { os: macos-latest, bioc: 'devel', deploy: 'yes', valgrind: 'no'}
           #- { os: ubuntu-latest, image: 'bioconductor/bioconductor_docker:devel', deploy: 'no'}
-          - { os: ubuntu-latest, bioc: 'devel', deploy: 'no'}
+          - { os: ubuntu-latest, bioc: 'devel', deploy: 'no', valgrind: 'yes'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -154,4 +154,27 @@ jobs:
         run: |
           R CMD INSTALL .
           Rscript -e "remotes::install_dev('pkgdown'); pkgdown::deploy_to_branch(new_process = FALSE)"
+
+      - name: Install Valgrind
+        if: matrix.config.valgrind == 'yes'
+        run: |
+          sudo -H apt-get update -y
+          sudo -H apt-get install -y valgrind
+        env:
+          DEBIAN_FRONTEND: noninteractive
+
+      - name: Run Valgrind
+        if: matrix.config.valgrind == 'yes'
+        run: |
+          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full" \
+              --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-countMismatchStatePairs.R")' | \
+              tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt
+
+      - name: Upload Valgrind results
+        if: matrix.config.valgrind == 'yes'
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ runner.os }}-Valgrind-results
+          path: "/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt"
+
 
