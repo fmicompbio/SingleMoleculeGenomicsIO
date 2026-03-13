@@ -710,12 +710,12 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         for (curr_records_it = curr_records.begin();
              curr_records_it != curr_records.end();
              curr_records_it++) {
-            bamdata = curr_records_it->second;
+            bamdata2 = curr_records_it->second;
 
             if ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction)) {
                 success = process_mismatch_bam_record(
                     MISMATCHBAM_MODE_STATE, // run mode
-                    bamdata,          // bam record
+                    bamdata2,         // bam record
                     bam_format,       // format of bam file
                     alncnt,           // alignment counter
                     had_error,        // error flag
@@ -750,9 +750,9 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             }
 
             // remove now processed record from map
-            if (bamdata) {
-                bam_destroy1(bamdata);
-                bamdata = NULL;
+            if (bamdata2) {
+                bam_destroy1(bamdata2);
+                bamdata2 = NULL;
             }
 
             if (verbose && CLI_SHOULD_TICK) { // # nocov start
