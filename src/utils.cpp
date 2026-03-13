@@ -742,6 +742,8 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
     if (!(infile = sam_open(inname, "r"))) {
         had_error = true;
         snprintf(buffer, buffer_len, "Could not open input file %s\n", inname);
+        bam_destroy1(bamdata);
+        bamdata = NULL;
         return -2;
     }
 
@@ -750,6 +752,10 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
         had_error = true;
         snprintf(buffer, buffer_len,
                  "Failed to load the index for %s\n", inname);
+        bam_destroy1(bamdata);
+        bamdata = NULL;
+        sam_close(infile);
+        infile = NULL;
         return -3;
     }
 
@@ -758,6 +764,12 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
         had_error = true; // # nocov start
         snprintf(buffer, buffer_len,
                  "Failed to read header from file %s\n", inname);
+        bam_destroy1(bamdata);
+        bamdata = NULL;
+        hts_idx_destroy(idx);
+        idx = NULL;
+        sam_close(infile);
+        infile = NULL;
         return -4; // # nocov end
     }
 
@@ -766,6 +778,14 @@ int open_bam_and_read_index_and_header(bam1_t *&bamdata,
         if (hts_set_threads(infile, n_threads)) {
             had_error = true; // # nocov start
             snprintf(buffer, buffer_len, "Error setting htslib threads to %d\n", n_threads);
+            bam_destroy1(bamdata);
+            bamdata = NULL;
+            sam_hdr_destroy(in_samhdr);
+            in_samhdr = NULL;
+            hts_idx_destroy(idx);
+            idx = NULL;
+            sam_close(infile);
+            infile = NULL;
             return -5; // # nocov end
         }
     }
