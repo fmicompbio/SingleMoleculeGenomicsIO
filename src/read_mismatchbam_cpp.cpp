@@ -861,10 +861,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     }
     if (verbose) {
         cli_progress_done(bar);
-        snprintf(buffer, buffer_len,
-                 "removed %llu unaligned (e.g. soft-masked) of %llu called bases",
-                 n_unaligned, n_total);
-        cli_alert_info(buffer);
         snprintf(buffer, buffer_len, "read %u alignments", alncnt);
         cli_alert_info(buffer);
     }
@@ -898,7 +894,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             Rcpp::List res;
 
             if (windowSize > 0) {
-                // Mode 3
+                // Mode 3 or 4
                 // create return list
                 res = Rcpp::List::create(
                     Rcpp::_["pair_counts"] = pair_counts
