@@ -112,7 +112,7 @@ int process_mismatch_bam_record_pair(
                         fwdbase = bam_seqi(hitseq, read_pos);
                         if (fwdbase & (unmod_int | mod_int)) {
                             qscore_pos = bam_get_qual(bamdata)[read_pos];
-                            mod_pos = fwdbase == unmod_int ? 0.0 : 1.0;
+                            mod_pos = fwdbase == unmod_int ? 0 : 1;
                             // check if position has already been seen, and
                             // keep the observation with the highest qscore
                             found = false;
