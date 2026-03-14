@@ -40,7 +40,8 @@ int process_mismatch_bam_record_pair(
         unsigned long long &n_total,     // total number of modified bases
         // vectors for return values (per modification)
         // ... mode == MISMATCHBAM_MODE_STATE
-        Rcpp::NumericMatrix &pair_counts) {
+        double *pair_counts_ptr,
+        int windowSize) {
 
     // allocate variable only used inside process_mismatch_bam_record_pair()
     unsigned int i = 0, j = 0, k = 0, mod_pos = 0;
@@ -162,13 +163,15 @@ int process_mismatch_bam_record_pair(
     }
 
     // process modposref and modstate to update counter in pair_counts
-    int maxdist = pair_counts.nrow() - 1, currdist = 0;
+    int maxdist = windowSize - 1, currdist = 0;
     for (i = 0; i < modposref.size(); i++) {
         for (j = i; j < modposref.size(); j++) {
-            currdist = modposref[j] - modposref[i];
-            if (currdist > maxdist)
-                break;
-            pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+            // use abs() to protect against situation where modposref
+            // is not sorted
+            currdist = std::abs(modposref[j] - modposref[i]);
+            if (currdist <= maxdist) {
+                pair_counts_ptr[((2 * modstate[i] + modstate[j]) * windowSize) + currdist]++;
+            }
         }
     }
 
@@ -207,7 +210,8 @@ int process_mismatch_bam_record(
         std::vector<int> &ref_position,
         std::vector<double> &mod_prob,
         // ... mode == MISMATCHBAM_MODE_STATE
-        Rcpp::NumericMatrix &pair_counts,
+        double *pair_counts_ptr,
+        int windowSize,
         // vectors for return values (per alignment)
         std::vector<std::string> &df_read_id,
         std::vector<double> &df_qscore,
@@ -335,13 +339,13 @@ int process_mismatch_bam_record(
 
     } else if (mode == MISMATCHBAM_MODE_STATE) {
         // process modposref and modstate to update counter in pair_counts
-        int maxdist = pair_counts.nrow() - 1, currdist = 0;
+        int maxdist = windowSize - 1, currdist = 0;
         for (i = 0; i < modposref.size(); i++) {
             for (j = i; j < modposref.size(); j++) {
-                currdist = modposref[j] - modposref[i];
-                if (currdist > maxdist)
-                    break;
-                pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+                currdist = std::abs(modposref[j] - modposref[i]);
+                if (currdist <= maxdist) {
+                    pair_counts_ptr[((2 * modstate[i] + modstate[j]) * windowSize) + currdist]++;
+                }
             }
         }
     }
@@ -523,8 +527,11 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     Rcpp::CharacterVector df_variant_label;
     Rcpp::CharacterVector df_ref_strand;
 
-    // ... return value for mode 3
+    // ... return value for mode 3, and native vector to hold
+    //     counts while processing
     Rcpp::NumericMatrix pair_counts;
+    std::vector<double> native_counts(windowSize * 4, 0.0);
+
     // random number generation
     // first generate a single random number from R
     // to link the C++ RNG to the R session's current seed state
@@ -569,7 +576,6 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     // start reading according to analysis mode
     if (windowSize > 0) {
         // Modes 3 or 4 (state-pair counting)
-        pair_counts = Rcpp::NumericMatrix(windowSize, 4);
 
         if (n_alns_to_sample > 0) {
             // Mode 4: random-sampling-based counting of pairs of bases by distance and modification state
@@ -639,7 +645,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         chrom,
                         ref_position,
                         mod_prob,
-                        pair_counts,
+                        native_counts.data(),
+                        windowSize,
                         // vectors for return values (per alignment)
                         df_read_id,
                         df_qscore,
@@ -691,7 +698,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                                 n_unaligned,      // number of unaligned positions
                                 n_total,          // total number of positions
                                 // vectors for return values (per modification)
-                                pair_counts);
+                                native_counts.data(),
+                                windowSize);
                         }
 
                         // remove now processed record from map
@@ -746,7 +754,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     chrom,
                     ref_position,
                     mod_prob,
-                    pair_counts,
+                    native_counts.data(),
+                    windowSize,
                     // vectors for return values (per alignment)
                     df_read_id,
                     df_qscore,
@@ -837,7 +846,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     chrom,
                     ref_position,
                     mod_prob,
-                    pair_counts,
+                    native_counts.data(),
+                    windowSize,
                     // vectors for return values (per alignment)
                     df_read_id,
                     df_qscore,
@@ -911,6 +921,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             if (windowSize > 0) {
                 // Mode 3 or 4
                 // create return list
+                pair_counts = Rcpp::NumericMatrix(windowSize, 4);
+                std::copy(native_counts.begin(), native_counts.end(), pair_counts.begin());
                 res = Rcpp::List::create(
                     Rcpp::_["pair_counts"] = pair_counts
                 );
