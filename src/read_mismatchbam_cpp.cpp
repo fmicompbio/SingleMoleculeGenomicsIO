@@ -11,6 +11,7 @@
 #include <Rcpp.h>
 #include <cli/progress.h>
 #include "utils.h"
+#include <random>
 
 #define MISMATCHBAM_MODE_READ      1
 #define MISMATCHBAM_MODE_STATE     3
@@ -524,6 +525,13 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
 
     // ... return value for mode 3
     Rcpp::NumericMatrix pair_counts;
+    // random number generation
+    // first generate a single random number from R
+    // to link the C++ RNG to the R session's current seed state
+    // dis() can then be used to draw uniformly distributed random numbers
+    double r_seed = R::runif(0, 1000000);
+    std::mt19937 gen((unsigned int)r_seed);
+    std::uniform_real_distribution<double> dis(0.0, 1.0);
 
     // prepare bam file for reading
     if (verbose) {
@@ -603,7 +611,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                 (calculate_aligned_bases(bamdata) >= minAlignedLength)) {
 
                 if (!(bamdata->core.flag & BAM_FPAIRED) &&
-                    ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction))) {
+                    ((n_alns_to_sample == 0) || (dis(gen) < keep_aln_fraction))) {
                     // single-end - process directly
                     success = process_mismatch_bam_record(
                         MISMATCHBAM_MODE_STATE, // run mode
@@ -663,7 +671,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                         // mate seen - get it from the map and process the pair
                         bamdata2 = curr_records_it->second;
 
-                        if ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction)) {
+                        if ((n_alns_to_sample == 0) || (dis(gen) < keep_aln_fraction)) {
                             success = process_mismatch_bam_record_pair(
                                 MISMATCHBAM_MODE_STATE, // run mode
                                 bamdata2,         // bam record
@@ -712,7 +720,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
              curr_records_it++) {
             bamdata2 = curr_records_it->second;
 
-            if ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction)) {
+            if ((n_alns_to_sample == 0) || (dis(gen) < keep_aln_fraction)) {
                 success = process_mismatch_bam_record(
                     MISMATCHBAM_MODE_STATE, // run mode
                     bamdata2,         // bam record
@@ -802,7 +810,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         // read overlapping alignments using iterator
         while ((c = sam_itr_next(infile, iter, bamdata)) >= 0) {
             if (!(bamdata->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) &&
-                ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction))) {
+                ((n_alns_to_sample == 0) || (dis(gen) < keep_aln_fraction))) {
                 success = process_mismatch_bam_record(
                     MISMATCHBAM_MODE_READ, // run mode
                     bamdata,          // bam record
