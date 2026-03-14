@@ -715,9 +715,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             }
         }
         // process remaining (unpaired) records in curr_records
-        for (curr_records_it = curr_records.begin();
-             curr_records_it != curr_records.end();
-             curr_records_it++) {
+        while (!curr_records.empty()) {
+            curr_records_it = curr_records.begin();
             bamdata2 = curr_records_it->second;
 
             if ((n_alns_to_sample == 0) || (dis(gen) < keep_aln_fraction)) {
@@ -762,6 +761,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                 bam_destroy1(bamdata2);
                 bamdata2 = NULL;
             }
+            curr_records.erase(curr_records_it);
 
             if (verbose && CLI_SHOULD_TICK) { // # nocov start
                 cli_progress_set(bar, (double)alncnt);
@@ -889,6 +889,13 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         }
         if (idx) {
             hts_idx_destroy(idx);
+        }
+        for (curr_records_it = curr_records.begin();
+             curr_records_it != curr_records.end();
+             curr_records_it++) {
+            if (curr_records_it->second) {
+                bam_destroy1(curr_records_it->second);
+            }
         }
         if (curr_records.size() > 0) {
             curr_records.clear();
