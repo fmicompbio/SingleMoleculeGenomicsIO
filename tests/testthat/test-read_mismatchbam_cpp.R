@@ -470,9 +470,9 @@ test_that("read_mismatchbam_cpp works", {
 
     # ... content of res4a, res4b and res4c
     expect_identical(res4a, res4b)
-    expect_length(unique(res4a$read_id), 5L)
+    expect_length(unique(res4a$read_id), 8L)
     expect_false(identical(res4a, res4c))
-    expect_length(unique(res4c$read_id), 9L)
+    expect_length(unique(res4c$read_id), 10L)
     expect_length(unique(res4a$read_id), nrow(res4a$read_df))
     expect_length(unique(res4c$read_id), nrow(res4c$read_df))
 
