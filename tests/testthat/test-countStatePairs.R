@@ -26,7 +26,8 @@ test_that("countStatePairs works", {
                  "must not be .NULL.")
     expect_error(countStatePairs(bamfile = modbamfile, regions = NULL,
                                  modbase = "a", nAlnsToSample = 5,
-                                 seqnamesToSampleFrom = "chr2"),
+                                 seqnamesToSampleFrom = "chr2",
+                                 BPPARAM = BiocParallel::SerialParam()),
                  "Cannot sample 5 alignments from a total of 0")
     expect_error(countStatePairs(bamfile = modbamfile, regions = ".",
                                  modbase = "a", threshUnmod = -1),

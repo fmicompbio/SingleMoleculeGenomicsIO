@@ -111,7 +111,7 @@ int process_mismatch_bam_record_pair(
                         fwdbase = bam_seqi(hitseq, read_pos);
                         if (fwdbase & (unmod_int | mod_int)) {
                             qscore_pos = bam_get_qual(bamdata)[read_pos];
-                            mod_pos = fwdbase == unmod_int ? 0.0 : 1.0;
+                            mod_pos = fwdbase == unmod_int ? 0 : 1;
                             // check if position has already been seen, and
                             // keep the observation with the highest qscore
                             found = false;
@@ -164,10 +164,12 @@ int process_mismatch_bam_record_pair(
     int maxdist = pair_counts.nrow() - 1, currdist = 0;
     for (i = 0; i < modposref.size(); i++) {
         for (j = i; j < modposref.size(); j++) {
-            currdist = modposref[j] - modposref[i];
-            if (currdist > maxdist)
-                break;
-            pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+            // use abs() to protect against situation where modposref
+            // is not sorted
+            currdist = std::abs(modposref[j] - modposref[i]);
+            if (currdist <= maxdist) {
+                pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+            }
         }
     }
 
@@ -337,10 +339,10 @@ int process_mismatch_bam_record(
         int maxdist = pair_counts.nrow() - 1, currdist = 0;
         for (i = 0; i < modposref.size(); i++) {
             for (j = i; j < modposref.size(); j++) {
-                currdist = modposref[j] - modposref[i];
-                if (currdist > maxdist)
-                    break;
-                pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+                currdist = std::abs(modposref[j] - modposref[i]);
+                if (currdist <= maxdist) {
+                    pair_counts(currdist, 2 * modstate[i] + modstate[j])++;
+                }
             }
         }
     }
@@ -494,8 +496,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     std::pair<std::map<std::string,bam1_t*>::iterator, bool> inserted;
     hts_idx_t *idx = NULL;
     hts_itr_t *iter = NULL;
-    unsigned int regcnt = 0, alncnt = 0;
-    char **regions_c = NULL;
+    unsigned int alncnt = 0;
     int buffer_len = 2000;
     char buffer[2000];
     const char* inname = inname_str.c_str();
@@ -568,7 +569,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             // Mode 4: random-sampling-based counting of pairs of bases by distance and modification state
             // -------------------------------------------------------------------------------------------
             success = create_multi_region_iterator_for_sampling(
-                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                n_alns_to_sample, tnames_for_sampling,
                 keep_aln_fraction, iter, idx, in_samhdr, had_error,
                 buffer_len, buffer);
 
@@ -580,9 +581,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         } else {
             // Mode 3: region-based counting of pairs of bases by distance and modification state
             // ----------------------------------------------------------------------------------
-            success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                                   iter, idx, in_samhdr, had_error,
-                                                   buffer_len, buffer);
+            success = create_multi_region_iterator(regions, iter, idx, in_samhdr,
+                                                   had_error, buffer_len, buffer);
         }
         if (success != 0) {
             goto end;
@@ -591,8 +591,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         // iterate over regions
         if (verbose) {
             snprintf(buffer, buffer_len,
-                     "counting state-pairs for alignments overlapping {%u} region{?s}",
-                     regcnt);
+                     "counting state-pairs for alignments");
             cli_alert_info(buffer);
             bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
                                    Rcpp::List::create(Rcpp::_["clear"] = false,
@@ -710,15 +709,14 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             }
         }
         // process remaining (unpaired) records in curr_records
-        for (curr_records_it = curr_records.begin();
-             curr_records_it != curr_records.end();
-             curr_records_it++) {
-            bamdata = curr_records_it->second;
+        while (!curr_records.empty()) {
+            curr_records_it = curr_records.begin();
+            bamdata2 = curr_records_it->second;
 
             if ((n_alns_to_sample == 0) || (R::runif(0, 1) < keep_aln_fraction)) {
                 success = process_mismatch_bam_record(
                     MISMATCHBAM_MODE_STATE, // run mode
-                    bamdata,          // bam record
+                    bamdata2,         // bam record
                     bam_format,       // format of bam file
                     alncnt,           // alignment counter
                     had_error,        // error flag
@@ -753,10 +751,11 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             }
 
             // remove now processed record from map
-            if (bamdata) {
-                bam_destroy1(bamdata);
-                bamdata = NULL;
+            if (bamdata2) {
+                bam_destroy1(bamdata2);
+                bamdata2 = NULL;
             }
+            curr_records.erase(curr_records_it);
 
             if (verbose && CLI_SHOULD_TICK) { // # nocov start
                 cli_progress_set(bar, (double)alncnt);
@@ -774,7 +773,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             // Mode 2: random-sampling-based alignment reading
             // ---------------------------------------------------------------------
             success = create_multi_region_iterator_for_sampling(
-                regcnt, regions_c, n_alns_to_sample, tnames_for_sampling,
+                n_alns_to_sample, tnames_for_sampling,
                 keep_aln_fraction, iter, idx, in_samhdr, had_error,
                 buffer_len, buffer);
             if (verbose) {
@@ -784,9 +783,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         } else {
             // Mode 1: region-based alignment reading
             // ---------------------------------------------------------------------
-            success = create_multi_region_iterator(regions, regcnt, regions_c,
-                                                   iter, idx, in_samhdr, had_error,
-                                                   buffer_len, buffer);
+            success = create_multi_region_iterator(regions, iter, idx, in_samhdr,
+                                                   had_error, buffer_len, buffer);
         }
 
         if (success != 0) {
@@ -796,8 +794,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         // iterate over regions
         if (verbose) {
             snprintf(buffer, buffer_len,
-                     "reading alignments overlapping {%u} region{?s}",
-                     regcnt);
+                     "reading alignments");
             cli_alert_info(buffer);
             bar = cli_progress_bar(n_alns_to_sample > 0 ? n_alns_to_sample : NA_REAL,
                                    Rcpp::List::create(Rcpp::_["clear"] = false,
@@ -866,20 +863,12 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     }
     if (verbose) {
         cli_progress_done(bar);
-        snprintf(buffer, buffer_len,
-                 "removed %llu unaligned (e.g. soft-masked) of %llu called bases",
-                 n_unaligned, n_total);
-        cli_alert_info(buffer);
         snprintf(buffer, buffer_len, "read %u alignments", alncnt);
         cli_alert_info(buffer);
     }
 
     end:
         //cleanup
-        if (regions_c) {
-            free((void*) regions_c);
-            regions_c = NULL;
-        }
         if (in_samhdr) {
             sam_hdr_destroy(in_samhdr);
         }
@@ -895,9 +884,16 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         if (idx) {
             hts_idx_destroy(idx);
         }
-        if (curr_records.size() > 0) {
+        for (curr_records_it = curr_records.begin();
+             curr_records_it != curr_records.end();
+             curr_records_it++) { // # nocov start
+            if (curr_records_it->second) {
+                bam_destroy1(curr_records_it->second);
+            }
+        } // # nocov end
+        if (curr_records.size() > 0) { // # nocov start
             curr_records.clear();
-        }
+        } // # nocov end
 
         if (had_error) {
             // we encountered an error (message in `buffer`) --> stop
@@ -907,7 +903,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
             Rcpp::List res;
 
             if (windowSize > 0) {
-                // Mode 3
+                // Mode 3 or 4
                 // create return list
                 res = Rcpp::List::create(
                     Rcpp::_["pair_counts"] = pair_counts
