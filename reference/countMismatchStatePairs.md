@@ -171,7 +171,7 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
 
-#> ✔ finding positions with C [67ms]
+#> ✔ finding positions with C [60ms]
 #> 
 tbl
 #> DataFrame with 200 rows and 5 columns
