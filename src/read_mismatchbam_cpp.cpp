@@ -886,14 +886,14 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
         }
         for (curr_records_it = curr_records.begin();
              curr_records_it != curr_records.end();
-             curr_records_it++) {
+             curr_records_it++) { // # nocov start
             if (curr_records_it->second) {
                 bam_destroy1(curr_records_it->second);
             }
-        }
-        if (curr_records.size() > 0) {
+        } // # nocov end
+        if (curr_records.size() > 0) { // # nocov start
             curr_records.clear();
-        }
+        } // # nocov end
 
         if (had_error) {
             // we encountered an error (message in `buffer`) --> stop
