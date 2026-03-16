@@ -5,10 +5,11 @@ test_that("countMismatchStatePairs works", {
                               "BisSeq_bismark_paired.bam",
                               "BisSeq_quasr_single.bam",
                               "BisSeq_quasr_paired_discordant.bam",
-                              "BisSeq_quasr_single_indels.bam"),
+                              "BisSeq_quasr_single_indels.bam",
+                              "BisSeq_quasr_paired_discordantseq.bam"),
                             package = "SingleMoleculeGenomicsIO")
     names(bamfiles) <- c("quasr", "bismark", "quasrsingle", "quasrdiscordant",
-                         "quasrindels")
+                         "quasrindels", "quasrdiscordantseq")
 
     # fails with incorrect arguments
     expect_error(countMismatchStatePairs(bamfile = "error",
@@ -67,7 +68,7 @@ test_that("countMismatchStatePairs works", {
                                                sequenceReference = ref,
                                                BPPARAM = BiocParallel::SerialParam()),
                        "Ignoring .regions. because .nAlnsToSample. is greater than zero"),
-                 "Cannot sample 1000 alignments from a total of ")
+        "Cannot sample 1000 alignments from a total of ")
     expect_error(
         expect_warning(countMismatchStatePairs(bamfile = bamfiles[1],
                                                regions = NULL,
@@ -258,14 +259,29 @@ test_that("countMismatchStatePairs works", {
     expect_identical(res[33, 3], 2)
     expect_identical(unname(colSums(as.data.frame(res))), c(20100, 78, 32, 16, 10))
 
+    # ... reads where some read pairs display a sequence mismatch between the mates,
+    #     so that some positions are only recorded in the second
+    resb <- countMismatchStatePairs(bamfile = bamfiles[6],
+                                    bamFormat = "QuasR",
+                                    regions = "chr1",
+                                    sequenceContext = "C",
+                                    windowSize = 200,
+                                    sequenceReference = ref,
+                                    BPPARAM = BiocParallel::SerialParam())
+    expect_s4_class(resb, "DFrame")
+    expect_identical(dim(resb), c(200L, 5L))
+    expect_named(resb, c("S", "unmod_unmod", "unmod_mod", "mod_unmod", "mod_mod"))
+    ## compare to e.g. nomeR::get_ctable_from_SE(readMismatchBam(bamfiles = bamfiles[6], bamFormat = "QuasR", regions = "chr1:9784500-16452600", sequenceReference = ref, sequenceContext = "C"), "mod_prob", 0.5, 0.5, 0, 0, 200, FALSE, 1, FALSE)
+    expect_identical(res, resb)
+
     # ... reads with indels
     res1 <- countMismatchStatePairs(bamfile = bamfiles[5],
-                                   bamFormat = "QuasR",
-                                   regions = "chr1:1-7000000",
-                                   sequenceContext = "C",
-                                   windowSize = 200,
-                                   sequenceReference = ref,
-                                   BPPARAM = BiocParallel::SerialParam())
+                                    bamFormat = "QuasR",
+                                    regions = "chr1:1-7000000",
+                                    sequenceContext = "C",
+                                    windowSize = 200,
+                                    sequenceReference = ref,
+                                    BPPARAM = BiocParallel::SerialParam())
     expect_s4_class(res1, "DFrame")
     expect_identical(dim(res1), c(200L, 5L))
     expect_named(res1, c("S", "unmod_unmod", "unmod_mod", "mod_unmod", "mod_mod"))
