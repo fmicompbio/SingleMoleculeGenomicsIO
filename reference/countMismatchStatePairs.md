@@ -165,16 +165,13 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/BisSeq_quasr_single.bam using 1 thread
 #> ℹ finding positions with C
 
-#> ℹ counting state-pairs for alignments overlapping 1 region
-#> ℹ finding positions with C
-
-#> ℹ removed 0 unaligned (e.g. soft-masked) of 0 called bases
+#> ℹ counting state-pairs for alignments
 #> ℹ finding positions with C
 
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
 
-#> ✔ finding positions with C [142ms]
+#> ✔ finding positions with C [67ms]
 #> 
 tbl
 #> DataFrame with 200 rows and 5 columns

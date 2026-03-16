@@ -71,10 +71,10 @@ se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [47ms]
+#> ✔ finding unique genomic positions... [21ms]
 #> 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [211ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [504ms]
 #> 
 se_exp <- expandSEToBaseSpace(se)
 dim(se)

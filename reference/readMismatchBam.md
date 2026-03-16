@@ -236,26 +236,23 @@ se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/BisSeq_quasr_single.bam using 1 thread
 #> ℹ finding positions with NCG
 
-#> ℹ reading alignments overlapping 1 region
-#> ℹ finding positions with NCG
-
-#> ℹ removed 0 unaligned (e.g. soft-masked) of 0 called bases
+#> ℹ reading alignments
 #> ℹ finding positions with NCG
 
 #> ℹ read 184 alignments
 #> ℹ finding positions with NCG
 
-#> ✔ finding positions with NCG [93ms]
+#> ✔ finding positions with NCG [79ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [37ms]
+#> ✔ finding unique genomic positions... [48ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ collapsed 50 positions to 38 unique ones
-#> ✔ collapsed 50 positions to 38 unique ones [39ms]
+#> ✔ collapsed 50 positions to 38 unique ones [21ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
