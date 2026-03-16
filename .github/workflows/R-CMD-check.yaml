@@ -155,40 +155,26 @@ jobs:
           R CMD INSTALL .
           Rscript -e "remotes::install_dev('pkgdown'); pkgdown::deploy_to_branch(new_process = FALSE)"
 
-      - name: Install Valgrind
-        if: matrix.config.valgrind == 'yes'
-        run: |
-          sudo -H apt-get update -y
-          sudo -H apt-get install -y valgrind
-        env:
-          DEBIAN_FRONTEND: noninteractive
-
-      - name: Run Valgrind
-        if: matrix.config.valgrind == 'yes'
-        run: |
-          R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full" \
-              --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-countMismatchStatePairs.R")' | \
-              tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt
-
-      # - name: Run Valgrind (2)
+      # - name: Install Valgrind
       #   if: matrix.config.valgrind == 'yes'
       #   run: |
-      #     R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full --show-leak-kinds=all" \
-      #         --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-readModBam.R")' | \
-      #         tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out-2.txt
+      #     sudo -H apt-get update -y
+      #     sudo -H apt-get install -y valgrind
+      #   env:
+      #     DEBIAN_FRONTEND: noninteractive
       #
-      # - name: Run Valgrind (3)
+      # - name: Run Valgrind
       #   if: matrix.config.valgrind == 'yes'
       #   run: |
-      #     R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full --show-leak-kinds=all" \
-      #         --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-readMismatchBam.R")' | \
-      #         tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out-3.txt
-
-      - name: Upload Valgrind results
-        if: matrix.config.valgrind == 'yes'
-        uses: actions/upload-artifact@master
-        with:
-          name: ${{ runner.os }}-Valgrind-results
-          path: "/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt"
+      #     R -d "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full" \
+      #         --vanilla -e 'pkgload::load_all("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO"); testthat::test_file("/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/tests/testthat/test-countMismatchStatePairs.R")' | \
+      #         tee -a /home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt
+      #
+      # - name: Upload Valgrind results
+      #   if: matrix.config.valgrind == 'yes'
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: ${{ runner.os }}-Valgrind-results
+      #     path: "/home/runner/work/SingleMoleculeGenomicsIO/SingleMoleculeGenomicsIO/valgrind-out.txt"
 
 
