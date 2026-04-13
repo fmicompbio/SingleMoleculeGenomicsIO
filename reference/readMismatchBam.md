@@ -244,21 +244,21 @@ se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
 
 #> ✔ finding positions with NCG [57ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
 #> ℹ finding unique genomic positions...
 #> ✔ finding unique genomic positions... [21ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
 #> ℹ collapsed 50 positions to 38 unique ones
 #> ✔ collapsed 50 positions to 38 unique ones [12ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [117ms]
+#> ✔ extracting sequence contexts [118ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
 ```

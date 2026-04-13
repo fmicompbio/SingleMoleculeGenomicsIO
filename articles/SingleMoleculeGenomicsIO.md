@@ -125,13 +125,13 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [75ms]
+#> ✔ finding unique genomic positions... [83ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
 #> ✔ collapsed 17739 positions to 7967 unique ones [15ms]
 #> 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [323ms]
+#> ✔ extracting sequence contexts [427ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -539,14 +539,12 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           verbose = TRUE, 
                           BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 #> ℹ finding unique genomic positions...
 #> ✔ finding unique genomic positions... [22ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ collapsed 11211 positions to 7967 unique ones
+#> ℹ collapsed 11211 positions to 7967 unique ones
 #> ✔ collapsed 11211 positions to 7967 unique ones [35ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 se_summary2
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
@@ -632,23 +630,22 @@ se_sample <- readModBam(bamfiles = modbamfiles,
                         verbose = TRUE, 
                         BPPARAM = SerialParam(RNGseed = 1327828L))
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ sampling alignments with probability 0.5
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ reading alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ read 5 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ sampling alignments with probability 0.5
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ reading alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ read 7 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ finding unique genomic positions...
+#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
+#> ℹ sampling alignments with probability 0.5
+#> ℹ reading alignments
+#> ℹ removed 150 unaligned (e.g. soft-masked) of 41618 called bases
+#> ℹ read 5 alignments
+#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
+#> ℹ sampling alignments with probability 0.5
+#> ℹ reading alignments
+#> ℹ removed 1165 unaligned (e.g. soft-masked) of 80587 called bases
+#> ℹ read 7 alignments
+#> ℹ finding unique genomic positions...
 #> ✔ finding unique genomic positions... [22ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [126ms]
+#> ℹ collapsed 31912 positions to 7238 unique ones
+#> ✔ collapsed 31912 positions to 7238 unique ones [147ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
 se_sample$n_reads
 #> [1] 5 7
 ```
@@ -1065,16 +1062,15 @@ res <- filterReadsModBam(infiles = modbamfile,
                          BPPARAM = BiocParallel::SerialParam(),
                          verbose = TRUE)
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ merging 1 filtered chunks
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]ℹ done filtering: retained 8 of 10 records (80%)
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [3ms]
+#> ℹ merging 1 filtered chunks
+#> ℹ done filtering: retained 8 of 10 records (80%)
 res
 #>   sample
 #> 1     s1
 #>                                                                                infile
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/t5/f77_gwnj6p95qxy9py3fckx00000gn/T//Rtmp2jZLNJ/fileb00225dd4dae.bam
+#> 1 /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//RtmpfI9tb1/file772113389d8e.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        8                 0                  0                      0
 #>   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction
@@ -1285,15 +1281,15 @@ sp
 sessioninfo::session_info()
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value
-#>  version  R Under development (unstable) (2026-02-28 r89501)
+#>  version  R version 4.6.0 alpha (2026-04-08 r89818)
 #>  os       macOS Sequoia 15.7.4
-#>  system   aarch64, darwin20
+#>  system   aarch64, darwin23
 #>  ui       X11
 #>  language en
 #>  collate  en_US.UTF-8
 #>  ctype    en_US.UTF-8
 #>  tz       UTC
-#>  date     2026-03-16
+#>  date     2026-04-13
 #>  pandoc   3.1.11 @ /usr/local/bin/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -1315,17 +1311,17 @@ sessioninfo::session_info()
 #>  crayon                     1.5.3      2024-06-20 [1] CRAN (R 4.6.0)
 #>  curl                       7.0.0      2025-08-19 [1] CRAN (R 4.6.0)
 #>  data.table                 1.18.2.1   2026-01-27 [1] CRAN (R 4.6.0)
-#>  DelayedArray               0.37.0     2025-11-13 [1] Bioconductor 3.23 (R 4.6.0)
+#>  DelayedArray               0.37.1     2026-04-01 [1] Bioconductor 3.23 (R 4.6.0)
 #>  desc                       1.4.3      2023-12-10 [1] CRAN (R 4.6.0)
 #>  digest                     0.6.39     2025-11-19 [1] CRAN (R 4.6.0)
-#>  dplyr                      1.2.0      2026-02-03 [1] CRAN (R 4.6.0)
+#>  dplyr                      1.2.1      2026-04-03 [1] CRAN (R 4.6.0)
 #>  evaluate                   1.0.5      2025-08-27 [1] CRAN (R 4.6.0)
 #>  farver                     2.1.2      2024-05-13 [1] CRAN (R 4.6.0)
 #>  fastmap                    1.2.0      2024-05-15 [1] CRAN (R 4.6.0)
-#>  fs                         1.6.7      2026-03-06 [1] CRAN (R 4.6.0)
+#>  fs                         2.0.1      2026-03-24 [1] CRAN (R 4.6.0)
 #>  generics                 * 0.1.4      2025-05-09 [1] CRAN (R 4.6.0)
 #>  GenomicAlignments          1.47.0     2025-12-08 [1] Bioconductor 3.23 (R 4.6.0)
-#>  GenomicRanges            * 1.63.1     2025-12-08 [1] Bioconductor 3.23 (R 4.6.0)
+#>  GenomicRanges            * 1.63.2     2026-04-06 [1] Bioconductor 3.23 (R 4.6.0)
 #>  ggplot2                    4.0.2      2026-02-03 [1] CRAN (R 4.6.0)
 #>  glue                       1.8.0      2024-09-30 [1] CRAN (R 4.6.0)
 #>  gtable                     0.3.6      2024-10-25 [1] CRAN (R 4.6.0)
@@ -1338,52 +1334,52 @@ sessioninfo::session_info()
 #>  labeling                   0.4.3      2023-08-29 [1] CRAN (R 4.6.0)
 #>  lattice                    0.22-9     2026-02-09 [2] CRAN (R 4.6.0)
 #>  lifecycle                  1.0.5      2026-01-08 [1] CRAN (R 4.6.0)
-#>  magrittr                   2.0.4      2025-09-12 [1] CRAN (R 4.6.0)
-#>  Matrix                   * 1.7-4      2025-08-28 [2] CRAN (R 4.6.0)
+#>  magrittr                   2.0.5      2026-04-04 [1] CRAN (R 4.6.0)
+#>  Matrix                   * 1.7-5      2026-03-21 [2] CRAN (R 4.6.0)
 #>  MatrixGenerics           * 1.23.0     2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  matrixStats              * 1.5.0      2025-01-07 [1] CRAN (R 4.6.0)
 #>  pillar                     1.11.1     2025-09-17 [1] CRAN (R 4.6.0)
 #>  pkgconfig                  2.0.3      2019-09-22 [1] CRAN (R 4.6.0)
-#>  pkgdown                    2.2.0.9000 2026-03-16 [1] Github (r-lib/pkgdown@a6abe43)
+#>  pkgdown                    2.2.0.9000 2026-04-13 [1] Github (r-lib/pkgdown@a6abe43)
 #>  purrr                      1.2.1      2026-01-09 [1] CRAN (R 4.6.0)
 #>  R.methodsS3                1.8.2      2022-06-13 [1] CRAN (R 4.6.0)
 #>  R.oo                       1.27.1     2025-05-02 [1] CRAN (R 4.6.0)
 #>  R.utils                    2.13.0     2025-02-24 [1] CRAN (R 4.6.0)
 #>  R6                         2.6.1      2025-02-15 [1] CRAN (R 4.6.0)
-#>  ragg                       1.5.1      2026-03-06 [1] CRAN (R 4.6.0)
+#>  ragg                       1.5.2      2026-03-23 [1] CRAN (R 4.6.0)
 #>  RColorBrewer               1.1-3      2022-04-03 [1] CRAN (R 4.6.0)
 #>  Rcpp                       1.1.1      2026-01-10 [1] CRAN (R 4.6.0)
-#>  RCurl                      1.98-1.17  2025-03-22 [1] CRAN (R 4.6.0)
+#>  RCurl                      1.98-1.18  2026-03-21 [1] CRAN (R 4.6.0)
 #>  restfulr                   0.0.16     2025-06-27 [1] CRAN (R 4.6.0)
 #>  rjson                      0.2.23     2024-09-16 [1] CRAN (R 4.6.0)
-#>  rlang                      1.1.7      2026-01-09 [1] CRAN (R 4.6.0)
-#>  rmarkdown                  2.30       2025-09-28 [1] CRAN (R 4.6.0)
-#>  Rsamtools                  2.27.1     2026-03-08 [1] Bioconductor 3.23 (R 4.6.0)
+#>  rlang                      1.2.0      2026-04-06 [1] CRAN (R 4.6.0)
+#>  rmarkdown                  2.31       2026-03-26 [1] CRAN (R 4.6.0)
+#>  Rsamtools                  2.27.2     2026-04-09 [1] Bioconductor 3.23 (R 4.6.0)
 #>  rtracklayer                1.71.3     2025-12-14 [1] Bioconductor 3.23 (R 4.6.0)
 #>  S4Arrays                 * 1.11.1     2025-11-25 [1] Bioconductor 3.23 (R 4.6.0)
-#>  S4Vectors                * 0.49.0     2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
+#>  S4Vectors                * 0.49.1     2026-04-05 [1] Bioconductor 3.23 (R 4.6.0)
 #>  S7                         0.2.1      2025-11-14 [1] CRAN (R 4.6.0)
 #>  sass                       0.4.10     2025-04-11 [1] CRAN (R 4.6.0)
 #>  scales                     1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
 #>  Seqinfo                  * 1.1.0      2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  sessioninfo                1.2.3      2025-02-05 [1] CRAN (R 4.6.0)
-#>  SingleMoleculeGenomicsIO * 0.1.1      2026-03-16 [1] Bioconductor
-#>  SparseArray              * 1.11.11    2026-03-06 [1] Bioconductor 3.23 (R 4.6.0)
+#>  SingleMoleculeGenomicsIO * 0.1.2      2026-04-13 [1] Bioconductor
+#>  SparseArray              * 1.11.13    2026-04-01 [1] Bioconductor 3.23 (R 4.6.0)
 #>  SummarizedExperiment     * 1.41.1     2026-02-06 [1] Bioconductor 3.23 (R 4.6.0)
 #>  systemfonts                1.3.2      2026-03-05 [1] CRAN (R 4.6.0)
 #>  textshaping                1.0.5      2026-03-06 [1] CRAN (R 4.6.0)
 #>  tibble                     3.3.1      2026-01-11 [1] CRAN (R 4.6.0)
 #>  tidyr                      1.3.2      2025-12-19 [1] CRAN (R 4.6.0)
 #>  tidyselect                 1.2.1      2024-03-11 [1] CRAN (R 4.6.0)
-#>  vctrs                      0.7.1      2026-01-23 [1] CRAN (R 4.6.0)
+#>  vctrs                      0.7.2      2026-03-21 [1] CRAN (R 4.6.0)
 #>  withr                      3.0.2      2024-10-28 [1] CRAN (R 4.6.0)
-#>  xfun                       0.56       2026-01-18 [1] CRAN (R 4.6.0)
-#>  XML                        3.99-0.22  2026-02-10 [1] CRAN (R 4.6.0)
+#>  xfun                       0.57       2026-03-20 [1] CRAN (R 4.6.0)
+#>  XML                        3.99-0.23  2026-03-20 [1] CRAN (R 4.6.0)
 #>  XVector                  * 0.51.0     2025-11-12 [1] Bioconductor 3.23 (R 4.6.0)
 #>  yaml                       2.3.12     2025-12-10 [1] CRAN (R 4.6.0)
 #> 
 #>  [1] /Users/runner/work/_temp/Library
-#>  [2] /Library/Frameworks/R.framework/Versions/4.6-arm64/Resources/library
+#>  [2] /Library/Frameworks/R.framework/Versions/4.6/Resources/library
 #>  * ── Packages attached to the search path.
 #> 
 #> ──────────────────────────────────────────────────────────────────────────────

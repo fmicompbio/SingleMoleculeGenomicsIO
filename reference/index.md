@@ -91,9 +91,6 @@
   [`regroupReadsByColData()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/regroupReads.md)
   : Regroup reads
 
-- [`removeAllNAReads()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/removeAllNAReads.md)
-  : Remove all-NA reads
-
 - [`sampleEntropy()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/sampleEntropy.md)
   : Sample Entropy of Time series signal
 

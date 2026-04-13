@@ -25,7 +25,7 @@ minSNR, maxFracLowConf, maxEntropy."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -221,23 +221,11 @@ the <code>outfiles</code> and that were filtered-out by reason of exclusion.</p>
 <span class="r-in"><span>                         minQscore <span class="op">=</span> <span class="fl">9.7</span>, maxFracLowConf <span class="op">=</span> <span class="fl">0.11</span>, maxEntropy <span class="op">=</span> <span class="fl">0.29</span>,</span></span>
 <span class="r-in"><span>                         BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> start filtering of <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
-</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> merging 1 filtered chunks</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
-</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done filtering: retained 6 of 10 records (60%)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
-</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> start filtering of <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
-</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> merging 1 filtered chunks</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
-</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done filtering: retained 7 of 10 records (70%)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
-</span>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   sample</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     s1</span>
@@ -246,8 +234,8 @@ the <code>outfiles</code> and that were filtered-out by reason of exclusion.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                             outfile</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 /var/folders/t5/f77_gwnj6p95qxy9py3fckx00000gn/T//RtmpWmsDJ2/file8f302465828d.bam</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  /var/folders/t5/f77_gwnj6p95qxy9py3fckx00000gn/T//RtmpWmsDJ2/file8f3045e09a6.bam</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//Rtmplw6ni1/file72cc1e768a33.bam</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//Rtmplw6ni1/file72cc786b29e4.bam</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   total retained filtered_unmapped filtered_secondary filtered_supplementary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    10        6                 0                  0                      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    10        7                 0                  0                      0</span>

@@ -1,5 +1,9 @@
 # Changelog
 
+## SingleMoleculeGenomicsIO 0.1.2
+
+- Remove `removeAllNAReads` function (move to `footprintR`)
+
 ## SingleMoleculeGenomicsIO 0.1.1
 
 - Add sampling mode to `countStatePairs` and `countMismatchStatePairs`
