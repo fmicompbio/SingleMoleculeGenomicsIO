@@ -496,7 +496,8 @@ readMismatchBam <- function(bamfiles,
                                                  colDataColumns = "readInfo"),
                             variantPositions = variantPositions,
                             readBaseMod = readBaseMod,
-                            readBaseUnmod = readBaseUnmod)
+                            readBaseUnmod = readBaseUnmod,
+                            bamHeader = lapply(resLL, function(x) x$bam_header$text))
         )
     } else {
         stopifnot(colnames(Nmod) == cdata$sample,
@@ -511,7 +512,8 @@ readMismatchBam <- function(bamfiles,
             metadata = list(readLevelData = list(assayNames = character(0),
                                                  colDataColumns = character(0)),
                             readBaseMod = readBaseMod,
-                            readBaseUnmod = readBaseUnmod)
+                            readBaseUnmod = readBaseUnmod,
+                            bamHeader = lapply(resLL, function(x) x$bam_header$text))
         )
     }
     if (nrow(se) > 0) {

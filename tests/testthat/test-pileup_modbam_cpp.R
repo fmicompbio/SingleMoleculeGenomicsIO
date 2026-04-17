@@ -1,4 +1,10 @@
 test_that("pileup_modbam_cpp works", {
+    ## helper functions --------------------------------------------------------
+    .readExpectedBamHeader <- function(fname) {
+        tmp <- Rsamtools::scanBamHeader(fname)[[1]]
+        tmp$text <- paste0(names(tmp$text), "\t", lapply(tmp$text, paste, collapse = "\t"))
+        return(tmp)
+    }
     ## example data ------------------------------------------------------------
     modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
                               package = "SingleMoleculeGenomicsIO")
@@ -48,6 +54,7 @@ test_that("pileup_modbam_cpp works", {
                                   n_threads = 2,
                                   verbose = TRUE)
     })
+    res1hdr <- .readExpectedBamHeader(modbamfile)
     res2 <- pileup_modbam_cpp(inname_str = modbamfile,
                               regions = "chr1:",
                               modbase = "a", level = "read",
@@ -63,11 +70,13 @@ test_that("pileup_modbam_cpp works", {
                               modbase = "a", level = "read",
                               n_threads = 1,
                               verbose = FALSE)
+    res4hdr <- .readExpectedBamHeader(bam4)
     res5 <- pileup_modbam_cpp(inname_str = bam5,
                               regions = "chr1",
                               modbase = "a", level = "read",
                               n_threads = 1,
                               verbose = FALSE)
+    res5hdr <- .readExpectedBamHeader(bam5)
     res6a <- pileup_modbam_cpp(inname_str = modbamfile,
                                regions = "chr1:6941000-6941001",
                                modbase = "a", level = "read",
@@ -92,6 +101,7 @@ test_that("pileup_modbam_cpp works", {
                                level = "read", n_threads = 1, verbose = FALSE)
     res9m <- pileup_modbam_cpp(inname_str = bam9, regions = "chr1", modbase = "m",
                                level = "read", n_threads = 1, verbose = FALSE)
+    res9hdr <- .readExpectedBamHeader(bam9)
 
     # ... results structure
     expect_type(res1, "list")
@@ -105,7 +115,8 @@ test_that("pileup_modbam_cpp works", {
     expect_type(res9m, "list")
 
     expected_names <- c(
-        "chrom", "ref_position", "ref_mod_strand", "mod_prob", "read_id", "read_df")
+        "chrom", "ref_position", "ref_mod_strand", "mod_prob", "read_id", "read_df",
+        "bam_header")
     expect_named(res1, expected_names)
     expect_named(res2, expected_names)
     expect_named(res3, expected_names)
@@ -118,7 +129,7 @@ test_that("pileup_modbam_cpp works", {
 
     expected_types <- c(
         "character", "integer", "character", "double",
-        "character", "list")
+        "character", "list", "list")
     for (i in seq_along(expected_names)) {
         expect_type(res1[[expected_names[i]]], expected_types[i])
         expect_type(res2[[expected_names[i]]], expected_types[i])
@@ -166,7 +177,7 @@ test_that("pileup_modbam_cpp works", {
     expect_identical(unname(sort(as.vector(table(res1$read_id)))),
                      c(3340L,  3597L, 4363L))
     expect_true(all(res1$mod_prob == -1 | (res1$mod_prob >= 0 & res1$mod_prob <= 1.0)))
-    for (nm in setdiff(expected_names, "read_df")) {
+    for (nm in setdiff(expected_names, c("read_df", "bam_header"))) {
         expect_length(res1[[nm]], 11300L)
     }
     expect_length(unique(res1$read_id), 3L)
@@ -175,6 +186,7 @@ test_that("pileup_modbam_cpp works", {
     expect_identical(sum(!is.na(i1)), 11183L)
     expect_identical(res1$ref_position[!is.na(i1)],
                      df$ref_position[i1[!is.na(i1)]])
+    expect_identical(res1$bam_header, res1hdr)
 
     # ... content res2
     expect_identical(res2$read_df$read_id,
@@ -199,7 +211,7 @@ test_that("pileup_modbam_cpp works", {
     expect_true(
         all(paste0(res1$chrom, ":", res1$ref_position, ":", res1$ref_mod_strand) %in%
                 paste0(res2$chrom, ":", res2$ref_position, ":", res2$ref_mod_strand)))
-    for (nm in setdiff(expected_names, "read_df")) {
+    for (nm in setdiff(expected_names, c("read_df", "bam_header"))) {
         expect_length(res2[[nm]], 29545L)
     }
     expect_length(unique(res2$read_id), 10L)
@@ -211,14 +223,16 @@ test_that("pileup_modbam_cpp works", {
     expect_true(all(
         res2$call_code[!is.na(i2)] == df$call_code[i2[!is.na(i2)]] |
             res2$mod_prob[!is.na(i2)] < 0.5))
+    expect_identical(res2$bam_header, res1hdr)
 
     # ... content res3
-    for (nm in setdiff(expected_names, "read_df")) {
+    for (nm in setdiff(expected_names, c("read_df", "bam_header"))) {
         expect_length(res3[[nm]], 0L)
     }
     ## This will still contain all reads - will be filtered out in the
     ## readModBam R wrapper
     expect_identical(nrow(res3$read_df), 10L)
+    expect_identical(res3$bam_header, res1hdr)
 
     # ... content of res4
     expect_equal(res4, list(
@@ -236,7 +250,8 @@ test_that("pileup_modbam_cpp works", {
                              read_length = c(21L, 25L),
                              aligned_length = c(19L, 23L),
                              variant_label = rep(NA_character_, 2L),
-                             ref_strand = c("+", "-"))))
+                             ref_strand = c("+", "-")),
+        bam_header = res4hdr))
 
     # ... content of res5
     expect_identical(res5, list(
@@ -245,7 +260,8 @@ test_that("pileup_modbam_cpp works", {
         read_id = character(0),
         read_df = data.frame(read_id = character(0), qscore = numeric(0),
                              read_length = integer(0), aligned_length = integer(0),
-                             variant_label = character(0), ref_strand = character(0))))
+                             variant_label = character(0), ref_strand = character(0)),
+        bam_header = res5hdr))
 
     # ... content of res6a and res6b (res6a should be a subset of res6b)
     # ... ... check ground truth
@@ -265,12 +281,16 @@ test_that("pileup_modbam_cpp works", {
     expect_identical(res6a$mod_prob, res6b$mod_prob[idx])
     expect_equal(res6a$read_df, res6b$read_df[2, , drop = FALSE],
                  ignore_attr = TRUE)
+    expect_identical(res6a$bam_header, res1hdr)
+    expect_identical(res6b$bam_header, res1hdr)
 
     # ... content of res9h and res9m
     expect_identical(res9h[!names(res9h) %in% c("call_code", "mod_prob")],
                      res9m[!names(res9m) %in% c("call_code", "mod_prob")])
     expect_equal(res9h$mod_prob, (c(25,10) + 0.5) / 256)
     expect_equal(res9m$mod_prob, (c(230,245) + 0.5) / 256)
+    expect_identical(res9h$bam_header, res9hdr)
+    expect_identical(res9m$bam_header, res9hdr)
 })
 
 test_that("pileup_modbam_cpp works by comparing to read_modbam_cpp", {
@@ -298,7 +318,7 @@ test_that("pileup_modbam_cpp works by comparing to read_modbam_cpp", {
                 as.data.frame() |>
                 dplyr::arrange(ref_position, read_id, dplyr::desc(ref_mod_strand))
         }
-        list(lst = as.list(tmp), df = tmp0$read_df)
+        list(lst = c(as.list(tmp), list(bam_header = tmp0$bam_header)), df = tmp0$read_df)
     }
 
     # reading all alignments in a bam file (summary)
@@ -315,9 +335,9 @@ test_that("pileup_modbam_cpp works by comparing to read_modbam_cpp", {
                                  n_threads = 1, verbose = TRUE, level = "summary")
     })
     expect_type(res, "list")
-    expect_length(res, 5L)
+    expect_length(res, 6L)
     expect_named(res, c("chrom", "ref_position", "ref_mod_strand",
-                        "Nmod", "Nvalid"))
+                        "Nmod", "Nvalid", "bam_header"))
     expect_identical(res0$lst, res)
 
     # reading all alignments in a bam file (read)
@@ -334,17 +354,17 @@ test_that("pileup_modbam_cpp works by comparing to read_modbam_cpp", {
                                  n_threads = 1, verbose = TRUE, level = "read")
     })
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_mod_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
-    expect_identical(names(res0$lst), names(res[1:5]))
-    expect_identical(lengths(res0$lst), lengths(res[1:5]))
+    expect_identical(names(res0$lst), names(res[c(1:5, 7)]))
+    expect_identical(lengths(res0$lst), lengths(res[c(1:5, 7)]))
     res <- res[1:5] |>
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_mod_strand)) |>
         as.list()
-    expect_identical(res0$lst, res)
+    expect_identical(res0$lst[names(res0$lst) != "bam_header"], res)
 
     # reading alignments overlapping a region (summary)
     # ... expected results
@@ -358,9 +378,9 @@ test_that("pileup_modbam_cpp works by comparing to read_modbam_cpp", {
                              modbase = "a", mod_prob_thresh = thresh,
                              n_threads = 1, verbose = FALSE, level = "summary")
     expect_type(res, "list")
-    expect_length(res, 5L)
+    expect_length(res, 6L)
     expect_named(res, c("chrom", "ref_position", "ref_mod_strand",
-                        "Nmod", "Nvalid"))
+                        "Nmod", "Nvalid", "bam_header"))
     expect_identical(res0$lst, res)
 
     # reading alignments overlapping a region (read)
@@ -375,13 +395,13 @@ test_that("pileup_modbam_cpp works by comparing to read_modbam_cpp", {
                              modbase = "a", mod_prob_thresh = thresh,
                              n_threads = 1, verbose = FALSE, level = "read")
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_mod_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
     res <- res[1:5] |>
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_mod_strand)) |>
         as.list()
-    expect_identical(res0$lst, res)
+    expect_identical(res0$lst[names(res0$lst) != "bam_header"], res)
 })

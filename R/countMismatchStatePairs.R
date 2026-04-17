@@ -32,6 +32,7 @@
 #' @author Charlotte Soneson, Michael Stadler
 #'
 #' @return A \code{DataFrame} with \code{windowSize} rows and five columns.
+#' The \code{metadata} slot contains header information from \code{bamfile}.
 #'
 #' @examples
 #' bamfile <- system.file("extdata", "BisSeq_quasr_single.bam",
@@ -48,7 +49,7 @@
 #'                                verbose = TRUE)
 #' tbl
 #'
-#' @importFrom S4Vectors DataFrame
+#' @importFrom S4Vectors DataFrame metadata
 #' @importFrom BiocParallel bpnworkers MulticoreParam
 #' @importFrom cli cli_abort
 #' @importFrom Biostrings IUPAC_CODE_MAP DNA_BASES vmatchPattern
@@ -192,5 +193,6 @@ countMismatchStatePairs <- function(bamfile,
                      unmod_mod = resL$pair_counts[, 2],
                      mod_unmod = resL$pair_counts[, 3],
                      mod_mod = resL$pair_counts[, 4])
+    metadata(res)$bamHeader <- resL$bam_header
     return(res)
 }

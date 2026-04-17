@@ -1,4 +1,10 @@
 test_that("pileup_mismatchbam_cpp works", {
+    ## helper functions --------------------------------------------------------
+    .readExpectedBamHeader <- function(fname) {
+        tmp <- Rsamtools::scanBamHeader(fname)[[1]]
+        tmp$text <- paste0(names(tmp$text), "\t", lapply(tmp$text, paste, collapse = "\t"))
+        return(tmp)
+    }
     ## example data ------------------------------------------------------------
     quasr_paired_bamfile <- system.file("extdata", "BisSeq_quasr_paired.bam",
                                         package = "SingleMoleculeGenomicsIO")
@@ -154,7 +160,8 @@ test_that("pileup_mismatchbam_cpp works", {
                 as.data.frame() |>
                 dplyr::arrange(ref_position, read_id, dplyr::desc(ref_strand))
         }
-        list(lst = as.list(tmp), df = tmp0$read_df)
+        list(lst = c(as.list(tmp), list(bam_header = tmp0$bam_header)),
+             df = tmp0$read_df)
     }
 
     # reading all alignments in a bam file (summary)
@@ -177,9 +184,9 @@ test_that("pileup_mismatchbam_cpp works", {
                                       n_threads = 1, verbose = FALSE)
     })
     expect_type(res, "list")
-    expect_length(res, 5L)
+    expect_length(res, 6L)
     expect_named(res, c("chrom", "ref_position", "ref_strand",
-                        "Nmod", "Nvalid"))
+                        "Nmod", "Nvalid", "bam_header"))
     expect_identical(res0$lst, res)
 
     # reading all alignments in a bam file (read)
@@ -202,17 +209,17 @@ test_that("pileup_mismatchbam_cpp works", {
                                       n_threads = 1, verbose = FALSE)
     })
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
-    expect_identical(names(res0$lst), names(res[1:5]))
-    expect_identical(lengths(res0$lst), lengths(res[1:5]))
-    res <- res[1:5] |>
+    expect_identical(names(res0$lst), names(res[c(1:5, 7)]))
+    expect_identical(lengths(res0$lst), lengths(res[c(1:5, 7)]))
+    res1 <- res[1:5] |>
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_strand)) |>
         as.list()
-    expect_identical(res0$lst, res)
+    expect_identical(res0$lst, c(res1, list(bam_header = res$bam_header)))
 
     # reading all alignments in a bam file (read, with deletion)
     posContextLtmp <- posContextL
@@ -236,17 +243,17 @@ test_that("pileup_mismatchbam_cpp works", {
                                       n_threads = 1, verbose = FALSE)
     })
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
-    expect_identical(names(res0$lst), names(res[1:5]))
-    expect_identical(lengths(res0$lst), lengths(res[1:5]))
-    res <- res[1:5] |>
+    expect_identical(names(res0$lst), names(res[c(1:5, 7)]))
+    expect_identical(lengths(res0$lst), lengths(res[c(1:5, 7)]))
+    res1 <- res[1:5] |>
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_strand)) |>
         as.list()
-    expect_identical(res0$lst, res)
+    expect_identical(res0$lst, c(res1, list(bam_header = res$bam_header)))
 
     # reading all alignments in a bam file (read, paired-end)
     reg <- "."
@@ -268,21 +275,21 @@ test_that("pileup_mismatchbam_cpp works", {
                                       n_threads = 1, verbose = TRUE)
     })
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
-    expect_identical(names(res0$lst), names(res[1:5]))
-    expect_true(all(lengths(res0$lst) >= lengths(res[1:5])))
-    res <- res[1:5] |>
+    expect_identical(names(res0$lst), names(res[c(1:5, 7)]))
+    expect_true(all(lengths(res0$lst) >= lengths(res[c(1:5, 7)])))
+    res1 <- res[1:5] |>
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_strand)) |>
         as.list()
-    expect_identical(res0$lst |>
+    expect_identical(res0$lst[names(res0$lst) != "bam_header"] |>
                          as.data.frame() |>
                          dplyr::distinct() |>
                          as.list(),
-                     res)
+                     res1)
 
     # reading all alignments in a bam file (read, paired-end,
     # position with discordant call in the two mates)
@@ -305,17 +312,17 @@ test_that("pileup_mismatchbam_cpp works", {
                                       n_threads = 1, verbose = TRUE)
     })
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
-    expect_identical(names(res0$lst), names(res[1:5]))
-    expect_true(all(lengths(res0$lst) >= lengths(res[1:5])))
+    expect_identical(names(res0$lst), names(res[c(1:5, 7)]))
+    expect_true(all(lengths(res0$lst) >= lengths(res[c(1:5, 7)])))
     res <- res[c(1,2,3,5)] |> # leave out mod_prob which will be collapsed in the R wrapper
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_strand)) |>
         as.list()
-    expect_identical(res0$lst |>
+    expect_identical(res0$lst[names(res0$lst) != "bam_header"] |>
                          as.data.frame() |>
                          dplyr::select(-mod_prob) |>
                          dplyr::distinct() |>
@@ -342,17 +349,17 @@ test_that("pileup_mismatchbam_cpp works", {
                                       n_threads = 1, verbose = TRUE)
     })
     expect_type(res, "list")
-    expect_length(res, 6L)
+    expect_length(res, 7L)
     expect_named(res, c("chrom", "ref_position", "ref_strand",
-                        "mod_prob", "read_id", "read_df"))
+                        "mod_prob", "read_id", "read_df", "bam_header"))
     expect_identical(res0$df$read_id, res$read_df$read_id)
-    expect_identical(names(res0$lst), names(res[1:5]))
-    expect_true(all(lengths(res0$lst) >= lengths(res[1:5])))
+    expect_identical(names(res0$lst), names(res[c(1:5, 7)]))
+    expect_true(all(lengths(res0$lst) >= lengths(res[c(1:5, 7)])))
     res <- res[1:5] |>
         as.data.frame() |>
         dplyr::arrange(ref_position, read_id, dplyr::desc(ref_strand)) |>
         as.list()
-    expect_identical(res0$lst |>
+    expect_identical(res0$lst[names(res0$lst) != "bam_header"] |>
                          as.data.frame() |>
                          dplyr::distinct() |>
                          as.list(),

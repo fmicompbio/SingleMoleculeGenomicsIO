@@ -211,7 +211,8 @@ index_bam_cpp <- function(infile) {
 #' @return A named list with elements \code{"chrom"} (chromosome name),
 #'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
 #'     \code{"ref_strand"} (the strand from which the original molecule
-#'     originated). If \code{level} is \code{"summary"},
+#'     originated) and \code{"bam_header"} (targets and text from the bam
+#'     header). If \code{level} is \code{"summary"},
 #'     the list additionally contains slots \code{"Nmod"} (number of modified
 #'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
 #'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
@@ -288,7 +289,8 @@ pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_
 #' @return A named list with elements \code{"chrom"} (chromosome name),
 #'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
 #'     \code{"ref_mod_strand"} (the strand relative to the reference on which
-#'     the modification was identified). If \code{level} is \code{"summary"},
+#'     the modification was identified) and \code{"bam_header"} (targets and
+#'     text from the bam header). If \code{level} is \code{"summary"},
 #'     the list additionally contains slots \code{"Nmod"} (number of modified
 #'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
 #'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
@@ -373,13 +375,14 @@ pileup_modbam_cpp <- function(inname_str, regions, modbase, level = "summary", m
 #'
 #' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
 #'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"}, \code{"qscore"},
-#'     \code{"mod_prob"} and \code{"read_df"}. The meaning of these elements is
-#'     similar to the return value of \code{read_modbam_cpp} and described in
-#'     https://nanoporetech.github.io/modkit/intro_extract.html,
+#'     \code{"mod_prob"}, \code{"read_df"} and \code{"bam_header"}. The meaning
+#'     of these elements is similar to the return value of \code{read_modbam_cpp}
+#'     and described in https://nanoporetech.github.io/modkit/intro_extract.html,
 #'     apart from \code{"mod_prob"}, which is equal to 0 or 1 for bases at
 #'     (mis-)match positions controlled by arguments \code{pos_context_list},
 #'     \code{unmod_integer}, \code{mod_integer} and their \code{_rev} variants.
-#'     \code{"read_df"} is a \code{data.frame} with one row per read and
+#'     \code{"read_df"} is a \code{data.frame} with one row per read,
+#'     \code{"bam_header"} contains targets and text from the bam header and
 #'     columns \code{"read_id"} (the read identifier), \code{"qscore"}
 #'     (the read quality score recorded in the \code{qs} tag of each bam record),
 #'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
@@ -482,11 +485,14 @@ read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_li
 #' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
 #'     \code{"forward_read_position"}, \code{"ref_position"},
 #'     \code{"chrom"}, \code{"ref_mod_strand"}, \code{"call_code"},
-#'     \code{"canonical_base"}, \code{"mod_prob"} and \code{"read_df"}.
-#'     The meaning of these elements is described in https://nanoporetech.github.io/modkit/intro_extract.html,
+#'     \code{"canonical_base"}, \code{"mod_prob"}, \code{"read_df"} and
+#'     \code{"bam_header"}.
+#'     The meaning of these elements is described in
+#'     https://nanoporetech.github.io/modkit/intro_extract.html,
 #'     apart from \code{"mod_prob"}, which is equal to \code{call_prob} for
 #'     modified bases and equal to \code{1 - call_prob} for unmodified bases
-#'     (\code{call_code == "-"}), and \code{"read_df"}, which is a
+#'     (\code{call_code == "-"}), \code{"bam_header"}, which contains targets
+#'     and text from the bam header, and \code{"read_df"}, which is a
 #'      \code{data.frame} with one row per read and columns \code{"read_id"}
 #'     (the read identifier), \code{"qscore"} (the read quality score recorded
 #'     in the \code{qs} tag of each bam record), \code{"read_length"} (the
@@ -581,6 +587,17 @@ read_modbam_cpp <- function(inname_str, regions, modbase, n_alns_to_sample, tnam
 sampleEntropy <- function(data, m, r, maxStarts = 1000L, nThreads = 1L) {
     .Call(`_SingleMoleculeGenomicsIO_sampleEntropy`, data, m, r, maxStarts, nThreads)
 }
+
+#' Get target and text lines from loaded BAM header
+#'
+#' @param inbamhdr A loaded (populated) sam_hdr_t*.
+#'
+#' @return A named list with two elements: \code{"text"} with a
+#'     character vector of all text files and \code{"targets"} with a
+#'     named integer vector of target lengths.
+#' @noRd
+#' @keywords internal
+NULL
 
 #' Calculate aligned bases (sum of 'M', '=', or 'X' operation lengths)
 #'

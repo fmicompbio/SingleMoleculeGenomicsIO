@@ -44,6 +44,12 @@ test_that("get_unmodified_base works", {
 ## Checks, read_modbam_cpp
 ## -------------------------------------------------------------------------- ##
 test_that("read_modbam_cpp works", {
+    ## helper functions --------------------------------------------------------
+    .readExpectedBamHeader <- function(fname) {
+        tmp <- Rsamtools::scanBamHeader(fname)[[1]]
+        tmp$text <- paste0(names(tmp$text), "\t", lapply(tmp$text, paste, collapse = "\t"))
+        return(tmp)
+    }
     ## example data ------------------------------------------------------------
     modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
                               package = "SingleMoleculeGenomicsIO")
@@ -179,6 +185,7 @@ test_that("read_modbam_cpp works", {
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
+    res1hdr <- .readExpectedBamHeader(modbamfile)
     res2 <- read_modbam_cpp(
         inname_str = modbamfile, regions = "chr1:", modbase = "a",
         n_alns_to_sample = 0, tnames_for_sampling = "",
@@ -194,11 +201,13 @@ test_that("read_modbam_cpp works", {
         n_alns_to_sample = 0, tnames_for_sampling = "",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 1, verbose = FALSE)
+    res4hdr <- .readExpectedBamHeader(bam4)
     res5 <- read_modbam_cpp(
         inname_str = bam5, regions = "chr1", modbase = "a",
         n_alns_to_sample = 0, tnames_for_sampling = "",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 1, verbose = FALSE)
+    res5hdr <- .readExpectedBamHeader(bam5)
     res6a <- read_modbam_cpp(
         inname_str = modbamfile, regions = "chr1:6941000-6941001", modbase = "a",
         n_alns_to_sample = 0, tnames_for_sampling = "",
@@ -252,6 +261,7 @@ test_that("read_modbam_cpp works", {
         n_alns_to_sample = 0, tnames_for_sampling = "",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 1, verbose = FALSE)
+    res9hdr <- .readExpectedBamHeader(bam9)
 
     suppressMessages(expect_message({
         res10a <- read_modbam_cpp(
@@ -284,12 +294,13 @@ test_that("read_modbam_cpp works", {
 
     expected_names <- c(
         "read_id", "forward_read_position", "ref_position", "chrom",
-        "ref_mod_strand", "call_code", "canonical_base", "mod_prob", "read_df")
+        "ref_mod_strand", "call_code", "canonical_base", "mod_prob", "read_df",
+        "bam_header")
     invisible(lapply(resL, function(r) expect_named(r, expected_names)))
 
     expected_types <- c(
         "character", "integer", "integer", "character", "character",
-        "character", "character", "double", "list")
+        "character", "character", "double", "list", "list")
     for (i in seq_along(expected_names)) {
         invisible(lapply(resL, function(r) {
             expect_type(r[[expected_names[i]]], expected_types[i])
@@ -297,6 +308,7 @@ test_that("read_modbam_cpp works", {
     }
 
     invisible(lapply(resL, function(r) expect_s3_class(r[["read_df"]], "data.frame")))
+    invisible(lapply(resL, function(r) expect_named(r$bam_header, c("targets", "text"))))
 
     expected_df_colnames <- c("read_id", "qscore", "read_length",
                               "aligned_length", "variant_label", "ref_strand")
@@ -318,7 +330,7 @@ test_that("read_modbam_cpp works", {
     expect_true(all(nchar(res1$call_code) == 1L))
     expect_true(all(res1$canonical_base == "A"))
     expect_true(all(res1$mod_prob == -1 | (res1$mod_prob >= 0 & res1$mod_prob <= 1.0)))
-    for (nm in setdiff(expected_names, "read_df")) {
+    for (nm in setdiff(expected_names, c("read_df", "bam_header"))) {
         expect_length(res1[[nm]], 11300L)
     }
     expect_length(unique(res1$read_id), 3L)
@@ -336,6 +348,7 @@ test_that("read_modbam_cpp works", {
                1 - res1$mod_prob[!is.na(i1a)],
                res1$mod_prob[!is.na(i1a)]),
         df$call_prob[i1a[!is.na(i1a)]], tolerance = 1e-6)
+    expect_identical(res1$bam_header, res1hdr)
 
     # ... content res2
     expect_true(all(res2$canonical_base == "A"))
@@ -363,7 +376,7 @@ test_that("read_modbam_cpp works", {
     expect_true(
         all(paste0(res1$chrom, ":", res1$ref_position, ":", res1$ref_mod_strand) %in%
             paste0(res2$chrom, ":", res2$ref_position, ":", res2$ref_mod_strand)))
-    for (nm in setdiff(expected_names, "read_df")) {
+    for (nm in setdiff(expected_names, c("read_df", "bam_header"))) {
         expect_length(res2[[nm]], 29545L)
     }
     expect_length(unique(res2$read_id), 10L)
@@ -381,12 +394,14 @@ test_that("read_modbam_cpp works", {
                1 - res2$mod_prob[!is.na(i2a)],
                res2$mod_prob[!is.na(i2a)]),
         df$call_prob[i2a[!is.na(i2a)]], tolerance = 1e-6)
+    expect_identical(res2$bam_header, res1hdr)
 
     # ... content res3
-    for (nm in setdiff(expected_names, "read_df")) {
+    for (nm in setdiff(expected_names, c("read_df", "bam_header"))) {
         expect_length(res3[[nm]], 0L)
     }
     expect_identical(nrow(res3$read_df), 0L)
+    expect_identical(res3$bam_header, res1hdr)
 
     # ... content of res4
     expect_equal(res4, list(
@@ -405,7 +420,8 @@ test_that("read_modbam_cpp works", {
                              read_length = c(21L, 25L),
                              aligned_length = c(19L, 23L),
                              variant_label = rep(NA_character_, 2L),
-                             ref_strand = c("+", "-"))))
+                             ref_strand = c("+", "-")),
+        bam_header = res4hdr))
 
     # ... content of res5
     expect_identical(res5, list(
@@ -415,7 +431,8 @@ test_that("read_modbam_cpp works", {
         canonical_base = character(0), mod_prob = numeric(0),
         read_df = data.frame(read_id = character(0), qscore = numeric(0),
                              read_length = integer(0), aligned_length = integer(0),
-                             variant_label = character(0), ref_strand = character(0))))
+                             variant_label = character(0), ref_strand = character(0)),
+        bam_header = res5hdr))
 
     # ... content of res6a and res6b (res6a should be a subset of res6b)
     # ... ... check ground truth
@@ -435,6 +452,8 @@ test_that("read_modbam_cpp works", {
     expect_identical(res6a$mod_prob, res6b$mod_prob[idx])
     expect_equal(res6a$read_df, res6b$read_df[2, , drop = FALSE],
                  ignore_attr = TRUE)
+    expect_identical(res6a$bam_header, res1hdr)
+    expect_identical(res6b$bam_header, res1hdr)
 
     # ... content of res7a, res7b and res7c
     expect_identical(res7a, res7b)
@@ -443,6 +462,9 @@ test_that("read_modbam_cpp works", {
     expect_length(unique(res7c$read_id), 2L)
     expect_length(unique(res7a$read_id), nrow(res7a$read_df))
     expect_length(unique(res7c$read_id), nrow(res7c$read_df))
+    expect_identical(res7a$bam_header, res1hdr)
+    expect_identical(res7b$bam_header, res1hdr)
+    expect_identical(res7c$bam_header, res1hdr)
 
     # ... content of res9h and res9m
     expect_identical(res9h[!names(res9h) %in% c("call_code", "mod_prob")],
@@ -451,20 +473,25 @@ test_that("read_modbam_cpp works", {
     expect_identical(res9m$call_code, c("m", "m"))
     expect_equal(res9h$mod_prob, (c(25,10) + 0.5) / 256)
     expect_equal(res9m$mod_prob, (c(230,245) + 0.5) / 256)
+    expect_identical(res9h$bam_header, res9hdr)
+    expect_identical(res9m$bam_header, res9hdr)
 
     # ... structure and content of res10a, res10b and res10c
     expect_type(res10a, "list")
     expect_type(res10b, "list")
     expect_type(res10c, "list")
-    expect_length(res10a, 1L)
-    expect_length(res10b, 1L)
-    expect_length(res10c, 1L)
-    expect_named(res10a, "pair_counts")
-    expect_named(res10b, "pair_counts")
-    expect_named(res10c, "pair_counts")
+    expect_length(res10a, 2L)
+    expect_length(res10b, 2L)
+    expect_length(res10c, 2L)
+    expect_named(res10a, c("pair_counts", "bam_header"))
+    expect_named(res10b, c("pair_counts", "bam_header"))
+    expect_named(res10c, c("pair_counts", "bam_header"))
     expect_identical(dim(res10a$pair_counts), c(200L, 4L))
     expect_identical(dim(res10b$pair_counts), c(200L, 4L))
     expect_identical(dim(res10c$pair_counts), c(200L, 4L))
     expect_identical(res10a, res10b)
     expect_true(all(res10c$pair_counts <= res10a$pair_counts))
+    expect_identical(res10a$bam_header, res1hdr)
+    expect_identical(res10b$bam_header, res1hdr)
+    expect_identical(res10c$bam_header, res1hdr)
 })

@@ -397,11 +397,14 @@ int count_pairs_bam_record(
 //' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
 //'     \code{"forward_read_position"}, \code{"ref_position"},
 //'     \code{"chrom"}, \code{"ref_mod_strand"}, \code{"call_code"},
-//'     \code{"canonical_base"}, \code{"mod_prob"} and \code{"read_df"}.
-//'     The meaning of these elements is described in https://nanoporetech.github.io/modkit/intro_extract.html,
+//'     \code{"canonical_base"}, \code{"mod_prob"}, \code{"read_df"} and
+//'     \code{"bam_header"}.
+//'     The meaning of these elements is described in
+//'     https://nanoporetech.github.io/modkit/intro_extract.html,
 //'     apart from \code{"mod_prob"}, which is equal to \code{call_prob} for
 //'     modified bases and equal to \code{1 - call_prob} for unmodified bases
-//'     (\code{call_code == "-"}), and \code{"read_df"}, which is a
+//'     (\code{call_code == "-"}), \code{"bam_header"}, which contains targets
+//'     and text from the bam header, and \code{"read_df"}, which is a
 //'      \code{data.frame} with one row per read and columns \code{"read_id"}
 //'     (the read identifier), \code{"qscore"} (the read quality score recorded
 //'     in the \code{qs} tag of each bam record), \code{"read_length"} (the
@@ -518,6 +521,9 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
     Rcpp::CharacterVector df_variant_label;
     Rcpp::CharacterVector df_ref_strand;
 
+    // ... ... one per call
+    Rcpp::List bam_header;
+
     // ... return value for mode 3
     Rcpp::NumericMatrix pair_counts;
 
@@ -532,6 +538,7 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
     if (success != 0) {
         goto end;
     }
+    bam_header = getTargetsAndTextFromBamHeader(in_samhdr);
 
     // initialize bam data storage for modifications
     if (!(ms = hts_base_mod_state_alloc())) {
@@ -748,7 +755,8 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                 // Mode 3
                 // create return list
                 res = Rcpp::List::create(
-                    Rcpp::_["pair_counts"] = pair_counts
+                    Rcpp::_["pair_counts"] = pair_counts,
+                    Rcpp::_["bam_header"] = bam_header
                 );
 
             } else {
@@ -778,7 +786,8 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                     Rcpp::_["call_code"] = call_code,
                     Rcpp::_["canonical_base"] = canonical_base,
                     Rcpp::_["mod_prob"] = mod_prob,
-                    Rcpp::_["read_df"] = df);
+                    Rcpp::_["read_df"] = df,
+                    Rcpp::_["bam_header"] = bam_header);
             }
 
             return res;

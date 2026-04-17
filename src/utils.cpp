@@ -262,6 +262,48 @@ Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string bamfile) {
         }
 }
 
+//' Get target and text lines from loaded BAM header
+//'
+//' @param inbamhdr A loaded (populated) sam_hdr_t*.
+//'
+//' @return A named list with two elements: \code{"text"} with a
+//'     character vector of all text files and \code{"targets"} with a
+//'     named integer vector of target lengths.
+//' @noRd
+//' @keywords internal
+Rcpp::List getTargetsAndTextFromBamHeader(sam_hdr_t *&inbamhdr) {
+    Rcpp::List res;
+    int i = 0, start = 0;
+
+    // extract targets
+    Rcpp::IntegerVector targets(inbamhdr->n_targets);
+    Rcpp::CharacterVector target_names(inbamhdr->n_targets);
+    for (i = 0; i < inbamhdr->n_targets; i++) {
+        targets[i] = inbamhdr->target_len[i];
+        target_names[i] = inbamhdr->target_name[i];
+    }
+    targets.names() = target_names;
+
+    // extract texts
+    Rcpp::CharacterVector text;
+    for (i = 0; i < inbamhdr->l_text; i++) {
+        if (inbamhdr->text[i] == '\n') { // found an end of a text element
+            if (i > 0) { // store previous text element
+                text.push_back(std::string(&inbamhdr->text[start], i - start));
+                start = i + 1;
+            }
+        }
+    }
+
+    // return as a list
+    res = Rcpp::List::create(
+        Rcpp::_["targets"] = targets,
+        Rcpp::_["text"] = text
+    );
+
+    return res;
+}
+
 //' Get unmodified base corresponding to a modified base
 //'
 //' @param b Modified base as a char

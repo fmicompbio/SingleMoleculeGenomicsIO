@@ -75,7 +75,8 @@ DEALINGS IN THE SOFTWARE
 //' @return A named list with elements \code{"chrom"} (chromosome name),
 //'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
 //'     \code{"ref_strand"} (the strand from which the original molecule
-//'     originated). If \code{level} is \code{"summary"},
+//'     originated) and \code{"bam_header"} (targets and text from the bam
+//'     header). If \code{level} is \code{"summary"},
 //'     the list additionally contains slots \code{"Nmod"} (number of modified
 //'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
 //'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
@@ -165,6 +166,9 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     Rcpp::CharacterVector df_variant_label;
     Rcpp::CharacterVector df_ref_strand;
 
+    // ... ... one per call
+    Rcpp::List bam_header;
+
     // ... cli progress bar
     Rcpp::RObject bar;
 
@@ -176,6 +180,7 @@ Rcpp::List pileup_mismatchbam_cpp(std::string inname_str,
     if (success != 0) {
         goto end;
     }
+    bam_header = getTargetsAndTextFromBamHeader(conf.in_samhdr);
 
     // check if BAM file is conforming to bam_format
     success = check_bam_format(conf.infile, conf.in_samhdr, bamdata, bam_format,
@@ -375,7 +380,8 @@ end:
                 Rcpp::_["ref_position"] = ref_position,
                 Rcpp::_["ref_strand"] = ref_strand,
                 Rcpp::_["Nmod"] = Nmod,
-                Rcpp::_["Nvalid"] = Nvalid);
+                Rcpp::_["Nvalid"] = Nvalid,
+                Rcpp::_["bam_header"] = bam_header);
         } else if (level == "read") {
             Rcpp::DataFrame df = Rcpp::DataFrame::create(
                 Rcpp::_["read_id"] = df_read_id,
@@ -391,7 +397,8 @@ end:
                 Rcpp::_["ref_strand"] = ref_strand,
                 Rcpp::_["mod_prob"] = mod_prob,
                 Rcpp::_["read_id"] = read_id,
-                Rcpp::_["read_df"] = df);
+                Rcpp::_["read_df"] = df,
+                Rcpp::_["bam_header"] = bam_header);
         }
 
         return res;

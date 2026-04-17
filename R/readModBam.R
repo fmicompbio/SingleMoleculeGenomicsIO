@@ -420,7 +420,8 @@ readModBam <- function(bamfiles,
             colData = cdata,
             metadata = list(readLevelData = list(assayNames = "mod_prob",
                                                  colDataColumns = "readInfo"),
-                            variantPositions = variantPositions)
+                            variantPositions = variantPositions,
+                            bamHeader = lapply(resLL, function(x) x$bam_header$text))
         )
     } else {
         stopifnot(colnames(Nmod) == cdata$sample,
@@ -433,7 +434,8 @@ readModBam <- function(bamfiles,
             rowRanges = gpos,
             colData = cdata,
             metadata = list(readLevelData = list(assayNames = character(0),
-                                                 colDataColumns = character(0)))
+                                                 colDataColumns = character(0)),
+                            bamHeader = lapply(resLL, function(x) x$bam_header$text))
         )
     }
     if (nrow(se) > 0) {
