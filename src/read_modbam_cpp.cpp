@@ -755,7 +755,8 @@ Rcpp::List read_modbam_cpp(std::string inname_str,
                 // Mode 3
                 // create return list
                 res = Rcpp::List::create(
-                    Rcpp::_["pair_counts"] = pair_counts
+                    Rcpp::_["pair_counts"] = pair_counts,
+                    Rcpp::_["bam_header"] = bam_header
                 );
 
             } else {
