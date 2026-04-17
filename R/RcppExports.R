@@ -211,7 +211,8 @@ index_bam_cpp <- function(infile) {
 #' @return A named list with elements \code{"chrom"} (chromosome name),
 #'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
 #'     \code{"ref_strand"} (the strand from which the original molecule
-#'     originated). If \code{level} is \code{"summary"},
+#'     originated) and \code{"bam_header"} (targets and text from the bam
+#'     header). If \code{level} is \code{"summary"},
 #'     the list additionally contains slots \code{"Nmod"} (number of modified
 #'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
 #'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
@@ -288,7 +289,8 @@ pileup_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_
 #' @return A named list with elements \code{"chrom"} (chromosome name),
 #'     \code{"ref_position"} (1-based coordinate on \code{"chrom"}),
 #'     \code{"ref_mod_strand"} (the strand relative to the reference on which
-#'     the modification was identified). If \code{level} is \code{"summary"},
+#'     the modification was identified) and \code{"bam_header"} (targets and
+#'     text from the bam header). If \code{level} is \code{"summary"},
 #'     the list additionally contains slots \code{"Nmod"} (number of modified
 #'     bases) and \code{"Nvalid"} (number of total bases). If \code{level} is
 #'     \code{"read"}, it contains slots \code{"mod_prob"} and \code{"read_id"}.
@@ -483,11 +485,14 @@ read_mismatchbam_cpp <- function(inname_str, bam_format, regions, pos_context_li
 #' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
 #'     \code{"forward_read_position"}, \code{"ref_position"},
 #'     \code{"chrom"}, \code{"ref_mod_strand"}, \code{"call_code"},
-#'     \code{"canonical_base"}, \code{"mod_prob"} and \code{"read_df"}.
-#'     The meaning of these elements is described in https://nanoporetech.github.io/modkit/intro_extract.html,
+#'     \code{"canonical_base"}, \code{"mod_prob"}, \code{"read_df"} and
+#'     \code{"bam_header"}.
+#'     The meaning of these elements is described in
+#'     https://nanoporetech.github.io/modkit/intro_extract.html,
 #'     apart from \code{"mod_prob"}, which is equal to \code{call_prob} for
 #'     modified bases and equal to \code{1 - call_prob} for unmodified bases
-#'     (\code{call_code == "-"}), and \code{"read_df"}, which is a
+#'     (\code{call_code == "-"}), \code{"bam_header"}, which contains targets
+#'     and text from the bam header, and \code{"read_df"}, which is a
 #'      \code{data.frame} with one row per read and columns \code{"read_id"}
 #'     (the read identifier), \code{"qscore"} (the read quality score recorded
 #'     in the \code{qs} tag of each bam record), \code{"read_length"} (the

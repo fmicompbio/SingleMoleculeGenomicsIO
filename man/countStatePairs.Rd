@@ -73,6 +73,7 @@ for reproducible results (see also
 }
 \value{
 A \code{DataFrame} with \code{windowSize} rows and five columns.
+The \code{metadata} slot contains header information from \code{bamfile}.
 }
 \description{
 For all pairs of bases with modification calls in a read, tabulate the

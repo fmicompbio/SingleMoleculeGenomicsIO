@@ -37,6 +37,7 @@
 #' @author Charlotte Soneson, Michael Stadler
 #'
 #' @return A \code{DataFrame} with \code{windowSize} rows and five columns.
+#' The \code{metadata} slot contains header information from \code{bamfile}.
 #'
 #' @examples
 #' modbamfile <- system.file("extdata", "6mA_1_10reads.bam",
@@ -47,7 +48,7 @@
 #'                        BPPARAM = BiocParallel::SerialParam())
 #' res
 #'
-#' @importFrom S4Vectors DataFrame
+#' @importFrom S4Vectors DataFrame metadata
 #' @importFrom BiocParallel bpnworkers MulticoreParam
 #' @importFrom cli cli_abort
 #'
@@ -121,5 +122,6 @@ countStatePairs <- function(bamfile,
                      unmod_mod = resL$pair_counts[, 2],
                      mod_unmod = resL$pair_counts[, 3],
                      mod_mod = resL$pair_counts[, 4])
+    metadata(res)$bamHeader <- resL$bam_header
     return(res)
 }
