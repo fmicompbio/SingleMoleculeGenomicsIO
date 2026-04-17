@@ -1,3 +1,7 @@
+# SingleMoleculeGenomicsIO 0.1.3
+
+* Return bam header information in the metadata of results from `readModBam`, `readMismatchBam`, `countStatePairs` and `countMismatchStatePairs`
+
 # SingleMoleculeGenomicsIO 0.1.2
 
 * Remove `removeAllNAReads` function (move to `footprintR`)
