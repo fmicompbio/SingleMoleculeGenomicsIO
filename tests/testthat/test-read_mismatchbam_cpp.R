@@ -387,6 +387,7 @@ test_that("read_mismatchbam_cpp works", {
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
+    res6hdr <- .readExpectedBamHeader(quasr_paired_bamfile)
     res7 <- read_mismatchbam_cpp(
         inname_str = quasr_paired_indel_bamfile, bam_format = "QuasR",
         regions = "chr1:6925411-6925964", pos_context_list = posContextL,
@@ -396,6 +397,7 @@ test_that("read_mismatchbam_cpp works", {
         n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
+    res7hdr <- .readExpectedBamHeader(quasr_paired_indel_bamfile)
 
     # ... collect all mode 1 and mode 2 results in list
     resL <- list(res1, res2, res3, res4a, res4b, res4c, res5)
@@ -513,15 +515,17 @@ test_that("read_mismatchbam_cpp works", {
 
     # ... content of res6
     expect_type(res6, "list")
-    expect_named(res6, "pair_counts")
+    expect_named(res6, c("pair_counts", "bam_header"))
     expect_type(res6$pair_counts, "double")
     expect_identical(dim(res6$pair_counts), c(30L, 4L))
+    expect_identical(res6$bam_header, res6hdr)
 
     # ... content of res7
     expect_type(res7, "list")
-    expect_named(res7, "pair_counts")
+    expect_named(res7, c("pair_counts", "bam_header"))
     expect_type(res7$pair_counts, "double")
     expect_identical(dim(res7$pair_counts), c(30L, 4L))
+    expect_identical(res7$bam_header, res7hdr)
     exp <- matrix(0, nrow = 30L, ncol = 4L)
     exp[1, 1] <- 12   # 3 read pairs, 4 positions in interval, all unmethylated
     exp[7, 1] <- exp[16, 1] <- exp[19, 1] <- exp[25, 1] <- 3
