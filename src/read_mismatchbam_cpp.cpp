@@ -407,13 +407,14 @@ int process_mismatch_bam_record(
 //'
 //' @return For reading modes 1. and 2., a named list with elements \code{"read_id"},
 //'     \code{"ref_position"}, \code{"chrom"}, \code{"ref_strand"}, \code{"qscore"},
-//'     \code{"mod_prob"} and \code{"read_df"}. The meaning of these elements is
-//'     similar to the return value of \code{read_modbam_cpp} and described in
-//'     https://nanoporetech.github.io/modkit/intro_extract.html,
+//'     \code{"mod_prob"}, \code{"read_df"} and \code{"bam_header"}. The meaning
+//'     of these elements is similar to the return value of \code{read_modbam_cpp}
+//'     and described in https://nanoporetech.github.io/modkit/intro_extract.html,
 //'     apart from \code{"mod_prob"}, which is equal to 0 or 1 for bases at
 //'     (mis-)match positions controlled by arguments \code{pos_context_list},
 //'     \code{unmod_integer}, \code{mod_integer} and their \code{_rev} variants.
-//'     \code{"read_df"} is a \code{data.frame} with one row per read and
+//'     \code{"read_df"} is a \code{data.frame} with one row per read,
+//'     \code{"bam_header"} contains targets and text from the bam header and
 //'     columns \code{"read_id"} (the read identifier), \code{"qscore"}
 //'     (the read quality score recorded in the \code{qs} tag of each bam record),
 //'     \code{"read_length"} (the total read length), and \code{"aligned_length"}
@@ -524,6 +525,9 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     Rcpp::CharacterVector df_variant_label;
     Rcpp::CharacterVector df_ref_strand;
 
+    // ... ... one per call
+    Rcpp::List bam_header;
+
     // ... return value for mode 3
     Rcpp::NumericMatrix pair_counts;
 
@@ -538,6 +542,7 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
     if (success != 0) {
         goto end;
     }
+    bam_header = getTargetsAndTextFromBamHeader(in_samhdr);
 
     // check if BAM file is conforming to bam_format
     success = check_bam_format(infile, in_samhdr, bamdata, bam_format,
@@ -934,7 +939,8 @@ Rcpp::List read_mismatchbam_cpp(std::string inname_str,
                     Rcpp::_["ref_strand"] = ref_strand,
                     Rcpp::_["qscore"] = qscore,
                     Rcpp::_["mod_prob"] = mod_prob,
-                    Rcpp::_["read_df"] = df);
+                    Rcpp::_["read_df"] = df,
+                    Rcpp::_["bam_header"] = bam_header);
             }
 
             return res;

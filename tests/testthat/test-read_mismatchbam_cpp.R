@@ -2,6 +2,12 @@
 ## Checks, read_mismatchbam_cpp
 ## -------------------------------------------------------------------------- ##
 test_that("read_mismatchbam_cpp works", {
+    ## helper functions --------------------------------------------------------
+    .readExpectedBamHeader <- function(fname) {
+        tmp <- Rsamtools::scanBamHeader(fname)[[1]]
+        tmp$text <- paste0(names(tmp$text), "\t", lapply(tmp$text, paste, collapse = "\t"))
+        return(tmp)
+    }
     ## example data ------------------------------------------------------------
     quasr_paired_bamfile <- system.file("extdata", "BisSeq_quasr_paired.bam",
                                         package = "SingleMoleculeGenomicsIO")
@@ -303,6 +309,7 @@ test_that("read_mismatchbam_cpp works", {
             variantRefNames = character(0), variantRefPositions = integer(0),
             n_threads = 2, verbose = TRUE)
     ))
+    res1hdr <- .readExpectedBamHeader(quasr_paired_bamfile)
     res2 <- read_mismatchbam_cpp(
         inname_str = quasr_single_bamfile, bam_format = "QuasR",
         regions = "chr1:6925411-6925964", pos_context_list = posContextL,
@@ -312,6 +319,7 @@ test_that("read_mismatchbam_cpp works", {
         n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
+    res2hdr <- .readExpectedBamHeader(quasr_single_bamfile)
     res3 <- read_mismatchbam_cpp(
         inname_str = bismark_paired_bamfile, bam_format = "Bismark",
         regions = "chr1:6925411-6925964", pos_context_list = posContextL,
@@ -321,6 +329,7 @@ test_that("read_mismatchbam_cpp works", {
         n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = character(0), variantRefPositions = integer(0),
         n_threads = 2, verbose = FALSE)
+    res3hdr <- .readExpectedBamHeader(bismark_paired_bamfile)
     # ... read level (sampling)
     set.seed(1L)
     expect_warning(
@@ -335,6 +344,7 @@ test_that("read_mismatchbam_cpp works", {
             n_threads = 2, verbose = FALSE),
         "Ignoring unknown target name"
     )
+    res4hdr <- .readExpectedBamHeader(quasr_single_bamfile)
     set.seed(1L)
     res4b <- read_mismatchbam_cpp(
         inname_str = quasr_single_bamfile, bam_format = "QuasR",
@@ -365,6 +375,7 @@ test_that("read_mismatchbam_cpp works", {
         n_alns_to_sample = 0, tnames_for_sampling = "chr1",
         variantRefNames = rep("chr1", 3L), variantRefPositions = c(6925369L, 6925370L, 6925372L), # GAT
         n_threads = 2, verbose = FALSE)
+    res5hdr <- .readExpectedBamHeader(quasr_single_indel_bamfile)
     suppressMessages(expect_message(
         res6 <- read_mismatchbam_cpp(
             inname_str = quasr_paired_bamfile, bam_format = "QuasR",
@@ -393,11 +404,11 @@ test_that("read_mismatchbam_cpp works", {
     invisible(lapply(resL, function(r) expect_type(r, "list")))
 
     expected_names <- c(
-        "read_id", "ref_position", "chrom", "ref_strand", "qscore", "mod_prob", "read_df")
+        "read_id", "ref_position", "chrom", "ref_strand", "qscore", "mod_prob", "read_df", "bam_header")
     invisible(lapply(resL, function(r) expect_named(r, expected_names)))
 
     expected_types <- c(
-        "character", "integer", "character", "character", "double", "double", "list")
+        "character", "integer", "character", "character", "double", "double", "list", "list")
     for (i in seq_along(expected_names)) {
         invisible(lapply(resL, function(r) {
             expect_type(r[[expected_names[i]]], expected_types[i])
@@ -409,6 +420,8 @@ test_that("read_mismatchbam_cpp works", {
     expected_df_colnames <- c("read_id", "qscore", "read_length",
                               "aligned_length", "variant_label", "ref_strand")
     invisible(lapply(resL, function(r) expect_named(r$read_df, expected_df_colnames)))
+
+    invisible(lapply(resL, function(r) expect_named(r$bam_header, c("targets", "text"))))
 
     # ... content res1
     expect_identical(sort(unique(res1$ref_position)), true_meth$pos)
@@ -424,6 +437,7 @@ test_that("read_mismatchbam_cpp works", {
     expect_identical(res1df$ref_strand, true_meth$strand)
     expect_true(all(res1df$count_total >= true_meth$quasr_count_total_paired))
     expect_identical(res1df$count_meth == 0, true_meth$quasr_count_meth_paired == 0)
+    expect_identical(res1$bam_header, res1hdr)
 
     # ... content res2
     expect_identical(sort(unique(res2$ref_position)), true_meth$pos)
@@ -442,6 +456,7 @@ test_that("read_mismatchbam_cpp works", {
     expect_identical(res2df$ref_strand, true_meth$strand)
     expect_identical(res2df$count_total, true_meth$quasr_count_total_single)
     expect_identical(res2df$count_meth, true_meth$quasr_count_meth_single)
+    expect_identical(res2$bam_header, res2hdr)
 
     # ... content res3
     expect_identical(sort(unique(res3$ref_position)), true_meth$pos)
@@ -467,6 +482,7 @@ test_that("read_mismatchbam_cpp works", {
     expect_true(!any(is.na(res3reads$mod_prob.x)))
     expect_true(!any(is.na(res3reads$mod_prob.y)))
     expect_identical(res3reads$mod_prob.x, res3reads$mod_prob.y)
+    expect_identical(res3$bam_header, res3hdr)
 
     # ... content of res4a, res4b and res4c
     expect_identical(res4a, res4b)
@@ -475,12 +491,13 @@ test_that("read_mismatchbam_cpp works", {
     expect_length(unique(res4c$read_id), 9L)
     expect_length(unique(res4a$read_id), nrow(res4a$read_df))
     expect_length(unique(res4c$read_id), nrow(res4c$read_df))
+    expect_identical(res4a$bam_header, res4hdr)
 
     # ... content of res5
     iByReadId <- split(seq_along(res5$read_id), res5$read_id)
     expect_identical(unname(lengths(iByReadId)), c(4L, 4L, 4L))
     for (j in c(2, 3)) {
-        for (nm in setdiff(names(res5), c("read_id", "read_df"))) {
+        for (nm in setdiff(names(res5), c("read_id", "read_df", "bam_header"))) {
             expect_identical(res5[[nm]][iByReadId[[j]]], res5[[nm]][iByReadId[[1]]])
         }
     }
@@ -492,6 +509,7 @@ test_that("read_mismatchbam_cpp works", {
     expect_identical(res5$read_df$read_length[idx], c(121L, 126L, 117L))
     expect_identical(res5$read_df$aligned_length[idx], c(121L, 121L, 117L))
     expect_identical(res5$read_df$variant_label[idx], c("GAT", "GAT", "GAT"))
+    expect_identical(res5$bam_header, res5hdr)
 
     # ... content of res6
     expect_type(res6, "list")
