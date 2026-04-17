@@ -9,6 +9,7 @@
 std::string concatenate_files(std::vector<std::string>, const std::string);
 std::string concatenate_hts_files(std::vector<std::string>, const std::string, int);
 Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string);
+Rcpp::List getTargetsAndTextFromBamHeader(sam_hdr_t *&inbamhdr);
 char get_unmodified_base(char);
 char complement(char);
 int calculate_aligned_bases(bam1_t*);
