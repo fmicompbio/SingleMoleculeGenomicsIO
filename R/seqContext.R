@@ -52,7 +52,7 @@
 #' @importFrom Seqinfo seqlengths seqlengths<-
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom BSgenome getSeq
-#' @importFrom BiocGenerics as.list
+#' @importFrom BiocGenerics as.list strand
 #' @importFrom methods as is
 #' @importFrom cli cli_abort cli_warn
 #'
@@ -80,8 +80,10 @@ extractSeqContext <- function(x,
     xcontext <- resize(x, width = sequenceContextWidth, fix = "center")
 
     # extract sequences
-    Npre <- pmax(0L, 1L - start(xcontext))
-    Npost <- pmax(0L, end(xcontext) - seqlengths(ref)[as.character(seqnames(xcontext))])
+    Nleft <- pmax(0L, 1L - start(xcontext))
+    Nright <- pmax(0L, end(xcontext) - seqlengths(ref)[as.character(seqnames(xcontext))])
+    Npre <- ifelse(strand(xcontext) %in% c("+", "*"), Nleft, Nright)
+    Npost <- ifelse(strand(xcontext) %in% c("+", "*"), Nright, Nleft)
     if (any(Npre > 0) || any(Npost > 0)) {
         suppressWarnings(
             seqlengths(xcontext) <- seqlengths(ref)
