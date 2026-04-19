@@ -1,3 +1,7 @@
+# SingleMoleculeGenomicsIO 0.1.4
+
+* Bug fix in padding of extracted sequence context for regions on the minus strand
+
 # SingleMoleculeGenomicsIO 0.1.3
 
 * Return bam header information in the metadata of results from `readModBam`, `readMismatchBam`, `countStatePairs` and `countMismatchStatePairs`
