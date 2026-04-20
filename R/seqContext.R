@@ -52,7 +52,7 @@
 #' @importFrom Seqinfo seqlengths seqlengths<-
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom BSgenome getSeq
-#' @importFrom BiocGenerics as.list strand
+#' @importFrom BiocGenerics as.list strand %in%
 #' @importFrom methods as is
 #' @importFrom cli cli_abort cli_warn
 #'
