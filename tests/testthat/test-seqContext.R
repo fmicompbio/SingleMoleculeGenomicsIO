@@ -12,12 +12,25 @@ test_that("extractSeqContext works", {
     # example data
     ref <- system.file("extdata", "reference.fa.gz", package = "SingleMoleculeGenomicsIO")
     gnm <- Biostrings::readDNAStringSet(ref)
-    regions <- GenomicRanges::GRanges(seqnames = "chr1",
-                                      ranges = IRanges::IRanges(start = 6957060 - c(4, 2, 0),
-                                                                width = 1, names = c("x", "y", "z")))
-    regions2 <- GenomicRanges::GRanges(seqnames = "chr1",
-                                       ranges = IRanges::IRanges(start = 1 + c(0, 2, 4),
-                                                                 width = 3, names = c("a", "b", "c")))
+    gnm2 <- DNAStringSet(c(chr1 = "CATGTCCCCT"))
+    regions <- GenomicRanges::GRanges(
+        seqnames = "chr1",
+        ranges = IRanges::IRanges(start = 6957060 - c(4, 2, 0),
+                                  width = 1, names = c("x", "y", "z")))
+    regions2 <- GenomicRanges::GRanges(
+        seqnames = "chr1",
+        ranges = IRanges::IRanges(start = 1 + c(0, 2, 4, 8),
+                                  width = 3, names = c("a", "b", "c", "d")))
+    regions3 <- GenomicRanges::GRanges(
+        seqnames = "chr1",
+        ranges = IRanges::IRanges(start = 1 + c(0, 2, 4, 8),
+                                  width = 3, names = c("a", "b", "c", "d")),
+        strand = "-")
+    regions4 <- GenomicRanges::GRanges(
+        seqnames = "chr1",
+        ranges = IRanges::IRanges(start = 1 + c(0, 2, 4, 8),
+                                  width = 3, names = c("a", "b", "c", "d")),
+        strand = "+")
     se <- SummarizedExperiment(assays = matrix(1:3, ncol = 1), rowRanges = regions)
 
     # invalid arguments
@@ -34,18 +47,29 @@ test_that("extractSeqContext works", {
     s5 <- extractSeqContext(x = regions2, sequenceContextWidth = 7, sequenceReference = gnm)
     s6 <- extractSeqContext(x = resize(regions2, width = 1L, fix = "center"), sequenceContextWidth = 7, sequenceReference = gnm)
     s7 <- extractSeqContext(x = se, sequenceContextWidth = 7, sequenceReference = gnm)
+    s8 <- extractSeqContext(x = regions2, sequenceContextWidth = 7, sequenceReference = gnm2)
+    s9 <- extractSeqContext(x = regions3, sequenceContextWidth = 7, sequenceReference = gnm2)
+    s10 <- extractSeqContext(x = c(regions4[seq(1, 2)], regions3[seq(1, 2)],
+                                   regions4[seq(3, 4)], regions3[seq(3, 4)]),
+                             sequenceContextWidth = 7, sequenceReference = gnm2)
     expect_s4_class(s1, "DNAStringSet")
     expect_s4_class(s2, "DNAStringSet")
     expect_s4_class(s4, "DNAStringSet")
     expect_s4_class(s5, "DNAStringSet")
     expect_s4_class(s6, "DNAStringSet")
     expect_s4_class(s7, "DNAStringSet")
+    expect_s4_class(s8, "DNAStringSet")
+    expect_s4_class(s9, "DNAStringSet")
     expect_identical(as.character(s1), c(x="AAAGGGG", y="AGGGGAN", z="GGGANNN"))
     expect_identical(s1, s2)
     expect_identical(unname(s1), s4)
-    expect_identical(as.character(s5), c(a="NNNNNNN", b="NNNNNNN", c="NNNNNNN"))
+    expect_identical(as.character(s5), c(a="NNNNNNN", b="NNNNNNN", c="NNNNNNN", d="NNNNNNN"))
     expect_identical(s5, s6)
     expect_identical(s7, s1)
+    expect_identical(as.character(s8), c(a="NNCATGT", b="CATGTCC", c="TGTCCCC", d="CCCTNNN"))
+    expect_identical(as.character(s9), c(a="ACATGNN", b="GGACATG", c="GGGGACA", d="NNNAGGG"))
+    expect_identical(as.character(s10), c(a="NNCATGT", b="CATGTCC", a="ACATGNN", b="GGACATG",
+                                          c="TGTCCCC", d="CCCTNNN", c="GGGGACA", d="NNNAGGG"))
 })
 
 ## -------------------------------------------------------------------------- ##
