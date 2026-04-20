@@ -26,6 +26,11 @@ test_that("extractSeqContext works", {
         ranges = IRanges::IRanges(start = 1 + c(0, 2, 4, 8),
                                   width = 3, names = c("a", "b", "c", "d")),
         strand = "-")
+    regions4 <- GenomicRanges::GRanges(
+        seqnames = "chr1",
+        ranges = IRanges::IRanges(start = 1 + c(0, 2, 4, 8),
+                                  width = 3, names = c("a", "b", "c", "d")),
+        strand = "+")
     se <- SummarizedExperiment(assays = matrix(1:3, ncol = 1), rowRanges = regions)
 
     # invalid arguments
@@ -44,6 +49,9 @@ test_that("extractSeqContext works", {
     s7 <- extractSeqContext(x = se, sequenceContextWidth = 7, sequenceReference = gnm)
     s8 <- extractSeqContext(x = regions2, sequenceContextWidth = 7, sequenceReference = gnm2)
     s9 <- extractSeqContext(x = regions3, sequenceContextWidth = 7, sequenceReference = gnm2)
+    s10 <- extractSeqContext(x = c(regions4[seq(1, 2)], regions3[seq(1, 2)],
+                                   regions4[seq(3, 4)], regions3[seq(3, 4)]),
+                             sequenceContextWidth = 7, sequenceReference = gnm2)
     expect_s4_class(s1, "DNAStringSet")
     expect_s4_class(s2, "DNAStringSet")
     expect_s4_class(s4, "DNAStringSet")
@@ -60,6 +68,8 @@ test_that("extractSeqContext works", {
     expect_identical(s7, s1)
     expect_identical(as.character(s8), c(a="NNCATGT", b="CATGTCC", c="TGTCCCC", d="CCCTNNN"))
     expect_identical(as.character(s9), c(a="ACATGNN", b="GGACATG", c="GGGGACA", d="NNNAGGG"))
+    expect_identical(as.character(s10), c(a="NNCATGT", b="CATGTCC", a="ACATGNN", b="GGACATG",
+                                          c="TGTCCCC", d="CCCTNNN", c="GGGGACA", d="NNNAGGG"))
 })
 
 ## -------------------------------------------------------------------------- ##
