@@ -273,23 +273,25 @@ Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string bamfile) {
 //' @keywords internal
 Rcpp::List getTargetsAndTextFromBamHeader(sam_hdr_t *&inbamhdr) {
     Rcpp::List res;
-    int i = 0, start = 0;
+    size_t start = 0, text_len = 0;
 
     // extract targets
     Rcpp::IntegerVector targets(inbamhdr->n_targets);
     Rcpp::CharacterVector target_names(inbamhdr->n_targets);
-    for (i = 0; i < inbamhdr->n_targets; i++) {
+    for (int i = 0; i < inbamhdr->n_targets; i++) {
         targets[i] = inbamhdr->target_len[i];
         target_names[i] = inbamhdr->target_name[i];
     }
     targets.names() = target_names;
 
     // extract texts
+    text_len = sam_hdr_length(inbamhdr);
     Rcpp::CharacterVector text;
-    for (i = 0; i < inbamhdr->l_text; i++) {
-        if (inbamhdr->text[i] == '\n') { // found an end of a text element
+    const char *text_str = sam_hdr_str(inbamhdr);
+    for (size_t i = 0; i < text_len; i++) {
+        if (text_str[i] == '\n') { // found an end of a text element
             if (i > 0) { // store previous text element
-                text.push_back(std::string(&inbamhdr->text[start], i - start));
+                text.push_back(std::string(&text_str[start], i - start));
                 start = i + 1;
             }
         }
