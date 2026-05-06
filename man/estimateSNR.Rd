@@ -22,9 +22,11 @@ For example, for \eqn{baseline = b0 + b1 * mean}, use
 \code{betas = c(b0, b1)}, \code{features = c(1, mean)}.}
 
 \item{noise_mode}{Character scalar: one of \code{"raw"}, \code{"model"}, \code{"floor"}.
-- \code{"raw"} -> use \code{noise_raw}
-- \code{"model"} -> use \code{baseline = sum(betas * features)}
-- \code{"floor"} -> use \code{max(noise_raw, baseline)}}
+\itemize{
+\item \code{"raw"} -> use \code{noise_raw}
+\item \code{"model"} -> use \code{baseline = sum(betas * features)}
+\item \code{"floor"} -> use \code{max(noise_raw, baseline)}
+}}
 }
 \value{
 Named numeric vector with elements:

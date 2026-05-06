@@ -53,7 +53,7 @@
 #' @importFrom BiocParallel bpnworkers MulticoreParam
 #' @importFrom cli cli_abort
 #' @importFrom Biostrings IUPAC_CODE_MAP DNA_BASES vmatchPattern
-#'     reverseComplement DNAString
+#' @importFrom Biostrings reverseComplement DNAString
 #' @importFrom Seqinfo seqlevelsInUse seqnames
 #' @importFrom IRanges resize
 #' @importFrom GenomicRanges start end

@@ -32,7 +32,7 @@
 #' plotReadStats(se)
 #'
 #' @importFrom ggplot2 ggplot aes geom_histogram geom_vline facet_wrap labs
-#'     theme_bw
+#' @importFrom ggplot2 theme_bw
 #' @importFrom tidyr pivot_longer
 #' @importFrom tibble rownames_to_column
 #' @importFrom BiocGenerics as.data.frame colnames
