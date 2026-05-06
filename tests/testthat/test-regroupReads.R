@@ -201,6 +201,19 @@ test_that("read regrouping works", {
     expect_identical(colnames(assay(sere, "mod_prob")[[1]]),
                      paste0("g1-", colnames(as.matrix(assay(se, "mod_prob")))))
 
+    # ... works also if there is no modbase column
+    setmp <- se
+    setmp$modbase <- NULL
+    sere2 <- regroupReadsByColData(setmp, colNames = "group",
+                                   withinSample = FALSE)
+    expect_identical(dim(sere2), c(nrow(setmp), 1L))
+    expect_identical(dim(assay(sere2, "mod_prob")[[1]]), c(nrow(setmp), 5L))
+    expect_identical(colnames(sere2), "g1")
+    expect_identical(colnames(assay(sere2, "mod_prob")[[1]]),
+                     paste0("g1-", colnames(as.matrix(assay(setmp, "mod_prob")))))
+    expect_null(sere2$modbase)
+    expect_identical(assays(sere), assays(sere2))
+
     # group + readInfo column
     sere1 <- regroupReadsByColData(se, colNames = "variant_label",
                                    withinSample = FALSE)

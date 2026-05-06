@@ -82,14 +82,22 @@ regroupReads <- function(se, readGroups) {
     # exclude groups without reads
     readGroups <- readGroups[lengths(readGroups) > 0]
 
-    # check that the modbase is consistent for each read group
-    mbmap <- setNames(
-        rep(se$modbase, vapply(assay(se, rlAssays[1]), ncol, 0L)),
-        unlist(lapply(assay(se, rlAssays[1]), colnames))
-    )
-    modbase <- lapply(readGroups, function(rg) unique(mbmap[rg]))
-    if (any(lengths(modbase) > 1)) {
-        cli_abort("Some read groups correspond to reads with different modbases")
+    # check that the modbase is consistent for each read group if it exists
+    if (!is.null(se$modbase)) {
+        mbmap <- setNames(
+            rep(se$modbase, vapply(assay(se, rlAssays[1]), ncol, 0L)),
+            unlist(lapply(assay(se, rlAssays[1]), colnames))
+        )
+        modbase <- lapply(readGroups, function(rg) unique(mbmap[rg]))
+        if (any(lengths(modbase) > 1)) {
+            cli_abort("Some read groups correspond to reads with different modbases")
+        }
+        cdata <- DataFrame(sample = names(readGroups),
+                           modbase = unlist(modbase),
+                           n_reads = lengths(readGroups))
+    } else {
+        cdata <- DataFrame(sample = names(readGroups),
+                           n_reads = lengths(readGroups))
     }
 
     # generate regrouped assays
@@ -106,9 +114,6 @@ regroupReads <- function(se, readGroups) {
     })
 
     # generate regrouped colData columns
-    cdata <- DataFrame(sample = names(readGroups),
-                       modbase = unlist(modbase),
-                       n_reads = lengths(readGroups))
     for (rlc in rlCols) {
         if (is(colData(se)[[rlc]][[1]], "data.frame") ||
             is(colData(se)[[rlc]][[1]], "DataFrame")) {
