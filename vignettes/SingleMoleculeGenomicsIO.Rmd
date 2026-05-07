@@ -732,12 +732,12 @@ the strand.
 se$readInfo$sample1
 
 # regroup reads by strand, ignoring the sample information
-se_regroup <- regroupReadsByColData(se, colNames = "ref_strand", 
+se_regroup <- regroupReadsByColData(se, colNames = "readInfo::ref_strand", 
                                     withinSample = FALSE)
 colnames(se_regroup)
 
 # regroup reads by strand, within each sample
-se_regroup <- regroupReadsByColData(se, colNames = "ref_strand", 
+se_regroup <- regroupReadsByColData(se, colNames = "readInfo::ref_strand", 
                                     withinSample = TRUE)
 colnames(se_regroup)
 ```
