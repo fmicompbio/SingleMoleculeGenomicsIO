@@ -106,6 +106,11 @@ test_that("validity checks work", {
                  "colnames(assay(se, an, withDimnames = FALSE)) == colnames(se) are not all TRUE", fixed = TRUE)
 
     rme1 <- rme_withreads
+    colnames(SummarizedExperiment::colData(rme1))[2] <- "one:two"
+    expect_error(checkSEValidity(rme1),
+                 "Column names in .colData.se.. can not contain")
+
+    rme1 <- rme_withreads
     rme1$QC[[2]] <- rme1$QC[[2]][1:5, ]
     expect_error(checkSEValidity(rme1),
                  "Mismatching reads for assay mod_prob and colData column QC, sample s2_5mC")
