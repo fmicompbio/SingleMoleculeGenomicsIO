@@ -20,9 +20,12 @@ group of reads (a "sample").}
 \item{colNames}{A character vector corresponding to the names of annotation
 (\code{colData}) columns, the combination of which represent the
 desired grouping of the reads. The names can be either columns of
-\code{colData(se)$readInfo}, or columns in \code{colData(se)} itself.
-If a column name is present in both of these, the column in
-\code{colData(se)$readInfo} will be used.}
+\code{colData(se)} itself, or columns in a nested (read-level)
+annotation column of \code{colData(se)}. In the latter case, the
+\code{colNames} should be of the form \code{outerColName:innerColName},
+where \code{outerColName} is a column name in \code{colData(se)},
+and \code{innerColName} is a column name in each element of
+\code{colData(se)[[outerColName]]}.}
 
 \item{withinSample}{A logical scalar, indicating whether the regrouping
 should be done within each current sample (column of \code{se}) or not.
@@ -63,12 +66,12 @@ lapply(assay(sere, "mod_prob"), ncol)
 
 # regroup by read annotation (variant label)
 # ... across samples
-sere <- regroupReadsByColData(se, colNames = "variant_label",
+sere <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
                               withinSample = FALSE)
 sere
 lapply(assay(sere, "mod_prob"), ncol)
 # ... within sample
-sere <- regroupReadsByColData(se, colNames = "variant_label",
+sere <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
                               withinSample = TRUE)
 sere
 lapply(assay(sere, "mod_prob"), ncol)

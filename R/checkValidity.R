@@ -125,6 +125,9 @@ checkSEValidity <- function(se, verbose = FALSE) {
     for (cn in getReadLevelColDataNames(se)) {
         stopifnot(names(se[[cn]]) == colnames(se))
     }
+    if (any(grepl(":", colnames(colData(se)), fixed = TRUE))) {
+        cli_abort("Column names in {.var colData(se)} can not contain ':'")
+    }
 
     rlAssays <- getReadLevelAssayNames(se)
     if (length(rlAssays) > 0) {

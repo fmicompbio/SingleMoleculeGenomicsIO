@@ -5,3 +5,5 @@
 ^\.github$
 ^_pkgdown.yml$
 ^sandbox$
+^\.positai$
+^\.claude$

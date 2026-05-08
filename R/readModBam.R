@@ -127,7 +127,7 @@
 #' @importFrom Seqinfo seqnames seqlengths seqlengths<-
 #' @importFrom BiocGenerics do.call cbind pos strand sort
 #' @importFrom BiocParallel bplapply MulticoreParam bpnworkers bpworkers<-
-#'     bpoptions
+#' @importFrom BiocParallel bpoptions
 #' @importFrom methods is
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom stats setNames

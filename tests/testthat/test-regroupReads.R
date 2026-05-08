@@ -41,14 +41,25 @@ test_that("read regrouping works", {
                  "must be of class .character.")
     expect_error(regroupReadsByColData(se = se, colNames = "missing", withinSample = TRUE),
                  "must be one of")
-    expect_error(regroupReadsByColData(se = se, colNames = "variant_label",
+    expect_error(regroupReadsByColData(se = se, colNames = "missing:missing",
+                                       withinSample = TRUE),
+                 "must be one of")
+    expect_error(regroupReadsByColData(se = se, colNames = "readInfo:missing",
+                                       withinSample = TRUE),
+                 "must be one of")
+    expect_error(regroupReadsByColData(se = se, colNames = "readInfo:variant_label",
                                        withinSample = 1),
                  "must be of class .logical.")
-    expect_error(regroupReadsByColData(se = se, colNames = "variant_label",
+    expect_error(regroupReadsByColData(se = se, colNames = "readInfo:variant_label",
                                        withinSample = c(TRUE, FALSE)),
                  "must have length 1")
     expect_error(regroupReadsByColData(se = se, colNames = "QC"),
                  "is not atomic and can not be used for read regrouping")
+    expect_error(regroupReadsByColData(se = se, colNames = "QC:PACModProb"),
+                 "is not atomic and can not be used for read regrouping")
+    expect_error(regroupReadsByColData(se = flattenReadLevelAssay(se, keepReads = FALSE),
+                                       colNames = "QC"),
+                 ".se. does not contain any read-level assays")
 
     # regroup reads based on predefined grouping
     sere <- regroupReads(se, readGroups = groups)
@@ -107,7 +118,7 @@ test_that("read regrouping works", {
                  "Some read groups correspond to reads with different modbases")
 
     # regroup by read annotation (variant label), across samples
-    sere <- regroupReadsByColData(se, colNames = "variant_label",
+    sere <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
                                   withinSample = FALSE)
     groups2 <- split(x = rownames(do.call(rbind, se$readInfo)),
                      f = do.call(rbind, se$readInfo)$variant_label)
@@ -126,7 +137,7 @@ test_that("read regrouping works", {
     expect_identical(rowRanges(se), rowRanges(sere))
 
     # ... within sample
-    sere <- regroupReadsByColData(se, colNames = "variant_label",
+    sere <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
                                   withinSample = TRUE)
     groups2 <- split(x = rownames(do.call(rbind, se$readInfo)),
                      f = paste0(rep(colnames(se), se$n_reads), "-",
@@ -147,16 +158,16 @@ test_that("read regrouping works", {
 
     # multiple annotation columns
     se2 <- se
-    se2$readInfo <- lapply(se2$readInfo, function(ri) {
-        ri$label2 <- ri$variant_label
-        ri
-    })
+    for (nm in names(se2$readInfo)) {
+        se2$QC[[nm]]$label2 <- se2$readInfo[[nm]]$variant_label
+    }
     # ... across samples
-    sere <- regroupReadsByColData(se2, colNames = c("variant_label", "label2"),
+    sere <- regroupReadsByColData(se2, colNames = c("readInfo:variant_label",
+                                                    "QC:label2"),
                                   withinSample = FALSE)
     groups2 <- split(x = rownames(do.call(rbind, se2$readInfo)),
                      f = paste0(do.call(rbind, se2$readInfo)$variant_label, "-",
-                                do.call(rbind, se2$readInfo)$label2))
+                                do.call(rbind, se2$QC)$label2))
     expectedOrder2 <- match(
         unlist(groups2, use.names = FALSE),
         unlist(lapply(assay(se2, "mod_prob"), colnames), use.names = FALSE))
@@ -172,12 +183,13 @@ test_that("read regrouping works", {
     expect_identical(rowRanges(se2), rowRanges(sere))
 
     # ... within sample
-    sere <- regroupReadsByColData(se2, colNames = c("variant_label", "label2"),
+    sere <- regroupReadsByColData(se2, colNames = c("readInfo:variant_label",
+                                                    "QC:label2"),
                                   withinSample = TRUE)
     groups2 <- split(x = rownames(do.call(rbind, se$readInfo)),
                      f = paste0(rep(colnames(se), se2$n_reads), "-",
                                 do.call(rbind, se2$readInfo)$variant_label, "-",
-                                do.call(rbind, se2$readInfo)$label2))
+                                do.call(rbind, se2$QC)$label2))
     expectedOrder2 <- match(
         unlist(groups2, use.names = FALSE),
         unlist(lapply(assay(se2, "mod_prob"), colnames), use.names = FALSE))
@@ -201,10 +213,23 @@ test_that("read regrouping works", {
     expect_identical(colnames(assay(sere, "mod_prob")[[1]]),
                      paste0("g1-", colnames(as.matrix(assay(se, "mod_prob")))))
 
-    # group + readInfo column
-    sere1 <- regroupReadsByColData(se, colNames = "variant_label",
+    # ... works also if there is no modbase column
+    setmp <- se
+    setmp$modbase <- NULL
+    sere2 <- regroupReadsByColData(setmp, colNames = "group",
                                    withinSample = FALSE)
-    sere2 <- regroupReadsByColData(se, colNames = c("variant_label", "group"),
+    expect_identical(dim(sere2), c(nrow(setmp), 1L))
+    expect_identical(dim(assay(sere2, "mod_prob")[[1]]), c(nrow(setmp), 5L))
+    expect_identical(colnames(sere2), "g1")
+    expect_identical(colnames(assay(sere2, "mod_prob")[[1]]),
+                     paste0("g1-", colnames(as.matrix(assay(setmp, "mod_prob")))))
+    expect_null(sere2$modbase)
+    expect_identical(assays(sere), assays(sere2))
+
+    # group + readInfo column
+    sere1 <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
+                                   withinSample = FALSE)
+    sere2 <- regroupReadsByColData(se, colNames = c("readInfo:variant_label", "group"),
                                    withinSample = FALSE)
     expect_identical(dim(sere1), dim(sere2))
     expect_identical(colnames(sere1), c("G-", "GT"))

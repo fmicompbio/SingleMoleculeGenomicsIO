@@ -1,3 +1,9 @@
+# SingleMoleculeGenomicsIO 0.1.5
+
+* Breaking change: Require specification of column names for read regrouping by to include the name of the nested `colData` column where they should be found
+* Do not allow column names in `colData(se)` containing ':'
+* Add `addReadLevelAssay` function to simplify addition of read-level assays to a `SummarizedExperiment` object
+
 # SingleMoleculeGenomicsIO 0.1.4
 
 * Bug fix in padding of extracted sequence context for regions on the minus strand

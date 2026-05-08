@@ -96,9 +96,9 @@
 #' @importFrom Seqinfo seqnames seqlengths seqlengths<- seqlevelsInUse
 #' @importFrom BiocGenerics do.call cbind pos strand sort
 #' @importFrom BiocParallel bplapply MulticoreParam bpnworkers bpworkers<-
-#'     bpoptions
+#' @importFrom BiocParallel bpoptions
 #' @importFrom Biostrings DNAString DNA_BASES
-#'     IUPAC_CODE_MAP vmatchPattern reverseComplement
+#' @importFrom Biostrings IUPAC_CODE_MAP vmatchPattern reverseComplement
 #' @importFrom BSgenome getSeq
 #' @importFrom methods is
 #' @importFrom cli cli_abort cli_warn
