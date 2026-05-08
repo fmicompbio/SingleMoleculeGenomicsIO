@@ -103,7 +103,8 @@ countStatePairs(
 
 ## Value
 
-A `DataFrame` with `windowSize` rows and five columns.
+A `DataFrame` with `windowSize` rows and five columns. The `metadata`
+slot contains header information from `bamfile`.
 
 ## Author
 

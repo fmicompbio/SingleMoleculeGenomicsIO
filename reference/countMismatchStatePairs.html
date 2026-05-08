@@ -9,7 +9,7 @@ number of pairs at a given distance with a given modification state."></head><bo
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -173,7 +173,8 @@ for reproducible results (see also
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>DataFrame</code> with <code>windowSize</code> rows and five columns.</p>
+    <p>A <code>DataFrame</code> with <code>windowSize</code> rows and five columns.
+The <code>metadata</code> slot contains header information from <code>bamfile</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -204,8 +205,10 @@ for reproducible results (see also
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> read 184 alignments</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding positions with C
 </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding positions with C <span style="color: #B2B2B2;">[73ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding positions with C <span style="color: #B2B2B2;">[88ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [4ms]
+</span>
 <span class="r-in"><span><span class="va">tbl</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 200 rows and 5 columns</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             S unmod_unmod unmod_mod mod_unmod   mod_mod</span>

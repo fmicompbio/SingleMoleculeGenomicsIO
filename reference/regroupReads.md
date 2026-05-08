@@ -31,9 +31,11 @@ regroupReadsByColData(se, colNames, withinSample = FALSE)
   A character vector corresponding to the names of annotation
   (`colData`) columns, the combination of which represent the desired
   grouping of the reads. The names can be either columns of
-  `colData(se)$readInfo`, or columns in `colData(se)` itself. If a
-  column name is present in both of these, the column in
-  `colData(se)$readInfo` will be used.
+  `colData(se)` itself, or columns in a nested (read-level) annotation
+  column of `colData(se)`. In the latter case, the `colNames` should be
+  of the form `outerColName:innerColName`, where `outerColName` is a
+  column name in `colData(se)`, and `innerColName` is a column name in
+  each element of `colData(se)[[outerColName]]`.
 
 - withinSample:
 
@@ -67,41 +69,46 @@ se <- readModBam(bamfiles = modbamfiles, regions = "chr1:6940000-6955000",
                                          pos = c(6940000, 6940500)),
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ reading alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ removed 1724 unaligned (e.g. soft-masked) of 25090 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ read 3 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ reading alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
+#> ⠙   1 done (191/s) | 6ms
+#> ⠙   1 done (60/s) | 17ms
+#> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ removed 320 unaligned (e.g. soft-masked) of 10174 called bases
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ read 2 alignments
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [23ms]
+#> ✔ finding unique genomic positions... [52ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [154ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [317ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 # number of reads per sample
 lapply(assay(se, "mod_prob"), ncol)
@@ -132,12 +139,12 @@ lapply(assay(sere, "mod_prob"), ncol)
 
 # regroup by read annotation (variant label)
 # ... across samples
-sere <- regroupReadsByColData(se, colNames = "variant_label",
+sere <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
                               withinSample = FALSE)
 sere
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
-#> metadata(3): readLevelData variantPositions filteredOutReads
+#> metadata(4): readLevelData variantPositions bamHeader filteredOutReads
 #> assays(1): mod_prob
 #> rownames: NULL
 #> rowData names(0):
@@ -151,12 +158,12 @@ lapply(assay(sere, "mod_prob"), ncol)
 #> [1] 2
 #> 
 # ... within sample
-sere <- regroupReadsByColData(se, colNames = "variant_label",
+sere <- regroupReadsByColData(se, colNames = "readInfo:variant_label",
                               withinSample = TRUE)
 sere
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 3 
-#> metadata(3): readLevelData variantPositions filteredOutReads
+#> metadata(4): readLevelData variantPositions bamHeader filteredOutReads
 #> assays(1): mod_prob
 #> rownames: NULL
 #> rowData names(0):

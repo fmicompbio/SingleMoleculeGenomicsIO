@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,9 +64,12 @@ group of reads (a "sample").</p></dd>
 <dd><p>A character vector corresponding to the names of annotation
 (<code>colData</code>) columns, the combination of which represent the
 desired grouping of the reads. The names can be either columns of
-<code>colData(se)$readInfo</code>, or columns in <code>colData(se)</code> itself.
-If a column name is present in both of these, the column in
-<code>colData(se)$readInfo</code> will be used.</p></dd>
+<code>colData(se)</code> itself, or columns in a nested (read-level)
+annotation column of <code>colData(se)</code>. In the latter case, the
+<code>colNames</code> should be of the form <code>outerColName:innerColName</code>,
+where <code>outerColName</code> is a column name in <code>colData(se)</code>,
+and <code>innerColName</code> is a column name in each element of
+<code>colData(se)[[outerColName]]</code>.</p></dd>
 
 
 <dt id="arg-withinsample">withinSample<a class="anchor" aria-label="anchor" href="#arg-withinsample"></a></dt>
@@ -101,41 +104,46 @@ no longer consistent with the regrouped read-level assays).</p>
 <span class="r-in"><span>                                         pos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6940000</span>, <span class="fl">6940500</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 BPPARAM <span class="op">=</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SerialParam-class.html" class="external-link">SerialParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam</span> using 1 thread</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading alignments</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> removed 1724 unaligned (e.g. soft-masked) of 25090 called bases</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> read 3 alignments</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> opening input file <span style="color: #0000BB;">/Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam</span> using 1 thread</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading alignments</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙   1 done (191/s) | 6ms</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙   1 done (60/s) | 17ms</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> removed 320 unaligned (e.g. soft-masked) of 10174 called bases</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> read 2 alignments</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[23ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[52ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> collapsed 17739 positions to 7967 unique ones</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[154ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 17739 positions to 7967 unique ones <span style="color: #B2B2B2;">[317ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 </span>
 <span class="r-in"><span><span class="co"># number of reads per sample</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"mod_prob"</span><span class="op">)</span>, <span class="va">ncol</span><span class="op">)</span></span></span>
@@ -166,12 +174,12 @@ no longer consistent with the regrouped read-level assays).</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># regroup by read annotation (variant label)</span></span></span>
 <span class="r-in"><span><span class="co"># ... across samples</span></span></span>
-<span class="r-in"><span><span class="va">sere</span> <span class="op">&lt;-</span> <span class="fu">regroupReadsByColData</span><span class="op">(</span><span class="va">se</span>, colNames <span class="op">=</span> <span class="st">"variant_label"</span>,</span></span>
+<span class="r-in"><span><span class="va">sere</span> <span class="op">&lt;-</span> <span class="fu">regroupReadsByColData</span><span class="op">(</span><span class="va">se</span>, colNames <span class="op">=</span> <span class="st">"readInfo:variant_label"</span>,</span></span>
 <span class="r-in"><span>                              withinSample <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sere</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: RangedSummarizedExperiment </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dim: 7967 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(3): readLevelData variantPositions filteredOutReads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(4): readLevelData variantPositions bamHeader filteredOutReads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): mod_prob</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rownames: NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(0):</span>
@@ -185,12 +193,12 @@ no longer consistent with the regrouped read-level assays).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="co"># ... within sample</span></span></span>
-<span class="r-in"><span><span class="va">sere</span> <span class="op">&lt;-</span> <span class="fu">regroupReadsByColData</span><span class="op">(</span><span class="va">se</span>, colNames <span class="op">=</span> <span class="st">"variant_label"</span>,</span></span>
+<span class="r-in"><span><span class="va">sere</span> <span class="op">&lt;-</span> <span class="fu">regroupReadsByColData</span><span class="op">(</span><span class="va">se</span>, colNames <span class="op">=</span> <span class="st">"readInfo:variant_label"</span>,</span></span>
 <span class="r-in"><span>                              withinSample <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sere</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: RangedSummarizedExperiment </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dim: 7967 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(3): readLevelData variantPositions filteredOutReads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(4): readLevelData variantPositions bamHeader filteredOutReads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): mod_prob</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rownames: NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(0):</span>

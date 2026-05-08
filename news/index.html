@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,21 @@
       <small>Source: <a href="https://github.com/fmicompbio/SingleMoleculeGenomicsIO/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.5" id="singlemoleculegenomicsio-015">SingleMoleculeGenomicsIO 0.1.5<a class="anchor" aria-label="anchor" href="#singlemoleculegenomicsio-015"></a></h2>
+<ul><li>Breaking change: Require specification of column names for read regrouping by to include the name of the nested <code>colData</code> column where they should be found</li>
+<li>Do not allow column names in <code>colData(se)</code> containing ‘:’</li>
+<li>Add <code>addReadLevelAssay</code> function to simplify addition of read-level assays to a <code>SummarizedExperiment</code> object</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.4" id="singlemoleculegenomicsio-014">SingleMoleculeGenomicsIO 0.1.4<a class="anchor" aria-label="anchor" href="#singlemoleculegenomicsio-014"></a></h2>
+<ul><li>Bug fix in padding of extracted sequence context for regions on the minus strand</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.3" id="singlemoleculegenomicsio-013">SingleMoleculeGenomicsIO 0.1.3<a class="anchor" aria-label="anchor" href="#singlemoleculegenomicsio-013"></a></h2>
+<ul><li>Return bam header information in the metadata of results from <code>readModBam</code>, <code>readMismatchBam</code>, <code>countStatePairs</code> and <code>countMismatchStatePairs</code>
+</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="singlemoleculegenomicsio-012">SingleMoleculeGenomicsIO 0.1.2<a class="anchor" aria-label="anchor" href="#singlemoleculegenomicsio-012"></a></h2>
 <ul><li>Remove <code>removeAllNAReads</code> function (move to <code>footprintR</code>)</li>

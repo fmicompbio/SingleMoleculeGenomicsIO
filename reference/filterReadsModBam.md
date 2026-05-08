@@ -163,11 +163,23 @@ res <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
                          minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
                          BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
 #> ℹ merging 1 filtered chunks
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
 #> ℹ done filtering: retained 6 of 10 records (60%)
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
 #> ℹ merging 1 filtered chunks
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
 #> ℹ done filtering: retained 7 of 10 records (70%)
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+
 res
 #>   sample
 #> 1     s1
@@ -176,8 +188,8 @@ res
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #> 2 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//Rtmplw6ni1/file72cc1e768a33.bam
-#> 2 /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//Rtmplw6ni1/file72cc786b29e4.bam
+#> 1  /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//RtmpnaRnfm/file90589a8a73a.bam
+#> 2 /var/folders/tb/y368xp_x10s3ty1b_mtl5mxr0000gn/T//RtmpnaRnfm/file90581f7ad5ca.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        6                 0                  0                      0
 #> 2    10        7                 0                  0                      0

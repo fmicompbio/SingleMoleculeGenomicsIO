@@ -44,10 +44,13 @@ estimateSNR(totalVar, noiseRaw, eps, betas, features, noise_mode = "floor")
 
 - noise_mode:
 
-  Character scalar: one of `"raw"`, `"model"`, `"floor"`. - `"raw"` -\>
-  use `noise_raw` - `"model"` -\> use
-  `baseline = sum(betas * features)` - `"floor"` -\> use
-  `max(noise_raw, baseline)`
+  Character scalar: one of `"raw"`, `"model"`, `"floor"`.
+
+  - `"raw"` -\> use `noise_raw`
+
+  - `"model"` -\> use `baseline = sum(betas * features)`
+
+  - `"floor"` -\> use `max(noise_raw, baseline)`
 
 ## Value
 

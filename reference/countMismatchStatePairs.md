@@ -140,7 +140,8 @@ countMismatchStatePairs(
 
 ## Value
 
-A `DataFrame` with `windowSize` rows and five columns.
+A `DataFrame` with `windowSize` rows and five columns. The `metadata`
+slot contains header information from `bamfile`.
 
 ## Author
 
@@ -171,8 +172,10 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
 
-#> ✔ finding positions with C [73ms]
+#> ✔ finding positions with C [88ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [4ms]
+
 tbl
 #> DataFrame with 200 rows and 5 columns
 #>             S unmod_unmod unmod_mod mod_unmod   mod_mod

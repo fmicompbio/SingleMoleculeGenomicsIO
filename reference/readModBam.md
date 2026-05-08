@@ -206,21 +206,21 @@ readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
            modbase = "a", verbose = TRUE,
            BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [18ms]
+#> ✔ finding unique genomic positions... [30ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [97ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [154ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> class: RangedSummarizedExperiment 
 #> dim: 4772 1 
-#> metadata(3): readLevelData variantPositions filteredOutReads
+#> metadata(4): readLevelData variantPositions bamHeader filteredOutReads
 #> assays(1): mod_prob
 #> rownames: NULL
 #> rowData names(0):

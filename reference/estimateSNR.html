@@ -21,7 +21,7 @@ baseline = sum_i beta[i] * feat[i]."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,10 +89,10 @@ For example, for \(baseline = b0 + b1 * mean\), use
 
 
 <dt id="arg-noise-mode">noise_mode<a class="anchor" aria-label="anchor" href="#arg-noise-mode"></a></dt>
-<dd><p>Character scalar: one of <code>"raw"</code>, <code>"model"</code>, <code>"floor"</code>.
-- <code>"raw"</code> -&gt; use <code>noise_raw</code>
-- <code>"model"</code> -&gt; use <code>baseline = sum(betas * features)</code>
-- <code>"floor"</code> -&gt; use <code>max(noise_raw, baseline)</code></p></dd>
+<dd><p>Character scalar: one of <code>"raw"</code>, <code>"model"</code>, <code>"floor"</code>.</p><ul><li><p><code>"raw"</code> -&gt; use <code>noise_raw</code></p></li>
+<li><p><code>"model"</code> -&gt; use <code>baseline = sum(betas * features)</code></p></li>
+<li><p><code>"floor"</code> -&gt; use <code>max(noise_raw, baseline)</code></p></li>
+</ul></dd>
 
 </dl></div>
     <div class="section level2">

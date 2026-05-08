@@ -2,6 +2,9 @@
 
 ## All functions
 
+- [`addReadLevelAssay()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/addReadLevelAssay.md)
+  : Add a read-level assay to a SummarizedExperiment object
+
 - [`addSeqContext()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/addSeqContext.md)
   : Add sequence context around positions of interest to a
   SummarizedExperiment
