@@ -272,7 +272,7 @@ readModkitExtract <- function(fnames,
         metadata = list(modkit_threshold = modkit_threshold,
                         filter_threshold = filter_threshold,
                         readLevelData = list(assayNames = "mod_prob",
-                                             colDataColumns = character(0)))
+                                             colDataColumns = "readInfo"))
     )
     colnames(se) <- rownames(colData(se))
 
