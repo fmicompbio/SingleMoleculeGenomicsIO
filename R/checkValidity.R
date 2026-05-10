@@ -169,27 +169,26 @@ checkSEValidity <- function(se, verbose = FALSE) {
     }
 
     rlAssays <- getReadLevelAssayNames(se)
-    if (length(rlAssays) > 0) {
-        .message("Read-level assay found")
-        ## Choose one assay as the reference to compare to
-        refAssay <- rlAssays[1]
-        refReads <- lapply(assay(se, refAssay), colnames)
-        for (an in setdiff(rlAssays, refAssay)) {
-            .message("Comparing {refAssay} and {an}")
+    rlColNames <- getReadLevelColDataNames(se)
+    if (length(rlAssays) > 0 || length(rlColNames) > 0) {
+        .message("Read-level assay or colData column found")
+        refReads <- getReadNamesBySample(se)
+        for (an in rlAssays) {
+            .message("Comparing {attr(refReads, 'source')} and colnames of {an}")
             for (sn in colnames(se)) {
                 if (!all(colnames(assay(se, an)[[sn]]) == refReads[[sn]])) {
                     cli_abort(paste0(
-                        "Mismatching reads for assays {refAssay} and {an}, ",
-                        "sample {sn}"))
+                        "Mismatching reads for {attr(refReads, 'source')} and ",
+                        "{an}, sample {sn}"))
                 }
             }
         }
         for (cn in getReadLevelColDataNames(se)) {
-            .message("Read-level column data found, checking consistency")
+            .message("Comparing {attr(refReads, 'source')} and rownames of {cn}")
             for (sn in colnames(se)) {
                 if (!all(rownames(se[[cn]][[sn]]) == refReads[[sn]])) {
                     cli_abort(paste0(
-                        "Mismatching reads for assay {refAssay} and ",
+                        "Mismatching reads for {attr(refReads, 'source')} and ",
                          "colData column {cn}, sample {sn}"))
                 }
             }
