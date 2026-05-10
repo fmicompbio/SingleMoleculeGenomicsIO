@@ -24,6 +24,23 @@ test_that("validity checks work", {
     expect_identical(getReadLevelAssayNames(rme_withreads), "mod_prob")
     expect_identical(getReadLevelAssayNames(rme_withoutreads), character(0))
 
+    ## Test getReadNamesBySample
+    expect_identical(getReadNamesBySample(rme_withreads),
+                     structure(
+                         list(s1_5mC = colnames(assay(rme_withreads, "mod_prob")[[1]]),
+                              s2_5mC = colnames(assay(rme_withreads, "mod_prob")[[2]]),
+                              s1_6mA = colnames(assay(rme_withreads, "mod_prob")[[3]])),
+                         source = "assay mod_prob"))
+    expect_equal(getReadNamesBySample(rme_withreads),
+                 getReadNamesBySample(rme_withoutreads),
+                 ignore_attr = TRUE)
+    expect_identical(lengths(getReadNamesBySample(rme_withreads)),
+                     c(s1_5mC = 10L, s2_5mC = 10L, s1_6mA = 10L))
+    tmp <- rme_withoutreads
+    tmp$QC <- tmp$readInfo <- NULL
+    expect_error(getReadNamesBySample(tmp),
+                 "does not contain any read-level assays or colData columns")
+
     ## Test checkSEValidity
     expect_no_error(checkSEValidity(rme_withreads))
     expect_no_error(checkSEValidity(rme_withoutreads))

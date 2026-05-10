@@ -24,6 +24,7 @@
 #'
 #' @importFrom SummarizedExperiment assayNames
 getReadLevelAssayNames <- function(se) {
+    .assertVector(x = se, type = "SummarizedExperiment")
     intersect(metadata(se)$readLevelData$assayNames,
               assayNames(se))
 }
@@ -56,8 +57,46 @@ getReadLevelAssayNames <- function(se) {
 #' @importFrom BiocGenerics colnames
 #' @importFrom S4Vectors metadata
 getReadLevelColDataNames <- function(se) {
+    .assertVector(x = se, type = "SummarizedExperiment")
     intersect(metadata(se)$readLevelData$colDataColumns,
               colnames(colData(se)))
+}
+
+#' Get list of read names by sample from SummarizedExperiment object
+#'
+#' @param se A \code{\link[SummarizedExperiment]{SummarizedExperiment}} object.
+#'
+#' @export
+#' @author Charlotte Soneson
+#'
+#' @returns A named list with one entry per sample, containing the read names
+#' for the respective sample.
+#'
+#' @examples
+#' extractfiles <- system.file("extdata",
+#'                             c("modkit_extract_rc_6mA_1.tsv.gz",
+#'                               "modkit_extract_rc_6mA_2.tsv.gz"),
+#'                             package = "SingleMoleculeGenomicsIO")
+#' se <- readModkitExtract(extractfiles, modbase = "a", filter = "modkit",
+#'                         BPPARAM = BiocParallel::SerialParam())
+#' getReadNamesBySample(se)
+#'
+#' @importFrom SummarizedExperiment assay colData
+#' @importFrom cli cli_abort
+getReadNamesBySample <- function(se) {
+    .assertVector(x = se, type = "SummarizedExperiment")
+    rlAssays <- getReadLevelAssayNames(se)
+    rlColNames <- getReadLevelColDataNames(se)
+    if (length(rlAssays) > 0) {
+        readsBySample <- lapply(assay(se, rlAssays[1]), colnames)
+        attr(readsBySample, "source") <- paste0("assay ", rlAssays[1])
+    } else if (length(rlColNames) > 0) {
+        readsBySample <- lapply(colData(se)[[rlColNames[1]]], rownames)
+        attr(readsBySample, "source") <- paste0("colData column ", rlColNames[1])
+    } else {
+        cli_abort("{.arg se} does not contain any read-level assays or colData columns")
+    }
+    return(readsBySample)
 }
 
 #' Check internal consistency of SummarizedExperiment object
