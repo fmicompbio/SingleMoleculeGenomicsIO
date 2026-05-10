@@ -6,7 +6,7 @@ test_that("extractColDataColumns works", {
     se <- readModkitExtract(extractfiles, modbase = "a", filter = "modkit",
                             BPPARAM = BiocParallel::SerialParam())
     suppressWarnings({
-        se <- addReadStats(se, name = "QC")
+        se <- addReadStats(se, name = "QC", BPPARAM = BiocParallel::SerialParam())
     })
 
     expect_error(extractColDataColumns(se = 1, colNames = "modbase"),
