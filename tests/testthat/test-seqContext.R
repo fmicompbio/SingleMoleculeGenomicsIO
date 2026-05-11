@@ -31,6 +31,11 @@ test_that("extractSeqContext works", {
         ranges = IRanges::IRanges(start = 1 + c(0, 2, 4, 8),
                                   width = 3, names = c("a", "b", "c", "d")),
         strand = "+")
+    # regions not overlapping with data range
+    regions_wrong <- GenomicRanges::GRanges(
+        seqnames = "chr2",
+        ranges = IRanges::IRanges(start = 6957060 - c(4, 2, 0),
+                                  width = 1, names = c("x", "y", "z")))
     se <- SummarizedExperiment(assays = matrix(1:3, ncol = 1), rowRanges = regions)
 
     # invalid arguments
@@ -39,6 +44,10 @@ test_that("extractSeqContext works", {
     expect_error(extractSeqContext(x = regions, sequenceContextWidth = "error"))
     expect_error(extractSeqContext(x = regions, sequenceContextWidth = 7))
     expect_error(extractSeqContext(x = regions, sequenceContextWidth = 7, sequenceReference = "error"))
+    expect_error(extractSeqContext(x = regions_wrong, sequenceContextWidth = 3,
+                                   sequenceReference = ref),
+                 "Not all chromosome names from .x. are present")
+
 
     # expected results
     expect_warning(s1 <- extractSeqContext(x = regions, sequenceContextWidth = 6, sequenceReference = ref))

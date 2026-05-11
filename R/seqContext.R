@@ -79,6 +79,13 @@ extractSeqContext <- function(x,
     # resize x
     xcontext <- resize(x, width = sequenceContextWidth, fix = "center")
 
+    # check that all seqnames of xcontext are also present in ref
+    # (to avoid NAs below)
+    seqnames_missing <- setdiff(as.character(seqnames(xcontext)), names(seqlengths(ref)))
+    if (length(seqnames_missing) > 0) {
+        cli_abort("Not all chromosome names from {.arg x} are present in {.arg sequenceReference} ({seqnames_missing})")
+    }
+
     # extract sequences
     Nleft <- pmax(0L, 1L - start(xcontext))
     Nright <- pmax(0L, end(xcontext) - seqlengths(ref)[as.character(seqnames(xcontext))])
