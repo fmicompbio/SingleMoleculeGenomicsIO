@@ -54,9 +54,9 @@ test_that("read regrouping works", {
                                        withinSample = c(TRUE, FALSE)),
                  "must have length 1")
     expect_error(regroupReadsByColData(se = se, colNames = "QC"),
-                 "is not atomic and can not be used for read regrouping")
+                 "is not atomic")
     expect_error(regroupReadsByColData(se = se, colNames = "QC:PACModProb"),
-                 "is not atomic and can not be used for read regrouping")
+                 "is not atomic")
     expect_error(regroupReadsByColData(se = flattenReadLevelAssay(se, keepReads = FALSE),
                                        colNames = "QC"),
                  ".se. does not contain any read-level assays")

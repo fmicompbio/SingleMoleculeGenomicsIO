@@ -3,6 +3,7 @@
 * Breaking change: Require specification of column names for read regrouping by to include the name of the nested `colData` column where they should be found
 * Do not allow column names in `colData(se)` containing ':'
 * Add `addReadLevelAssay` function to simplify addition of read-level assays to a `SummarizedExperiment` object
+* Add `extractColDataColumns` and `getReadNamesBySample` utility functions
 
 # SingleMoleculeGenomicsIO 0.1.4
 

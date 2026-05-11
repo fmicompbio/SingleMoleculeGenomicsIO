@@ -12,6 +12,10 @@
 #' @export
 #' @author Charlotte Soneson
 #'
+#' @returns
+#' A \code{\link[SummarizedExperiment]{SummarizedExperiment}} object with the
+#' new read-level assay added.
+#'
 #' @examples
 #' library(SummarizedExperiment)
 #' library(S4Vectors)

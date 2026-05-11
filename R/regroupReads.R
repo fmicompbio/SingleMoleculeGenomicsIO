@@ -176,58 +176,21 @@ regroupReadsByColData <- function(se, colNames, withinSample = FALSE) {
     if (length(rlAssays) == 0) {
         cli_abort("{.arg se} does not contain any read-level assays")
     }
-    .assertVector(x = colNames, type = "character")
-    colNamesTopLevel <- colNames[!grepl(":", colNames, fixed = TRUE)]
-    colNamesNested <- colNames[grepl(":", colNames, fixed = TRUE)]
-    matches <- regexec("^([^:]+):(.+)$", colNamesNested)
-    tmp <- regmatches(colNamesNested, matches)
-    colNamesNested <- setNames(vapply(tmp, "[", 3, FUN.VALUE = ""),
-                               vapply(tmp, "[", 2, FUN.VALUE = ""))
-    for (cn in colNamesTopLevel) {
-        .assertScalar(x = cn, type = "character", validValues = colnames(colData(se)))
-    }
-    for (i in seq_along(colNamesNested)) {
-        .assertScalar(x = names(colNamesNested)[i],
-                      type = "character", validValues = getReadLevelColDataNames(se))
-        .assertScalar(x = colNamesNested[i], type = "character",
-                      validValues = colnames(se[[names(colNamesNested)[i]]][[1]]))
-    }
     .assertScalar(x = withinSample, type = "logical")
 
-    nReadsPerSample <- vapply(assay(se, rlAssays[1]), ncol, 0L)
-    readInfo <- data.frame(
-        sample = rep(se$sample, nReadsPerSample),
-        read_id = unlist(lapply(assay(se, rlAssays[1]), colnames))
+    readInfo <- extractColDataColumns(
+        se = se, colNames = colNames, alignWith = "read"
     )
-    for (i in seq_along(colNamesNested)) {
-        if (!is.atomic(se[[names(colNamesNested)[i]]][[1]][[colNamesNested[i]]])) {
-            cli_abort("The {.var {names(colNamesNested)[i]}:{colNamesNested[i]}} column is not atomic and can not be used for read regrouping")
-        }
-        tmp <- unlist(lapply(se[[names(colNamesNested)[i]]], "[[", colNamesNested[i]))
-        readInfo[[paste0(names(colNamesNested)[i], "_", colNamesNested[i])]] <- tmp
-    }
-    # additional columns from colData(se)
-    for (m in colNamesTopLevel) {
-        if (!is.atomic(se[[m]])) {
-            cli_abort("The {.var {m}} column is not atomic and can not be used for read regrouping")
-        }
-        readInfo[[m]] <- rep(se[[m]], nReadsPerSample)
-    }
+
     # generate read groups
     if (withinSample) {
-        readGroups <- split(x = readInfo$read_id,
+        readGroups <- split(x = readInfo$read,
                             f = apply(readInfo[, c("sample",
-                                                   paste0(names(colNamesNested),
-                                                          rep("_", length(colNamesNested)),
-                                                          colNamesNested),
-                                                   colNamesTopLevel), drop = FALSE],
+                                                   make.names(colNames)), drop = FALSE],
                                       1, paste, collapse = "-"))
     } else {
-        readGroups <- split(x = readInfo$read_id,
-                            f = apply(readInfo[, c(paste0(names(colNamesNested),
-                                                          rep("_", length(colNamesNested)),
-                                                          colNamesNested),
-                                                   colNamesTopLevel), drop = FALSE],
+        readGroups <- split(x = readInfo$read,
+                            f = apply(readInfo[, make.names(colNames), drop = FALSE],
                                       1, paste, collapse = "-"))
     }
     regroupReads(se = se, readGroups = readGroups)

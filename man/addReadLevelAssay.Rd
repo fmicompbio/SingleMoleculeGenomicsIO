@@ -26,6 +26,10 @@ existing assay with the same name or not.}
 
 \item{verbose}{Logical scalar. If \code{TRUE}, report on progress.}
 }
+\value{
+A \code{\link[SummarizedExperiment]{SummarizedExperiment}} object with the
+new read-level assay added.
+}
 \description{
 Add a read-level assay to a SummarizedExperiment object
 }
