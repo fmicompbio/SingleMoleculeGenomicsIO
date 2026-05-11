@@ -172,9 +172,9 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
 
-#> ✔ finding positions with C [88ms]
+#> ✔ finding positions with C [64ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.000 Mio./s) [4ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
 tbl
 #> DataFrame with 200 rows and 5 columns

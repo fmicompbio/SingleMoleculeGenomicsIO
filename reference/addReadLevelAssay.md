@@ -44,6 +44,12 @@ addReadLevelAssay(
 
   Logical scalar. If `TRUE`, report on progress.
 
+## Value
+
+A
+[`SummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
+object with the new read-level assay added.
+
 ## Author
 
 Charlotte Soneson
@@ -129,10 +135,10 @@ se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [73ms]
+#> ✔ finding unique genomic positions... [47ms]
 #> 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [333ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [244ms]
 #> 
 # duplicate the 'mod_prob' assay into a new assay named 'new_assay'
 se <- addReadLevelAssay(se, assayDF = assay(se, "mod_prob"),

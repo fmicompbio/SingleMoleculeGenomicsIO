@@ -17,6 +17,7 @@
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/estimateNoise.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/estimateSNR.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/expandSEToBaseSpace.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractColDataColumns.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractSeqContext.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterPositions.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/filterReads.html</loc></url>
@@ -24,6 +25,7 @@
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/flattenReadLevelAssay.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelAssayNames.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelColDataNames.html</loc></url>
+<url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadNamesBySample.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/index.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/plotReadStats.html</loc></url>
 <url><loc>https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/readBedMethyl.html</loc></url>

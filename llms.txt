@@ -68,6 +68,10 @@ Current contributors include:
   Expand the rows of a `RangedSummarizedExperiment` to single base
   resolution.
 
+- [`extractColDataColumns()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractColDataColumns.md)
+  : Extract one or more (possibly nested) columns from the colData of a
+  SummarizedExperiment object
+
 - [`extractSeqContext()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/extractSeqContext.md)
   : Extract the sequence context around positions of interest
 
@@ -91,6 +95,9 @@ Current contributors include:
 
 - [`getReadLevelColDataNames()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelColDataNames.md)
   : Get names of colData columns containing read-level data
+
+- [`getReadNamesBySample()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadNamesBySample.md)
+  : Get list of read names by sample from SummarizedExperiment object
 
 - [`plotReadStats()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/plotReadStats.md)
   : Plot distribution of QC statistics
