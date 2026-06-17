@@ -60,6 +60,7 @@ Charlotte Soneson
 library(SummarizedExperiment)
 #> Loading required package: MatrixGenerics
 #> Loading required package: matrixStats
+#> Warning: package ‘matrixStats’ was built under R version 4.7.0
 #> 
 #> Attaching package: ‘MatrixGenerics’
 #> The following objects are masked from ‘package:matrixStats’:
@@ -83,6 +84,7 @@ library(SummarizedExperiment)
 #> Loading required package: stats4
 #> Loading required package: BiocGenerics
 #> Loading required package: generics
+#> Warning: package ‘generics’ was built under R version 4.7.0
 #> 
 #> Attaching package: ‘generics’
 #> The following objects are masked from ‘package:base’:
@@ -94,14 +96,17 @@ library(SummarizedExperiment)
 #> The following objects are masked from ‘package:stats’:
 #> 
 #>     IQR, mad, sd, var, xtabs
+#> The following object is masked from ‘package:utils’:
+#> 
+#>     data
 #> The following objects are masked from ‘package:base’:
 #> 
 #>     Filter, Find, Map, Position, Reduce, anyDuplicated, aperm, append,
 #>     as.data.frame, basename, cbind, colnames, dirname, do.call,
 #>     duplicated, eval, evalq, get, grep, grepl, is.unsorted, lapply,
 #>     mapply, match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
-#>     rank, rbind, rownames, sapply, saveRDS, table, tapply, unique,
-#>     unsplit, which.max, which.min
+#>     rank, rbind, rownames, sapply, saveRDS, scale, sequence, table,
+#>     tapply, transform, unique, unsplit, which.max, which.min
 #> Loading required package: S4Vectors
 #> 
 #> Attaching package: ‘S4Vectors’
@@ -135,10 +140,10 @@ se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [47ms]
+#> ✔ finding unique genomic positions... [43ms]
 #> 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [244ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [329ms]
 #> 
 # duplicate the 'mod_prob' assay into a new assay named 'new_assay'
 se <- addReadLevelAssay(se, assayDF = assay(se, "mod_prob"),

@@ -148,16 +148,16 @@ se <- readModBam(bamfile = modbamfile, regions = "chr1:6920000-6995000",
 #> ℹ extracting base modifications from modBAM files
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [20ms]
+#> ✔ finding unique genomic positions... [45ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ collapsed 29545 positions to 8439 unique ones
-#> ✔ collapsed 29545 positions to 8439 unique ones [117ms]
+#> ✔ collapsed 29545 positions to 8439 unique ones [219ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 se <- addReadStats(se, name = "QC",
                    BPPARAM = BiocParallel::SerialParam())
@@ -190,7 +190,10 @@ if (require(SimpleUpset)) {
     SimpleUpset::simpleUpSet(as.data.frame(filtstats$s1))
 }
 #> Loading required package: SimpleUpset
+#> Warning: package ‘SimpleUpset’ was built under R version 4.7.0
 #> Loading required package: ggplot2
+#> Warning: package ‘ggplot2’ was built under R version 4.7.0
 #> Loading required package: patchwork
+#> Warning: package ‘patchwork’ was built under R version 4.7.0
 
 ```
