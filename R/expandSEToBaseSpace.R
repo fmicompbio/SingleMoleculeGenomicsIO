@@ -24,7 +24,7 @@
 #' @importFrom GenomicRanges GPos
 #' @importFrom utils modifyList
 #' @importFrom cli cli_abort
-#' @importFrom BiocGenerics start end ncol colnames unstrand
+#' @importFrom BiocGenerics start end nrow ncol colnames unstrand
 #' @importFrom SparseArray NaArray nnawhich
 #'
 #' @return A single-base resolution \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
@@ -57,10 +57,6 @@ expandSEToBaseSpace <- function(se,
         region <- range(rowRanges(se), ignore.strand = TRUE)
     }
     .assertVector(x = region, type = "GRanges")
-    if (countOverlaps(query = range(unstrand(rowRanges(se))),
-                      subject = region, type = "within") == 0L) {
-        cli_abort("Not all positions in {.arg se} are within {.arg region}")
-    }
     .assertVector(x = keepAssays, type = "character",
                   validValues = getReadLevelAssayNames(se))
     .assertScalar(x = ignore.strand, type = "logical", validValues = TRUE)
@@ -70,35 +66,50 @@ expandSEToBaseSpace <- function(se,
     md$readLevelData <- modifyList(x = md$readLevelData,
                                    val = list(assayNames = keepAssays))
 
-    # create base-resolution rowRanges
-    if (ignore.strand) {
-        rr <- GPos(seqnames = seqnames(region)[1],
-                   pos = seq(start(region), end(region)),
-                   strand = "*",
-                   seqinfo = seqinfo)
+    if (nrow(se) > 0) {
+        if (countOverlaps(query = range(unstrand(rowRanges(se))),
+                          subject = region, type = "within") == 0L) {
+            cli_abort("Not all positions in {.arg se} are within {.arg region}")
+        }
+
+        # create base-resolution rowRanges
+        if (ignore.strand) {
+            rr <- GPos(seqnames = seqnames(region)[1],
+                       pos = seq(start(region), end(region)),
+                       strand = "*",
+                       seqinfo = seqinfo)
+        } else {
+            cli_abort("{.arg ignore.strand = FALSE} is not supported yet") # nocov
+        }
+
+        # iterate over assays
+        newRowIdx <- match(unstrand(rowRanges(se)), rr)
+        assayL <- lapply(assays(se, withDimnames = FALSE)[keepAssays], function(Df) {
+            endoapply(Df, function(naArr) {
+                naArrBases <- NaArray(
+                    dim = c(length(rr), ncol(naArr)),
+                    dimnames = list(NULL, colnames(naArr)),
+                    type = "double")
+                idx <- nnawhich(naArr, arr.ind = TRUE)
+                idx[, 1] <- newRowIdx[idx[, 1]]
+                naArrBases[idx] <- nnavals(naArr)
+                return(naArrBases)
+            })
+        })
     } else {
-        cli_abort("{.arg ignore.strand = FALSE} is not supported yet") # nocov
+        assayL <- assays(se)[keepAssays]
+        rr <- GPos(seqinfo = seqinfo)
     }
 
-    # iterate over assays
-    newRowIdx <- match(unstrand(rowRanges(se)), rr)
-    assayL <- lapply(assays(se, withDimnames = FALSE)[keepAssays], function(Df) {
-        endoapply(Df, function(naArr) {
-            naArrBases <- NaArray(
-                dim = c(length(rr), ncol(naArr)),
-                dimnames = list(NULL, colnames(naArr)),
-                type = "double")
-            idx <- nnawhich(naArr, arr.ind = TRUE)
-            idx[, 1] <- newRowIdx[idx[, 1]]
-            naArrBases[idx] <- nnavals(naArr)
-            return(naArrBases)
-        })
-    })
-
     # construct new SummarizedExperiment
-    res <- SummarizedExperiment(assays = assayL,
-                                rowRanges = rr,
-                                colData = colData(se),
-                                metadata = md)
+    suppressWarnings({
+        # currently, assigning to assays triggers a deprecation warning
+        # (introduced in https://github.com/Bioconductor/IRanges/commit/b4e9e7e8530a822980259c37cef186c652ba8be5)
+        # see issue at https://github.com/Bioconductor/SummarizedExperiment/issues/74
+        res <- SummarizedExperiment(assays = assayL,
+                                    rowRanges = rr,
+                                    colData = colData(se),
+                                    metadata = md)
+    })
     return(res)
 }

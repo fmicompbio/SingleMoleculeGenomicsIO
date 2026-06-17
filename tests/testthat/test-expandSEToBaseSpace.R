@@ -18,6 +18,14 @@ test_that("expandSEToBaseSpace works", {
     expect_error(expandSEToBaseSpace(se = se, ignore.strand = FALSE),
                  "All values in .ignore.strand. must be one of: TRUE")
 
+    # empty input
+    seExp0 <- expandSEToBaseSpace(se = se[numeric(0), ])
+    expect_identical(dim(seExp0), c(0L, ncol(se)))
+    expect_identical(SummarizedExperiment::assayNames(seExp0),
+                     getReadLevelAssayNames(se))
+    expect_identical(lapply(SummarizedExperiment::assay(se, "mod_prob"), colnames),
+                     lapply(SummarizedExperiment::assay(seExp0, "mod_prob"), colnames))
+
     # expected return value
     seExp1 <- expandSEToBaseSpace(se = se)
     expect_s4_class(seExp1, "RangedSummarizedExperiment")
@@ -27,11 +35,11 @@ test_that("expandSEToBaseSpace works", {
                        ncol(se)))
     expect_identical(SummarizedExperiment::assayNames(seExp1),
                      getReadLevelAssayNames(se))
-    expect_identical(lapply(assay(se, "mod_prob"), colnames),
-                     lapply(assay(seExp1, "mod_prob"), colnames))
+    expect_identical(lapply(SummarizedExperiment::assay(se, "mod_prob"), colnames),
+                     lapply(SummarizedExperiment::assay(seExp1, "mod_prob"), colnames))
     for (s in colnames(se)) {
-        assayOrig <- assay(se, "mod_prob")[[s]]
-        assayExp <- assay(seExp1, "mod_prob")[[s]]
+        assayOrig <- SummarizedExperiment::assay(se, "mod_prob")[[s]]
+        assayExp <- SummarizedExperiment::assay(seExp1, "mod_prob")[[s]]
 
         valsOrig <- SparseArray::nnavals(assayOrig)
         valsExp <- SparseArray::nnavals(assayExp)
