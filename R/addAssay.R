@@ -49,6 +49,9 @@ addReadLevelAssay <- function(se, assayDF, assayName,
     }
 
     suppressWarnings({
+        # currently, assigning to assays triggers a deprecation warning
+        # (introduced in https://github.com/Bioconductor/IRanges/commit/b4e9e7e8530a822980259c37cef186c652ba8be5)
+        # see issue at https://github.com/Bioconductor/SummarizedExperiment/issues/74
         assay(se, assayName) <- assayDF
     })
     metadata(se)$readLevelData$assayNames <-
