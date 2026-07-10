@@ -49,7 +49,7 @@
 #'
 #' @importFrom SummarizedExperiment rowRanges
 #' @importFrom GenomicRanges GRanges resize trim
-#' @importFrom Seqinfo seqlengths seqlengths<-
+#' @importFrom Seqinfo seqlengths seqlengths<- seqlevelsInUse
 #' @importFrom Biostrings readDNAStringSet DNAStringSet
 #' @importFrom BSgenome getSeq
 #' @importFrom BiocGenerics as.list strand %in%
@@ -93,7 +93,7 @@ extractSeqContext <- function(x,
     Npost <- ifelse(strand(xcontext) %in% c("+", "*"), Nright, Nleft)
     if (any(Npre > 0) || any(Npost > 0)) {
         suppressWarnings(
-            seqlengths(xcontext) <- seqlengths(ref)
+            seqlengths(xcontext) <- seqlengths(ref)[seqlevelsInUse(xcontext)]
         )
         xcontext <- trim(xcontext)
         seqcontext <- DNAStringSet(
