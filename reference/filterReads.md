@@ -150,12 +150,12 @@ se <- readModBam(bamfile = modbamfile, regions = "chr1:6920000-6995000",
 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [45ms]
+#> ✔ finding unique genomic positions... [26ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ collapsed 29545 positions to 8439 unique ones
-#> ✔ collapsed 29545 positions to 8439 unique ones [219ms]
+#> ✔ collapsed 29545 positions to 8439 unique ones [158ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
@@ -190,7 +190,6 @@ if (require(SimpleUpset)) {
     SimpleUpset::simpleUpSet(as.data.frame(filtstats$s1))
 }
 #> Loading required package: SimpleUpset
-#> Warning: package ‘SimpleUpset’ was built under R version 4.7.0
 #> Loading required package: ggplot2
 #> Warning: package ‘ggplot2’ was built under R version 4.7.0
 #> Loading required package: patchwork

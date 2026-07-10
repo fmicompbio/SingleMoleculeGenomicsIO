@@ -209,12 +209,12 @@ readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [34ms]
+#> ✔ finding unique genomic positions... [45ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [200ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [273ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
 
