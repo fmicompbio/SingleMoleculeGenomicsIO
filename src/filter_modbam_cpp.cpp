@@ -136,11 +136,11 @@ Rcpp::NumericVector filter_modbam_cpp(std::string infile,
     Rcpp::RObject bar;
 
     // determine outmode based on extension of outfile
-    if (outfile.compare(outfile.size() - 4, 4, ".bam") == 0 ||
-        outfile.compare(outfile.size() - 4, 4, ".BAM") == 0) {
+    if (outfile.size() >= 4 && (outfile.compare(outfile.size() - 4, 4, ".bam") == 0 ||
+        outfile.compare(outfile.size() - 4, 4, ".BAM") == 0)) {
         outmode = "wb";
-    } else if (outfile.compare(outfile.size() - 4, 4, ".sam") == 0 ||
-        outfile.compare(outfile.size() - 4, 4, ".SAM") == 0) {
+    } else if (outfile.size() >= 4 && (outfile.compare(outfile.size() - 4, 4, ".sam") == 0 ||
+        outfile.compare(outfile.size() - 4, 4, ".SAM") == 0)) {
         outmode = "w";
     } else {
         had_error = true;
