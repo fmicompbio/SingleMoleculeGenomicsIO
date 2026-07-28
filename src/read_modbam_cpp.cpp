@@ -155,9 +155,10 @@ int process_bam_record(bam1_t *bamdata,        // bam record
 
     // ... remove unaligned (e.g. soft-masked) read-bases
     //     (iterate backwards to avoid messing up indices
-    //      when removing elements)
-    n_total += ref_position.size();
-    for (size_t e = ref_position.size(); e-- > 0;) {
+    //     when removing elements). Only iterate over the
+    //     elements added for this read
+    n_total += aligned_read_position_converted.size();
+    for (size_t e = ref_position.size(); e-- > size_before_this_read;) {
         if (ref_position[e] == -1) {
             n_unaligned++;
             read_id.erase(read_id.begin() + e);
