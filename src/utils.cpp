@@ -92,11 +92,13 @@ std::string concatenate_hts_files(std::vector<std::string> input_files,
     }
 
     // determine outmode based on extension of output_file
-    if (output_file.compare(output_file.size() - 4, 4, ".bam") == 0 ||
-        output_file.compare(output_file.size() - 4, 4, ".BAM") == 0) {
+    if (output_file.size() >= 4 &&
+        (output_file.compare(output_file.size() - 4, 4, ".bam") == 0 ||
+        output_file.compare(output_file.size() - 4, 4, ".BAM") == 0)) {
         outmode = "wb";
-    } else if (output_file.compare(output_file.size() - 4, 4, ".sam") == 0 ||
-        output_file.compare(output_file.size() - 4, 4, ".SAM") == 0) {
+    } else if (output_file.size() >= 4 &&
+        (output_file.compare(output_file.size() - 4, 4, ".sam") == 0 ||
+        output_file.compare(output_file.size() - 4, 4, ".SAM") == 0)) {
         outmode = "w";
     } else {
         had_error = true;
