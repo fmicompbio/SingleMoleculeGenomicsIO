@@ -1,9 +1,9 @@
 pandoc: 3.8.3
 pkgdown: 2.2.1.9000
-pkgdown_sha: 2ee801842df1f581a47fa0e405596f2cad0a0011
+pkgdown_sha: 179cfaee3d4e17eaa9e7d7c700b1269dc62e4d46
 articles:
   SingleMoleculeGenomicsIO: SingleMoleculeGenomicsIO.html
-last_built: 2026-07-10T11:49Z
+last_built: 2026-08-03T12:22Z
 urls:
   reference: https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference
   article: https://fmicompbio.github.io/SingleMoleculeGenomicsIO/articles

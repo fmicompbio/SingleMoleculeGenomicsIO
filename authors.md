@@ -24,13 +24,13 @@ Source:
 
 Stadler M, Soneson C, Papasaikas P, Smallwood S (2026).
 *SingleMoleculeGenomicsIO: Tools for reading single molecule genomics
-data*. R package version 0.1.5,
+data*. R package version 0.1.6,
 <https://github.com/fmicompbio/SingleMoleculeGenomicsIO>.
 
     @Manual{,
       title = {SingleMoleculeGenomicsIO: Tools for reading single molecule genomics data},
       author = {Michael Stadler and Charlotte Soneson and Panagiotis Papasaikas and Sebastien Smallwood},
       year = {2026},
-      note = {R package version 0.1.5},
+      note = {R package version 0.1.6},
       url = {https://github.com/fmicompbio/SingleMoleculeGenomicsIO},
     }

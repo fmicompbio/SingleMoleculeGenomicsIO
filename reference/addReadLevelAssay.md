@@ -60,7 +60,6 @@ Charlotte Soneson
 library(SummarizedExperiment)
 #> Loading required package: MatrixGenerics
 #> Loading required package: matrixStats
-#> Warning: package ‘matrixStats’ was built under R version 4.7.0
 #> 
 #> Attaching package: ‘MatrixGenerics’
 #> The following objects are masked from ‘package:matrixStats’:
@@ -84,7 +83,6 @@ library(SummarizedExperiment)
 #> Loading required package: stats4
 #> Loading required package: BiocGenerics
 #> Loading required package: generics
-#> Warning: package ‘generics’ was built under R version 4.7.0
 #> 
 #> Attaching package: ‘generics’
 #> The following objects are masked from ‘package:base’:
@@ -140,10 +138,10 @@ se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [46ms]
+#> ✔ finding unique genomic positions... [63ms]
 #> 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [649ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [419ms]
 #> 
 # duplicate the 'mod_prob' assay into a new assay named 'new_assay'
 se <- addReadLevelAssay(se, assayDF = assay(se, "mod_prob"),
