@@ -1,6 +1,6 @@
 Package: SingleMoleculeGenomicsIO
 Title: Tools for reading single molecule genomics data 
-Version: 0.1.5
+Version: 0.1.6
 Authors@R: c(
     person("Michael", "Stadler", , "michael.stadler@fmi.ch",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2269-4934")),

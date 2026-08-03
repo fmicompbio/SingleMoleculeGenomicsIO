@@ -1,3 +1,8 @@
+# SingleMoleculeGenomicsIO 0.1.6
+
+* Fix reporting of total number of processed modifications
+* Avoid processing of prior modification data upon removing of soft-masked bases (may improve performance of readModBam several-fold)
+
 # SingleMoleculeGenomicsIO 0.1.5
 
 * Breaking change: Require specification of column names for read regrouping by to include the name of the nested `colData` column where they should be found
