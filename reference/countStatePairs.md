@@ -57,7 +57,8 @@ countStatePairs(
 
   A character vector with one or several sequence names (chromosomes)
   from which to sample alignments from (only used if `nAlnsToSample` is
-  greater than zero).
+  greater than zero). If set to `character(0)`, all chromosomes present
+  in any of the bam files will be used.
 
 - threshUnmod, threshMod:
 

@@ -77,7 +77,8 @@ countMismatchStatePairs(
 
   A character vector with one or several sequence names (chromosomes)
   from which to sample alignments from (only used if `nAlnsToSample` is
-  greater than zero).
+  greater than zero). If set to `character(0)`, all chromosomes present
+  in any of the bam files will be used.
 
 - readBaseUnmod, readBaseMod:
 
@@ -172,7 +173,7 @@ tbl <- countMismatchStatePairs(bamfile = bamfile, bamFormat = "QuasR",
 #> ℹ read 184 alignments
 #> ℹ finding positions with C
 
-#> ✔ finding positions with C [171ms]
+#> ✔ finding positions with C [63ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 

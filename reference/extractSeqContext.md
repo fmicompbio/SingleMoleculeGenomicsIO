@@ -76,7 +76,7 @@ regions <- GenomicRanges::GRanges(
 # extract sequence context (note the padding with N's)
 extractSeqContext(regions, 7, reffile)
 #> DNAStringSet object of length 3:
-#>     width seq                                               names               
+#>     width sequence                                          names               
 #> [1]     7 AAAGGGG                                           a
 #> [2]     7 AGGGGAN                                           b
 #> [3]     7 GGGANNN                                           c

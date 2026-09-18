@@ -163,22 +163,22 @@ res <- filterReadsModBam(infiles = modbamfiles, outfiles = filtbamfiles,
                          minQscore = 9.7, maxFracLowConf = 0.11, maxEntropy = 0.29,
                          BPPARAM = BiocParallel::SerialParam(), verbose = TRUE)
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ merging 1 filtered chunks
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ done filtering: retained 6 of 10 records (60%)
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ merging 1 filtered chunks
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ done filtering: retained 7 of 10 records (70%)
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [1ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 res
 #>   sample
@@ -188,8 +188,8 @@ res
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #> 2 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/df/djsxfhc17x95674wsm_g8s980000gn/T//RtmpgahJen/file7fd7508af898.bam
-#> 2 /var/folders/df/djsxfhc17x95674wsm_g8s980000gn/T//RtmpgahJen/file7fd753c6ec77.bam
+#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpjlVqik/filee39929913357.bam
+#> 2 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpjlVqik/filee3997bc1aa12.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        6                 0                  0                      0
 #> 2    10        7                 0                  0                      0

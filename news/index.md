@@ -1,5 +1,10 @@
 # Changelog
 
+## SingleMoleculeGenomicsIO 0.1.7
+
+- Default to sample reads from all chromosomes in the bam files if no
+  explicit sequence name(s) are given
+
 ## SingleMoleculeGenomicsIO 0.1.6
 
 - Fix reporting of total number of processed modifications

@@ -25,7 +25,7 @@ readMismatchBam(
   overlapAggregation = "maxQscore",
   sampleAnnot = NULL,
   nAlnsToSample = 0,
-  seqnamesToSampleFrom = "chr19",
+  seqnamesToSampleFrom = character(0),
   seqinfo = NULL,
   sequenceReference = NULL,
   variantPositions = NULL,
@@ -145,7 +145,8 @@ readMismatchBam(
 
   A character vector with one or several sequence names (chromosomes)
   from which to sample alignments from (only used if `nAlnsToSample` is
-  greater than zero).
+  greater than zero). If set to `character(0)`, all chromosomes present
+  in any of the bam files will be used.
 
 - seqinfo:
 
@@ -242,23 +243,23 @@ se <- readMismatchBam(bamfiles = bamfile, regions = "chr1:6940000-6955000",
 #> ℹ read 184 alignments
 #> ℹ finding positions with NCG
 
-#> ✔ finding positions with NCG [79ms]
+#> ✔ finding positions with NCG [63ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [30ms]
+#> ✔ finding unique genomic positions... [23ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ collapsed 50 positions to 38 unique ones
-#> ✔ collapsed 50 positions to 38 unique ones [18ms]
+#> ✔ collapsed 50 positions to 38 unique ones [15ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [269ms]
+#> ✔ extracting sequence contexts [148ms]
 #> 
-#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
 
 ```

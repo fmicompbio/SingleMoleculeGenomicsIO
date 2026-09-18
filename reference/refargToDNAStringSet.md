@@ -46,6 +46,6 @@ ref <- refargToDNAStringSet(system.file("extdata", "reference.fa.gz",
                                         package = "SingleMoleculeGenomicsIO"))
 ref
 #> DNAStringSet object of length 1:
-#>       width seq                                             names               
+#>       width sequence                                        names               
 #> [1] 6957060 NNNNNNNNNNNNNNNNNNNNNN...GACAGTAATCCAGGAAAGGGGA chr1
 ```
