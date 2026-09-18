@@ -63,7 +63,8 @@
 #'     \code{nAlnsToSample}.
 #' @param seqnamesToSampleFrom A character vector with one or several sequence
 #'     names (chromosomes) from which to sample alignments from (only used if
-#'     \code{nAlnsToSample} is greater than zero).
+#'     \code{nAlnsToSample} is greater than zero). If set to \code{character(0)},
+#'     all chromosomes present in any of the bam files will be used.
 #' @param seqinfo \code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 #'     containing information about the set of genomic sequences (chromosomes).
 #'     Alternatively, a named numeric vector with genomic sequence names and
@@ -192,11 +193,11 @@ readModBam <- function(bamfiles,
     }
     .assertValidModbase(modbase)
     .assertScalar(x = nAlnsToSample, type = "numeric", rngIncl = c(0, Inf))
-    if (nAlnsToSample > 0 && level %in% c("summary", "quickread")) {
-        cli_abort(paste0("Read sampling is not supported if {.arg level} is set ",
-                         "to 'summary' or 'quickread'"))
-    }
     if (nAlnsToSample > 0) {
+        if (level %in% c("summary", "quickread")) {
+            cli_abort(paste0("Read sampling is not supported if {.arg level} is set ",
+                             "to 'summary' or 'quickread'"))
+        }
         if (length(regions) > 0) {
             cli_warn("Ignoring {.arg regions} because {.arg nAlnsToSample} is greater than zero")
         }
@@ -205,13 +206,16 @@ readModBam <- function(bamfiles,
             cli_warn("Ignoring {.arg variantPositions} because {.arg nAlnsToSample} is greater than zero")
         }
         variantPositions <- NULL
+        .assertVector(x = seqnamesToSampleFrom, type = "character")
+        if (length(seqnamesToSampleFrom) == 0) {
+            seqnamesToSampleFrom <- Reduce(union, lapply(bamfiles, getChromosomeNamesFromBam))
+        }
     } else {
         if (length(regions) == 0) {
             cli_abort("{.arg regions} must contain at least one genomic range if not in sampling mode")
         }
     }
     .assertScalar(x = modProbThreshold, type = "numeric", rngIncl = c(0, 1))
-    .assertVector(x = seqnamesToSampleFrom, type = "character")
     if (!is.null(seqinfo) &&
         (!is(seqinfo, "Seqinfo") &&
          (!is.numeric(seqinfo) || is.null(names(seqinfo))))) {

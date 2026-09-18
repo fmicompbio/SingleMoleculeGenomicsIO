@@ -42,7 +42,8 @@ alignments may be lower than \code{nAlnsToSample}.}
 
 \item{seqnamesToSampleFrom}{A character vector with one or several sequence
 names (chromosomes) from which to sample alignments from (only used if
-\code{nAlnsToSample} is greater than zero).}
+\code{nAlnsToSample} is greater than zero). If set to \code{character(0)},
+all chromosomes present in any of the bam files will be used.}
 
 \item{threshUnmod, threshMod}{Numeric scalars defining how to convert
 modification probabilities \code{p} to modification states. Bases with

@@ -116,7 +116,7 @@ readMismatchBam <- function(bamfiles,
                             overlapAggregation = "maxQscore",
                             sampleAnnot = NULL,
                             nAlnsToSample = 0,
-                            seqnamesToSampleFrom = "chr19",
+                            seqnamesToSampleFrom = character(0),
                             seqinfo = NULL,
                             sequenceReference = NULL,
                             variantPositions = NULL,
@@ -176,13 +176,11 @@ readMismatchBam <- function(bamfiles,
     }
     .assertVector(x = regions, type = "GRanges", allowNULL = TRUE)
     .assertScalar(x = nAlnsToSample, type = "numeric", rngIncl = c(0, Inf))
-    if (nAlnsToSample > 0 && level %in% c("summary")) {
-        cli_abort(paste0("Read sampling is not supported if {.arg level} is set ",
-                         "to 'summary'"))
-    }
     if (nAlnsToSample > 0) {
-        .assertVector(x = seqnamesToSampleFrom, type = "character")
-        seqLevelsUsed <- seqnamesToSampleFrom
+        if (level %in% c("summary")) {
+            cli_abort(paste0("Read sampling is not supported if {.arg level} is set ",
+                             "to 'summary'"))
+        }
         if (length(regions) > 0) {
             cli_warn("Ignoring {.arg regions} because {.arg nAlnsToSample} is greater than zero")
         }
@@ -191,6 +189,11 @@ readMismatchBam <- function(bamfiles,
             cli_warn("Ignoring {.arg variantPositions} because {.arg nAlnsToSample} is greater than zero")
         }
         variantPositions <- NULL
+        .assertVector(x = seqnamesToSampleFrom, type = "character")
+        if (length(seqnamesToSampleFrom) == 0) {
+            seqnamesToSampleFrom <- Reduce(union, lapply(bamfiles, getChromosomeNamesFromBam))
+        }
+        seqLevelsUsed <- seqnamesToSampleFrom
     } else {
         if (length(regions) == 0) {
             cli_abort("{.arg regions} must contain at least one genomic range if not in sampling mode")

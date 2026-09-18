@@ -265,12 +265,13 @@ test_that("readModBam works", {
                             BPPARAM = BiocParallel::MulticoreParam(2L, RNGseed = 55L),
                             verbose = FALSE)
     )
+    # don't set seqnamesToSampleFrom - should use all chromosomes in the bam files
     suppressMessages({
         expect_message(
             se6b  <- readModBam(bamfiles = modbamfiles[1],
                                 regions = NULL,
                                 modbase = "a",
-                                nAlnsToSample = 5, seqnamesToSampleFrom = "chr1",
+                                nAlnsToSample = 5,
                                 BPPARAM = BiocParallel::SerialParam(RNGseed = 55L),
                                 verbose = TRUE)
         )

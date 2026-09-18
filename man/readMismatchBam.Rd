@@ -15,7 +15,7 @@ readMismatchBam(
   overlapAggregation = "maxQscore",
   sampleAnnot = NULL,
   nAlnsToSample = 0,
-  seqnamesToSampleFrom = "chr19",
+  seqnamesToSampleFrom = character(0),
   seqinfo = NULL,
   sequenceReference = NULL,
   variantPositions = NULL,
@@ -110,7 +110,8 @@ complete.}
 
 \item{seqnamesToSampleFrom}{A character vector with one or several sequence
 names (chromosomes) from which to sample alignments from (only used if
-\code{nAlnsToSample} is greater than zero).}
+\code{nAlnsToSample} is greater than zero). If set to \code{character(0)},
+all chromosomes present in any of the bam files will be used.}
 
 \item{seqinfo}{\code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 containing information about the set of genomic sequences (chromosomes).

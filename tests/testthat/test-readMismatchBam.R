@@ -278,11 +278,12 @@ test_that("readMismatchBam works", {
                                  BPPARAM = BiocParallel::MulticoreParam(2L, RNGseed = 55L),
                                  verbose = FALSE)
     )
+    # don't set seqnamesToSampleFrom - should use all chromosomes in the bam files
     suppressMessages({
         expect_message(
             se5b  <- readMismatchBam(bamfiles = bamfiles[1], bamFormat = "QuasR",
                                      regions = NULL, sequenceReference = ref,
-                                     nAlnsToSample = 5, seqnamesToSampleFrom = "chr1",
+                                     nAlnsToSample = 5,
                                      BPPARAM = BiocParallel::SerialParam(RNGseed = 55L),
                                      verbose = TRUE)
         )
