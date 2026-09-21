@@ -6,7 +6,7 @@
 \usage{
 expandSEToBaseSpace(
   se,
-  region = NULL,
+  regions = NULL,
   seqinfo = NULL,
   keepAssays = getReadLevelAssayNames(se),
   ignore.strand = TRUE
@@ -16,11 +16,11 @@ expandSEToBaseSpace(
 \item{se}{\code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
 object to be expanded to single base resolution.}
 
-\item{region}{A \code{\link[GenomicRanges]{GRanges}} object with a single
-region defining the range for expanding \code{se}. Alternatively, the
-region can be specified as a character scalar (e.g. "chr1:1200-1300")
+\item{regions}{A \code{\link[GenomicRanges]{GRanges}} object with one or more
+regions defining the ranges for expanding \code{se}. Alternatively, the
+regions can be specified as character scalars (e.g. "chr1:1200-1300")
 that can be coerced into a \code{GRanges} object. If \code{NULL} (the
-default), \code{region} is set to the range of the data in \code{se}.}
+default), \code{regions} is set to the range of the data in \code{se}.}
 
 \item{seqinfo}{\code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 containing information about the set of genomic sequences (chromosomes).

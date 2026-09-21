@@ -2,11 +2,11 @@
 #'
 #' @param se \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
 #'     object to be expanded to single base resolution.
-#' @param region A \code{\link[GenomicRanges]{GRanges}} object with a single
-#'     region defining the range for expanding \code{se}. Alternatively, the
-#'     region can be specified as a character scalar (e.g. "chr1:1200-1300")
+#' @param regions A \code{\link[GenomicRanges]{GRanges}} object with one or more
+#'     regions defining the ranges for expanding \code{se}. Alternatively, the
+#'     regions can be specified as character scalars (e.g. "chr1:1200-1300")
 #'     that can be coerced into a \code{GRanges} object. If \code{NULL} (the
-#'     default), \code{region} is set to the range of the data in \code{se}.
+#'     default), \code{regions} is set to the range of the data in \code{se}.
 #' @param seqinfo \code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 #'     containing information about the set of genomic sequences (chromosomes).
 #'     Alternatively, a named numeric vector with genomic sequence names and
@@ -20,12 +20,13 @@
 #'
 #' @importFrom SummarizedExperiment SummarizedExperiment colData assays
 #' @importFrom S4Vectors metadata
-#' @importFrom IRanges countOverlaps
+#' @importFrom IRanges countOverlaps width reduce subsetByOverlaps
 #' @importFrom GenomicRanges GPos
 #' @importFrom utils modifyList
 #' @importFrom cli cli_abort
 #' @importFrom BiocGenerics start end nrow ncol colnames unstrand
 #' @importFrom SparseArray NaArray nnawhich
+#' @importFrom Seqinfo seqnames seqinfo
 #'
 #' @return A single-base resolution \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
 #'     corresponding to \code{se}.
@@ -43,23 +44,14 @@
 #'
 #' @export
 expandSEToBaseSpace <- function(se,
-                                region = NULL,
+                                regions = NULL,
                                 seqinfo = NULL,
                                 keepAssays = getReadLevelAssayNames(se),
                                 ignore.strand = TRUE) {
     # check arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")
-    if (is.character(region)) {
-        region <- regionStringToGRanges(regions = region,
-                                        seqinfo = seqinfo)
-    }
-    if (is.null(region)) {
-        region <- range(rowRanges(se), ignore.strand = TRUE)
-    }
-    .assertVector(x = region, type = "GRanges")
     .assertVector(x = keepAssays, type = "character",
                   validValues = getReadLevelAssayNames(se))
-    .assertScalar(x = ignore.strand, type = "logical", validValues = TRUE)
 
     # clean-up metadata
     md <- metadata(se)
@@ -67,20 +59,53 @@ expandSEToBaseSpace <- function(se,
                                    val = list(assayNames = keepAssays))
 
     if (nrow(se) > 0) {
-        if (countOverlaps(query = range(unstrand(rowRanges(se))),
-                          subject = region, type = "within") == 0L) {
-            cli_abort("Not all positions in {.arg se} are within {.arg region}")
+        if (is.character(regions)) {
+            regions <- regionStringToGRanges(regions = regions,
+                                             seqinfo = seqinfo)
         }
+        if (is.null(regions)) {
+            # infer regions from SE (genomic intervals covered by reads)
+            regions <- reduce(do.call(c, lapply(keepAssays, function(assayName) {
+                nnaIdx <- nnawhich(as.matrix(assay(se, assayName)), arr.ind = TRUE)
+                nnaIdx <- as.data.frame(nnaIdx) |>
+                    setNames(c("position", "read")) |>
+                    mutate(seqname = as.character(seqnames(se))[.data$position],
+                           position = start(se)[.data$position]) |>
+                    group_by(read) |>
+                    summarize(seqname = seqname[1],
+                              minpos = min(position),
+                              maxpos = max(position),
+                              .groups = "drop")
+                reduce(GRanges(seqnames = nnaIdx$seqname,
+                               ranges = IRanges(start = nnaIdx$minpos,
+                                                end = nnaIdx$maxpos),
+                               seqinfo = seqinfo(se)))
+            })))
+        }
+        .assertVector(x = regions, type = "GRanges")
+        .assertScalar(x = ignore.strand, type = "logical", validValues = TRUE)
+
+        # note: commenting out for now, in order to allow shrinking of the
+        #       range covered by the SE as well
+        # if (countOverlaps(query = range(unstrand(rowRanges(se))),
+        #                   subject = region, type = "within") == 0L) {
+        #     cli_abort("Not all positions in {.arg se} are within {.arg region}")
+        # }
 
         # create base-resolution rowRanges
         if (ignore.strand) {
-            rr <- GPos(seqnames = seqnames(region)[1],
-                       pos = seq(start(region), end(region)),
+            rr <- GPos(seqnames = rep(seqnames(regions), width(regions)),
+                       pos = unlist(lapply(seq_along(regions), function(i) {
+                           seq(start(regions)[i], end(regions)[i])
+                       })),
                        strand = "*",
                        seqinfo = seqinfo)
         } else {
             cli_abort("{.arg ignore.strand = FALSE} is not supported yet") # nocov
         }
+
+        # subset SE to only the requested regions
+        se <- subsetByOverlaps(se, regions, ignore.strand = TRUE)
 
         # iterate over assays
         newRowIdx <- match(unstrand(rowRanges(se)), rr)
