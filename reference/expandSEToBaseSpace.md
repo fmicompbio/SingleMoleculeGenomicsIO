@@ -8,7 +8,7 @@ resolution.
 ``` r
 expandSEToBaseSpace(
   se,
-  region = NULL,
+  regions = NULL,
   seqinfo = NULL,
   keepAssays = getReadLevelAssayNames(se),
   ignore.strand = TRUE
@@ -22,14 +22,14 @@ expandSEToBaseSpace(
   [`RangedSummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/RangedSummarizedExperiment-class.html)
   object to be expanded to single base resolution.
 
-- region:
+- regions:
 
   A
   [`GRanges`](https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html)
-  object with a single region defining the range for expanding `se`.
-  Alternatively, the region can be specified as a character scalar (e.g.
-  "chr1:1200-1300") that can be coerced into a `GRanges` object. If
-  `NULL` (the default), `region` is set to the range of the data in
+  object with one or more regions defining the ranges for expanding
+  `se`. Alternatively, the regions can be specified as character scalars
+  (e.g. "chr1:1200-1300") that can be coerced into a `GRanges` object.
+  If `NULL` (the default), `regions` is set to the range of the data in
   `se`.
 
 - seqinfo:
@@ -72,13 +72,14 @@ se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
 #> ℹ extracting base modifications from modBAM files
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [20ms]
+#> ✔ finding unique genomic positions... [27ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [120ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [201ms]
 #> 
 #> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 

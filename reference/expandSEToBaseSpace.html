@@ -42,7 +42,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expandSEToBaseSpace</span><span class="op">(</span></span>
 <span>  <span class="va">se</span>,</span>
-<span>  region <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  regions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seqinfo <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keepAssays <span class="op">=</span> <span class="fu"><a href="getReadLevelAssayNames.html">getReadLevelAssayNames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>,</span>
 <span>  ignore.strand <span class="op">=</span> <span class="cn">TRUE</span></span>
@@ -58,12 +58,12 @@
 object to be expanded to single base resolution.</p></dd>
 
 
-<dt id="arg-region">region<a class="anchor" aria-label="anchor" href="#arg-region"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></code> object with a single
-region defining the range for expanding <code>se</code>. Alternatively, the
-region can be specified as a character scalar (e.g. "chr1:1200-1300")
+<dt id="arg-regions">regions<a class="anchor" aria-label="anchor" href="#arg-regions"></a></dt>
+<dd><p>A <code><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></code> object with one or more
+regions defining the ranges for expanding <code>se</code>. Alternatively, the
+regions can be specified as character scalars (e.g. "chr1:1200-1300")
 that can be coerced into a <code>GRanges</code> object. If <code>NULL</code> (the
-default), <code>region</code> is set to the range of the data in <code>se</code>.</p></dd>
+default), <code>regions</code> is set to the range of the data in <code>se</code>.</p></dd>
 
 
 <dt id="arg-seqinfo">seqinfo<a class="anchor" aria-label="anchor" href="#arg-seqinfo"></a></dt>
@@ -105,13 +105,14 @@ corresponding to <code>se</code>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[20ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[27ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> collapsed 11300 positions to 4772 unique ones</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 11300 positions to 4772 unique ones <span style="color: #B2B2B2;">[120ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 11300 positions to 4772 unique ones <span style="color: #B2B2B2;">[201ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 </span>
