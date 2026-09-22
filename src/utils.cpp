@@ -3,6 +3,7 @@
 #include <htslib/thread_pool.h>
 #include <string>
 #include <vector>
+#include <cerrno>
 #include <Rcpp.h>
 #include "utils.h"
 
@@ -1099,27 +1100,34 @@ int check_bam_format(samFile *infile,
 //' @keywords internal
 static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
                        hts_pos_t beg, hts_pos_t end, int32_t *diff,
-                       uint32_t *hist, uint maxd) {
+                       uint64_t *hist, uint maxd) {
     hts_pos_t len = end - beg;
     memset(diff, 0, (len + 1) * sizeof(int32_t));
 
     while (sam_itr_next(fp, it, b) >= 0) {
-        if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) continue;
+        if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) {
+            continue;
+        }
         hts_pos_t pos = b->core.pos;
         const uint32_t *cig = bam_get_cigar(b);
+
         for (uint32_t i = 0; i < b->core.n_cigar; i++) {
+            uint32_t opl = bam_cigar_oplen(cig[i]);
             int op = bam_cigar_op(cig[i]);
-            hts_pos_t l = bam_cigar_oplen(cig[i]);
             if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
-                hts_pos_t s = pos - beg, e = s + l;
-                if (e > 0 && s < len) {               // clip to region
-                    diff[s < 0 ? 0 : s]++;
-                    diff[e > len ? len : e]--;
+                // soft-clips before this op consumed no reference bases,
+                // so the reference position of this op's start is still `pos`
+                hts_pos_t s_rel = pos - beg;
+                hts_pos_t e_rel = s_rel + opl;
+                if (e_rel > 0 && s_rel < len) {
+                    diff[s_rel < 0 ? 0 : s_rel]++;
+                    diff[e_rel > len ? len : e_rel]--;
                 }
-                pos += l;
+                pos += opl;
             } else if (op == BAM_CDEL || op == BAM_CREF_SKIP) {
-                pos += l;                              // gap: no coverage
+                pos += opl;
             }
+            // S / I / P do not advance the reference position
         }
     }
     int32_t d = 0;
@@ -1129,12 +1137,78 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
     }
 }
 
+// Resolve a vector of region strings into (tid, beg, end) spans, where
+// `beg` is 0-based and `end` is exclusive. "." or "*" expands to all
+// non-empty contigs. Returns 0 on success, -1 on failure (message in buffer).
+static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
+                                    sam_hdr_t *hdr,
+                                    std::vector<std::tuple<int, hts_pos_t, hts_pos_t>> &spans,
+                                    bool &had_error, int buffer_len, char *buffer) {
+    int n = sam_hdr_nref(hdr);
+    for (const std::string &rs : regionsvect) {
+        if (rs == "." || rs == "*") {
+            spans.clear();
+            for (int t = 0; t < n; t++) {
+                hts_pos_t L = sam_hdr_tid2len(hdr, t);
+                if (L > 0) spans.push_back(std::make_tuple(t, (hts_pos_t)0, L));
+            }
+            break;
+        }
+        size_t colon = rs.find(':');
+        if (colon == std::string::npos) {
+            int tid = sam_hdr_name2tid(hdr, rs.c_str());
+            if (tid < 0) {
+                had_error = true;
+                snprintf(buffer, buffer_len, "Unknown contig: %s\n", rs.c_str());
+                return -1;
+            }
+            hts_pos_t L = sam_hdr_tid2len(hdr, tid);
+            if (L > 0) spans.push_back(std::make_tuple(tid, (hts_pos_t)0, L));
+            continue;
+        }
+        std::string name = rs.substr(0, colon);
+        std::string posstr = rs.substr(colon + 1);
+        size_t dash = posstr.find('-');
+        if (dash == std::string::npos) {
+            had_error = true;
+            snprintf(buffer, buffer_len,
+                     "Malformed region (expected 'name:beg-end'): %s\n", rs.c_str());
+            return -1;
+        }
+        errno = 0;
+        long long beg_in = strtoll(posstr.substr(0, dash).c_str(), NULL, 10);
+        errno = 0;
+        long long end_in = strtoll(posstr.substr(dash + 1).c_str(), NULL, 10);
+        if (errno != 0 || beg_in < 1 || end_in < beg_in) {
+            had_error = true;
+            snprintf(buffer, buffer_len,
+                     "Invalid region position in: %s\n", rs.c_str());
+            return -1;
+        }
+        int tid = sam_hdr_name2tid(hdr, name.c_str());
+        if (tid < 0) {
+            had_error = true;
+            snprintf(buffer, buffer_len, "Unknown contig: %s\n", name.c_str());
+            return -1;
+        }
+        hts_pos_t hdr_len = sam_hdr_tid2len(hdr, tid);
+        hts_pos_t beg = (hts_pos_t)beg_in - 1;                       // 0-based
+        hts_pos_t end = (hts_pos_t)end_in > hdr_len ? hdr_len : (hts_pos_t)end_in; // exclusive, clamped
+        if (end > beg) {
+            spans.push_back(std::make_tuple(tid, beg, end));
+        }
+    }
+    return 0;
+}
+
+
 //' Get base coverage histogram for a BAM file
 //'
 //' @param bamfile A character scalar with the bam file name (and path).
 //' @param regions Character vector specifying the region(s) for which
 //'     to calculate coverage, in the form \code{"."}, \code{"chr"} or
-//'     \code{"chr:start-end"}.
+//'     \code{"chr:start-end"}. If \code{NULL}, the whole genome
+//'     (\code{"."}) is used by default.
 //' @param maxDepth An integer scalar defining the maximal depth to consider.
 //' @param nThreads A numeric scalar with the number of threads used for
 //'     decompressing BAM records.
@@ -1150,12 +1224,12 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
 //'
 //' @return A numeric vector of length \code{maxDepth + 1}, with values at
 //'     index \code{i} giving the number of positions that were overlapped by
-//'     \code{i - 1} alignments. Positions overlapped by more than
+//'     exactly \code{i} alignments. Positions overlapped by more than
 //'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 //'     at index \code{maxDepth + 1}.
 //'
 // [[Rcpp::export]]
-Rcpp::IntegerVector getBaseCoverageForBam(const std::string bamfile,
+Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
                                           Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
                                           const uint maxDepth = 200,
                                           int nThreads = 3) {
@@ -1164,16 +1238,15 @@ Rcpp::IntegerVector getBaseCoverageForBam(const std::string bamfile,
     char buffer[2000];
     bool had_error = false;
     std::vector<std::string> regionsvect;
+    std::vector<std::tuple<int, hts_pos_t, hts_pos_t>> spans;
     samFile *inbamfile = NULL;
     const char* inname = bamfile.c_str();
     bam1_t *bamdata = NULL;
     hts_idx_t *idx = NULL;
     hts_itr_t *iter = NULL;
     sam_hdr_t *inbamhdr = NULL;
-    int32_t *diff = NULL;
-    uint32_t *hist = (uint32_t*)calloc(maxDepth + 1, sizeof(uint32_t)); // hist[maxDepth] = overflow bin
-    Rcpp::IntegerVector histvect(maxDepth + 1);
-    hts_pos_t maxlen = 0;
+    uint64_t *hist = (uint64_t*)calloc(maxDepth + 1, sizeof(uint64_t)); // hist[maxDepth] = overflow bin
+    Rcpp::NumericVector histvect(maxDepth + 1);
 
     // set default regions if NULL
     if (regions.isNotNull()) {
@@ -1194,39 +1267,62 @@ Rcpp::IntegerVector getBaseCoverageForBam(const std::string bamfile,
         goto end;
     }
 
-    // create multi-region iterator
-    success = create_multi_region_iterator(regionsvect, iter, idx, inbamhdr,
-                                           had_error, buffer_len, buffer);
+    // resolve regions to (tid, beg, end) spans in header coordinates
+    success = resolve_regions_to_spans(regionsvect, inbamhdr, spans,
+                                       had_error, buffer_len, buffer);
     if (success != 0) {
         goto end;
     }
 
-    // get length of longest chromosome and allocate per-base start/end vector `diff`
-    for (int t = 0; t < sam_hdr_nref(inbamhdr); t++)
-        if (sam_hdr_tid2len(inbamhdr, t) > maxlen) maxlen = sam_hdr_tid2len(inbamhdr, t);
-    diff = (int32_t*)malloc((maxlen + 1) * sizeof(int32_t));
-    if (diff == NULL) {
-        had_error = true;
-        snprintf(buffer, buffer_len, "Failed to allocate memory for coverage vector\n");
-        goto end;
+    // process each span independently, accumulating into `hist`
+    for (const std::tuple<int, hts_pos_t, hts_pos_t> &sp : spans) {
+        int tid = std::get<0>(sp);
+        hts_pos_t beg = std::get<1>(sp);
+        hts_pos_t end = std::get<2>(sp);
+        hts_pos_t len = end - beg;
+        if (len == 0) {
+            continue;
+        }
+
+        int32_t *diff = (int32_t*)malloc((len + 1) * sizeof(int32_t));
+        if (diff == NULL) {
+            had_error = true;
+            snprintf(buffer, buffer_len,
+                     "Failed to allocate memory for coverage vector\n");
+            goto end;
+        }
+
+        iter = sam_itr_queryi(idx, tid, beg, end);
+        if (iter == NULL) {
+            free(diff);
+            diff = NULL;
+            had_error = true;
+            snprintf(buffer, buffer_len, "Failed to create region iterator\n");
+            goto end;
+        }
+
+        region_cov(inbamfile, iter, bamdata, beg, end, diff, hist, maxDepth);
+
+        if (iter) {
+            sam_itr_destroy(iter);
+        }
+        iter = NULL;
+        free(diff);
+        diff = NULL;
     }
 
-    // populate `diff` and `hist`
-    region_cov(inbamfile, iter, bamdata, 0, maxlen, diff, hist, maxDepth);
+    // copy result into return vector before releasing `hist`
     for (int i = 0; i <= maxDepth; i++) {
-        histvect[i] = hist[i];
+        histvect[i] = (double) hist[i];
     }
 
     end:
-        //cleanup
-        if (diff) free(diff);
+        // cleanup
         if (hist) free(hist);
         if (bamdata) bam_destroy1(bamdata);
-        if (iter) sam_itr_destroy(iter);
         if (idx) hts_idx_destroy(idx);
         if (inbamhdr) sam_hdr_destroy(inbamhdr);
         if (inbamfile) sam_close(inbamfile);
-        if (hist) free(hist);
 
     if (had_error) {
         // we encountered an error (message in `buffer`) --> stop

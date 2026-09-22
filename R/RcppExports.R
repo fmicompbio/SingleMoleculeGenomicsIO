@@ -791,7 +791,8 @@ complement <- function(n) {
 #' @param bamfile A character scalar with the bam file name (and path).
 #' @param regions Character vector specifying the region(s) for which
 #'     to calculate coverage, in the form \code{"."}, \code{"chr"} or
-#'     \code{"chr:start-end"}.
+#'     \code{"chr:start-end"}. If \code{NULL}, the whole genome
+#'     (\code{"."}) is used by default.
 #' @param maxDepth An integer scalar defining the maximal depth to consider.
 #' @param nThreads A numeric scalar with the number of threads used for
 #'     decompressing BAM records.
@@ -807,7 +808,7 @@ complement <- function(n) {
 #'
 #' @return A numeric vector of length \code{maxDepth + 1}, with values at
 #'     index \code{i} giving the number of positions that were overlapped by
-#'     \code{i - 1} alignments. Positions overlapped by more than
+#'     exactly \code{i} alignments. Positions overlapped by more than
 #'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 #'     at index \code{maxDepth + 1}.
 #'

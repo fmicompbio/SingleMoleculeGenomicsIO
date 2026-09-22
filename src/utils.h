@@ -94,9 +94,9 @@ static void region_cov(samFile*,
                        hts_pos_t,
                        hts_pos_t,
                        int32_t*,
-                       uint32_t*,
+                       uint64_t*,
                        uint);
-Rcpp::IntegerVector getBaseCoverageForBam(const std::string,
-                                          std::vector<std::string>,
+Rcpp::NumericVector getBaseCoverageForBam(const std::string,
+                                          Rcpp::Nullable<std::vector<std::string>>,
                                           const uint,
                                           int);
