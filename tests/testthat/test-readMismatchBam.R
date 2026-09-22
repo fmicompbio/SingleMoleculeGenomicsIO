@@ -108,16 +108,14 @@ test_that("readMismatchBam works", {
                                  BPPARAM = BiocParallel::SerialParam()),
                  "must be one of")
     expect_error(
-        expect_warning(
-            expect_warning(readMismatchBam(bamfiles = bamfiles, bamFormat = "QuasR",
-                                           regions = "chr1:6940000-6955000",
-                                           nAlnsToSample = 10,
-                                           seqnamesToSampleFrom = "error",
-                                           sequenceReference = ref,
-                                           BPPARAM = BiocParallel::SerialParam()),
-                           "Ignoring .regions."),
-            "Ignoring unknown target name"),
-        "Cannot sample 10 alignments from a total of 0")
+        expect_warning(readMismatchBam(bamfiles = bamfiles, bamFormat = "QuasR",
+                                       regions = "chr1:6940000-6955000",
+                                       nAlnsToSample = 10,
+                                       seqnamesToSampleFrom = "error",
+                                       sequenceReference = ref,
+                                       BPPARAM = BiocParallel::SerialParam()),
+                       "Ignoring .regions."),
+        "All values in `seqnamesToSampleFrom` must be one of: chr1")
     expect_error(readMismatchBam(bamfiles = bamfiles, bamFormat = "QuasR",
                                  regions = "chr1:6940000-6955000",
                                  nAlnsToSample = 0,

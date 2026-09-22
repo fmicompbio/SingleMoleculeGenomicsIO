@@ -92,15 +92,13 @@ test_that("readModBam works", {
                             BPPARAM = BiocParallel::SerialParam()),
                  "must be one of")
     expect_error(
-        expect_warning(
-            expect_warning(readModBam(bamfiles = modbamfiles,
-                                      regions = "chr1:6940000-6955000",
-                                      modbase = "a", nAlnsToSample = 10,
-                                      seqnamesToSampleFrom = "error",
-                                      BPPARAM = BiocParallel::SerialParam()),
-                           "Ignoring .regions."),
-            "Ignoring unknown target name"),
-        "Cannot sample 10 alignments from a total of 0")
+        expect_warning(readModBam(bamfiles = modbamfiles,
+                                  regions = "chr1:6940000-6955000",
+                                  modbase = "a", nAlnsToSample = 10,
+                                  seqnamesToSampleFrom = "error",
+                                  BPPARAM = BiocParallel::SerialParam()),
+                       "Ignoring .regions."),
+        "All values in `seqnamesToSampleFrom` must be one of: chr1, chr2, chr3")
     expect_error(readModBam(bamfiles = modbamfiles,
                             regions = "chr1:6940000-6955000",
                             modbase = "a", nAlnsToSample = 0,
