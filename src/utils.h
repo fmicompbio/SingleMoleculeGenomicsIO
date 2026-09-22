@@ -87,3 +87,16 @@ int check_bam_format(samFile *infile,
                      bool &had_error,
                      char *buffer,
                      int &buffer_len);
+
+static void region_cov(samFile*,
+                       hts_itr_t*,
+                       bam1_t*,
+                       hts_pos_t,
+                       hts_pos_t,
+                       int32_t*,
+                       uint32_t*,
+                       uint);
+Rcpp::NumericVector getBaseCoverageForBam(const std::string,
+                                          std::vector<std::string>,
+                                          const uint,
+                                          int);

@@ -264,6 +264,7 @@ Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string bamfile) {
         }
 }
 
+
 //' Get target and text lines from loaded BAM header
 //'
 //' @param inbamhdr A loaded (populated) sam_hdr_t*.
@@ -1090,4 +1091,145 @@ int check_bam_format(samFile *infile,
         }
     }
     return result;
+}
+
+
+//' Helper function for getBaseCoverageForBam
+//' @noRd
+//' @keywords internal
+static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
+                       hts_pos_t beg, hts_pos_t end, int32_t *diff,
+                       uint32_t *hist, uint maxd) {
+    hts_pos_t len = end - beg;
+    memset(diff, 0, (len + 1) * sizeof(int32_t));
+
+    while (sam_itr_next(fp, it, b) >= 0) {
+        if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) continue;
+        hts_pos_t pos = b->core.pos;
+        const uint32_t *cig = bam_get_cigar(b);
+        for (uint32_t i = 0; i < b->core.n_cigar; i++) {
+            int op = bam_cigar_op(cig[i]);
+            hts_pos_t l = bam_cigar_oplen(cig[i]);
+            if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
+                hts_pos_t s = pos - beg, e = s + l;
+                if (e > 0 && s < len) {               // clip to region
+                    diff[s < 0 ? 0 : s]++;
+                    diff[e > len ? len : e]--;
+                }
+                pos += l;
+            } else if (op == BAM_CDEL || op == BAM_CREF_SKIP) {
+                pos += l;                              // gap: no coverage
+            }
+        }
+    }
+    int32_t d = 0;
+    for (hts_pos_t i = 0; i < len; i++) {
+        d += diff[i];
+        hist[d < maxd ? d : maxd]++;
+    }
+}
+
+//' Get base coverage histogram for a BAM file
+//'
+//' @param bamfile A character scalar with the bam file name (and path).
+//' @param regions Character vector specifying the region(s) for which
+//'     to calculate coverage, in the form \code{"."}, \code{"chr"} or
+//'     \code{"chr:start-end"}.
+//' @param maxDepth An integer scalar defining the maximal depth to consider.
+//' @param nThreads A numeric scalar with the number of threads used for
+//'     decompressing BAM records.
+//'
+//' @details CIGAR operations are considered, thus not counting the genomic
+//'     bases in a read-insertion as covered. Secondary and supplementary
+//'     alignments are not included.
+//'
+//' @reference The algorithm was described in Pedersen BS and Quinlan AR.
+//'     "Mosdepth: quick coverage calculation for genomes and exomes".
+//'     Bioinformatics. 2018; 34(5):867-868. doi: 10.1093/bioinformatics/btx699
+//'
+//' @return A numeric vector of length \code{maxDepth + 1}, with values at
+//'     index \code{i} giving the number of positions that were overlapped by
+//'     \code{maxDepth} are also added to the value for \code{maxDepth}
+//'     at index \code{maxDepth + 1}.
+//'
+// [[Rcpp::export]]
+Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
+                                          Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
+                                          const uint maxDepth = 200,
+                                          int nThreads = 3) {
+
+    int buffer_len = 2000, success = 0;
+    char buffer[2000];
+    bool had_error = false;
+    std::vector<std::string> regionsvect;
+    samFile *inbamfile = NULL;
+    const char* inname = bamfile.c_str();
+    bam1_t *bamdata = NULL;
+    hts_idx_t *idx = NULL;
+    hts_itr_t *iter = NULL;
+    sam_hdr_t *inbamhdr = NULL;
+    int32_t *diff = NULL;
+    uint32_t *hist = (uint32_t*)calloc(maxDepth + 1, sizeof(uint32_t)); // hist[maxDepth] = overflow bin
+    Rcpp::NumericVector histvect(maxDepth + 1);
+    hts_pos_t maxlen = 0;
+
+    // set default regions if NULL
+    if (regions.isNotNull()) {
+        regionsvect = Rcpp::as<std::vector<std::string>>(regions);
+    } else {
+        regionsvect = {"."}; // default: whole genome
+    }
+
+    // turn htslib logging off -> handle via Rcpp::warning or Rcpp::stop
+    hts_set_log_level(HTS_LOG_OFF);
+
+    // open bam file and read index and header
+    success = open_bam_and_read_index_and_header(bamdata, inname,
+                                                 inbamfile, idx,
+                                                 inbamhdr, nThreads,
+                                                 had_error, buffer_len, buffer);
+    if (success != 0) {
+        goto end;
+    }
+
+    // create multi-region iterator
+    success = create_multi_region_iterator(regionsvect, iter, idx, inbamhdr,
+                                           had_error, buffer_len, buffer);
+    if (success != 0) {
+        goto end;
+    }
+
+    // get length of longest chromosome and allocate per-base start/end vector `diff`
+    for (int t = 0; t < sam_hdr_nref(inbamhdr); t++)
+        if (sam_hdr_tid2len(inbamhdr, t) > maxlen) maxlen = sam_hdr_tid2len(inbamhdr, t);
+    diff = (int32_t*)malloc((maxlen + 1) * sizeof(int32_t));
+    if (diff == NULL) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Failed to allocate memory for coverage vector\n");
+        goto end;
+    }
+
+    // populate `diff` and `hist`
+    region_cov(inbamfile, iter, bamdata, 0, maxlen, diff, hist, maxDepth);
+    for (int i = 0; i <= maxDepth; i++) {
+        histvect[i] = hist[i];
+    }
+
+    end:
+        //cleanup
+        if (diff) free(diff);
+        if (hist) free(hist);
+        if (bamdata) bam_destroy1(bamdata);
+        if (iter) sam_itr_destroy(iter);
+        if (idx) hts_idx_destroy(idx);
+        if (inbamhdr) sam_hdr_destroy(inbamhdr);
+        if (inbamfile) sam_close(inbamfile);
+        if (hist) free(hist);
+
+    if (had_error) {
+        // we encountered an error (message in `buffer`) --> stop
+        Rcpp::stop(buffer);
+    }
+
+    return histvect;
 }
