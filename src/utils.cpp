@@ -1155,7 +1155,7 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
 //'     at index \code{maxDepth + 1}.
 //'
 // [[Rcpp::export]]
-Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
+Rcpp::IntegerVector getBaseCoverageForBam(const std::string bamfile,
                                           Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
                                           const uint maxDepth = 200,
                                           int nThreads = 3) {
@@ -1172,7 +1172,7 @@ Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
     sam_hdr_t *inbamhdr = NULL;
     int32_t *diff = NULL;
     uint32_t *hist = (uint32_t*)calloc(maxDepth + 1, sizeof(uint32_t)); // hist[maxDepth] = overflow bin
-    Rcpp::NumericVector histvect(maxDepth + 1);
+    Rcpp::IntegerVector histvect(maxDepth + 1);
     hts_pos_t maxlen = 0;
 
     // set default regions if NULL

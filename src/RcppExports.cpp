@@ -248,7 +248,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // getBaseCoverageForBam
-Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile, Rcpp::Nullable<std::vector<std::string>> regions, const uint maxDepth, int nThreads);
+Rcpp::IntegerVector getBaseCoverageForBam(const std::string bamfile, Rcpp::Nullable<std::vector<std::string>> regions, const uint maxDepth, int nThreads);
 RcppExport SEXP _SingleMoleculeGenomicsIO_getBaseCoverageForBam(SEXP bamfileSEXP, SEXP regionsSEXP, SEXP maxDepthSEXP, SEXP nThreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
