@@ -206,9 +206,12 @@ readModBam <- function(bamfiles,
             cli_warn("Ignoring {.arg variantPositions} because {.arg nAlnsToSample} is greater than zero")
         }
         variantPositions <- NULL
-        .assertVector(x = seqnamesToSampleFrom, type = "character")
+        seqnamesInBamFiles <- Reduce(union, lapply(bamfiles, getChromosomeNamesFromBam))
         if (length(seqnamesToSampleFrom) == 0) {
-            seqnamesToSampleFrom <- Reduce(union, lapply(bamfiles, getChromosomeNamesFromBam))
+            seqnamesToSampleFrom <- seqnamesInBamFiles
+        } else {
+            .assertVector(x = seqnamesToSampleFrom, type = "character",
+                          validValues = seqnamesInBamFiles)
         }
     } else {
         if (length(regions) == 0) {
