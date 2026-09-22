@@ -800,13 +800,15 @@ complement <- function(n) {
 #'     bases in a read-insertion as covered. Secondary and supplementary
 #'     alignments are not included.
 #'
-#' @reference The algorithm was described in Pedersen BS and Quinlan AR.
+#' @references The algorithm was described in Pedersen BS and Quinlan AR.
 #'     "Mosdepth: quick coverage calculation for genomes and exomes".
-#'     Bioinformatics. 2018; 34(5):867-868. doi: 10.1093/bioinformatics/btx699
+#'     Bioinformatics. 2018; 34(5):867-868.
+#'     \url{https://doi.org/10.1093/bioinformatics/btx699}
 #'
 #' @return A numeric vector of length \code{maxDepth + 1}, with values at
 #'     index \code{i} giving the number of positions that were overlapped by
-#'     \code{maxDepth} are also added to the value for \code{maxDepth}
+#'     \code{i - 1} alignments. Positions overlapped by more than
+#'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 #'     at index \code{maxDepth + 1}.
 #'
 getBaseCoverageForBam <- function(bamfile, regions = NULL, maxDepth = 200L, nThreads = 3L) {
