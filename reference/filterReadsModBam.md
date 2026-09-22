@@ -188,8 +188,8 @@ res
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
 #> 2 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam
 #>                                                                             outfile
-#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpttkT2D/file7e0a77940e12.bam
-#> 2 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpttkT2D/file7e0a1927fd13.bam
+#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpTnv17q/file794812b892fc.bam
+#> 2 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpTnv17q/file794813b9e7fe.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        6                 0                  0                      0
 #> 2    10        7                 0                  0                      0
