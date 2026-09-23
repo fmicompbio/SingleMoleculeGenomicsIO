@@ -374,3 +374,85 @@ test_that("refargToDNAStringSet works", {
     unlink(rlibdir)
 })
 
+
+## -------------------------------------------------------------------------- ##
+## Checks, getBaseCoverageForBam
+## -------------------------------------------------------------------------- ##
+test_that("getBaseCoverageForBam works", {
+    bamfile <- system.file("extdata", "6mA_1_10reads.bam",
+                           package = "SingleMoleculeGenomicsIO")
+    expect_true(file.exists(bamfile))
+
+    ## -- error cases -------------------------------------------------------- ##
+    expect_error(getBaseCoverageForBam(bamfile = "NO_SUCH_FILE.bam"),
+                 "Could not open input file")
+    expect_error(getBaseCoverageForBam(bamfile, regions = "notarealcontig"),
+                 "Unknown contig")
+    expect_error(getBaseCoverageForBam(bamfile, regions = "chr1:6940000"),
+                 "Malformed region")
+    expect_error(getBaseCoverageForBam(bamfile, regions = "chr1:5-3"),
+                 "Invalid region position")
+    expect_error(getBaseCoverageForBam(bamfile, regions = "chr1:-10"),
+                 "Invalid region position")
+
+    ## -- whole genome (NULL == ".") ------------------------------------------ ##
+    vNULL <- getBaseCoverageForBam(bamfile, regions = NULL)
+    vDot  <- getBaseCoverageForBam(bamfile, regions = ".")
+    expect_identical(vNULL, vDot)
+
+    # structure
+    expect_length(vNULL, 201L)
+    expect_true(all(vNULL >= 0))
+    expect_false(any(is.na(vNULL)))
+
+    # ground truth (verified against samtools depth -a)
+    expect_identical(head(vNULL, 11),
+        c(2728206677, 3841, 811, 563, 973, 596, 675, 463, 420, 1066, 6366))
+    expect_true(all(vNULL[12:201] == 0))  # max depth is 10 for 10 reads
+
+    ## -- single contig (no coordinates) -------------------------------------- ##
+    # this file only has reads on chr1, so the per-depth histogram matches
+    # the whole genome, but with zero-count restricted to chr1 length.
+    vChr1 <- getBaseCoverageForBam(bamfile, regions = "chr1")
+    expect_identical(head(vChr1, 11),
+        c(195138505, 3841, 811, 563, 973, 596, 675, 463, 420, 1066, 6366))
+    expect_true(all(vChr1[12:201] == 0))
+    expect_equal(sum(vChr1), 195154279)  # contig length
+
+    ## -- bounded region ------------------------------------------------------ ##
+    vRegion <- getBaseCoverageForBam(bamfile, regions = "chr1:6940000-6960000")
+    expect_identical(head(vRegion, 5),
+        c(18370, 841, 651, 139, 0))
+    expect_true(all(vRegion[6:201] == 0))
+    expect_equal(sum(vRegion), 20001)  # total positions in region
+
+    ## -- region end beyond contig end is clamped ------------------------------ ##
+    vClamp <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-999999999")
+    expect_identical(head(vClamp, 4),
+        c(188212649, 841, 651, 139))
+    # clamped to chr1 length, so sum = 195154279 - 6939999
+    expect_equal(sum(vClamp), 195154279 - 6939999)
+
+    ## -- multi-region (disjoint union) ---------------------------------------- ##
+    vA <- getBaseCoverageForBam(bamfile, regions = "chr1:6940000-6950000")
+    vB <- getBaseCoverageForBam(bamfile, regions = "chr1:6950001-6960000")
+    vMulti <- getBaseCoverageForBam(
+        bamfile,
+        regions = c("chr1:6940000-6950000", "chr1:6950001-6960000"))
+    # sum of disjoint regions == single region
+    expect_identical(vA + vB, vMulti)
+    expect_identical(vMulti, vRegion)
+
+    ## -- overflow bin (maxDepth < actual max coverage) ------------------------ ##
+    vSmall <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-6960000", maxDepth = 2L)
+    expect_length(vSmall, 3L)
+    # index 2 = overflow: positions covered by depth 3 AND 4
+    expect_identical(vSmall, c(18370, 841, 651 + 139))
+
+    ## -- nThreads parameter does not affect result ---------------------------- ##
+    v2t <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-6960000", nThreads = 2L)
+    expect_identical(v2t, vRegion)
+})
