@@ -308,6 +308,107 @@ Rcpp::List getTargetsAndTextFromBamHeader(sam_hdr_t *&inbamhdr) {
     return res;
 }
 
+//' Count alignments in an indexed bam file
+//'
+//' Report the number of mapped and unmapped alignments in a sorted
+//' and indexed bam file.
+//'
+//' @param bamfile Character scalar giving the name of the bam file to count
+//'     alignments in. The file must have an associated index.
+//'
+//' @return A named list with elements \code{"mapped"} and \code{"unmapped"},
+//'     where the \code{"mapped"} element is a named vector with the number
+//'     of alignments per chromosome, and the \code{"unmapped"} element is
+//'     a numeric scalar giving the number of unmapped reads in the bam file.
+//'
+//' @examples
+//' countAlignmentsInBam(system.file("extdata/6mA_1_10reads.bam",
+//'                                  package = "SingleMoleculeGenomicsIO"))
+//' @export
+// [[Rcpp::export]]
+Rcpp::List countAlignmentsInBam(const std::string bamfile) {
+    int buffer_len = 2000;
+    char buffer[2000];
+    bool had_error = false;
+    samFile *infile = NULL;
+    hts_idx_t *idx = NULL;
+    sam_hdr_t *in_samhdr = NULL;
+    int n_ref, tid;
+    uint64_t mapped = 0, unmapped = 0;
+    uint64_t total_unmapped = 0;
+    Rcpp::CharacterVector chrom_names;
+    std::vector<uint64_t> chrom_mapped;
+    const char *name;
+
+    hts_set_log_level(HTS_LOG_OFF);
+
+    // open bam file
+    if (!(infile = sam_open(bamfile.c_str(), "r"))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Could not open input file %s\n", bamfile.c_str());
+        goto end;
+    }
+
+    // read bam index (fails if not present)
+    if (!(idx = sam_index_load(infile, bamfile.c_str()))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Failed to load the index for %s\n", bamfile.c_str());
+        goto end;
+    }
+
+    // read bam header
+    if (!(in_samhdr = sam_hdr_read(infile))) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Failed to read header from %s\n", bamfile.c_str());
+        goto end;
+    }
+
+    if ((n_ref = sam_hdr_nref(in_samhdr)) < 0) {
+        had_error = true;
+        snprintf(buffer, buffer_len, "Failed to get n_ref from %s\n", bamfile.c_str());
+        goto end;
+    }
+
+    // get per-reference record stats
+    for (tid = 0; tid < n_ref; tid++) {
+        mapped = 0;
+        unmapped = 0;
+        // can't really check whether getting the stats fails, as the
+        // return value -1 means both an actual failure and that the target
+        // didn't have any alignments
+        hts_idx_get_stat(idx, tid, &mapped, &unmapped);
+
+        name = sam_hdr_tid2name(in_samhdr, tid);
+        chrom_names.push_back(name ? name : "NA");
+        chrom_mapped.push_back(mapped);
+        total_unmapped += unmapped;
+    }
+    total_unmapped += hts_idx_get_n_no_coor(idx);
+
+    end:
+        // cleanup
+        if (in_samhdr) {
+            sam_hdr_destroy(in_samhdr);
+        }
+        if (idx) {
+            hts_idx_destroy(idx);
+        }
+        if (infile) {
+            sam_close(infile);
+        }
+        if (had_error) {
+            // we encountered an error (message in `buffer`) --> stop
+            Rcpp::stop(buffer);
+        } else {
+            Rcpp::NumericVector mapped_vec(chrom_mapped.begin(), chrom_mapped.end());
+            mapped_vec.attr("names") = chrom_names;
+            return Rcpp::List::create(
+                Rcpp::_["mapped"] = mapped_vec,
+                Rcpp::_["unmapped"] = (int64_t) total_unmapped
+            );
+        }
+}
+
 //' Get unmodified base corresponding to a modified base
 //'
 //' @param b Modified base as a char
