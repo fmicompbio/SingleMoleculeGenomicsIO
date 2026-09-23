@@ -358,15 +358,15 @@ Rcpp::List countAlignmentsInBam(const std::string bamfile) {
 
     // read bam header
     if (!(in_samhdr = sam_hdr_read(infile))) {
-        had_error = true;
+        had_error = true; // # nocov start
         snprintf(buffer, buffer_len, "Failed to read header from %s\n", bamfile.c_str());
-        goto end;
+        goto end; // # nocov end
     }
 
     if ((n_ref = sam_hdr_nref(in_samhdr)) < 0) {
-        had_error = true;
+        had_error = true; // # nocov start
         snprintf(buffer, buffer_len, "Failed to get n_ref from %s\n", bamfile.c_str());
-        goto end;
+        goto end; // # nocov end
     }
 
     // get per-reference record stats
