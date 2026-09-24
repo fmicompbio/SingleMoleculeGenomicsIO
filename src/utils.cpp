@@ -379,7 +379,7 @@ Rcpp::List countAlignmentsInBam(const std::string bamfile) {
         hts_idx_get_stat(idx, tid, &mapped, &unmapped);
 
         name = sam_hdr_tid2name(in_samhdr, tid);
-        chrom_names.push_back(name ? name : "NA");
+        chrom_names.push_back(name ? name : "unknown");
         chrom_mapped.push_back(mapped);
         total_unmapped += unmapped;
     }
