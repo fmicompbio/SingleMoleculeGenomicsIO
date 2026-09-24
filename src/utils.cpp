@@ -1139,13 +1139,21 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
 
 // Resolve a vector of region strings into (tid, beg, end) spans, where
 // `beg` is 0-based and `end` is exclusive. "." or "*" expands to all
-// non-empty contigs. Returns 0 on success, -1 on failure (message in buffer).
+// non-empty contigs. Individual region strings are parsed with htslib's
+// sam_parse_region(), which accepts the forms:
+//     REF          -> entire contig
+//     REF:START    -> REF:START to end of contig
+//     REF:-END     -> begin of contig to END
+//     REF:START-END
+// Returns 0 on success, -1 on failure (message in buffer).
 static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
                                     sam_hdr_t *hdr,
                                     std::vector<std::tuple<int, hts_pos_t, hts_pos_t>> &spans,
                                     bool &had_error, int buffer_len, char *buffer) {
     int n = sam_hdr_nref(hdr);
     for (const std::string &rs : regionsvect) {
+        // htslib treats "." and "*" as "all contigs" via sam_parse_region,
+        // but we only want non-empty contigs, so handle them explicitly
         if (rs == "." || rs == "*") {
             spans.clear();
             for (int t = 0; t < n; t++) {
@@ -1154,46 +1162,18 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
             }
             break;
         }
-        size_t colon = rs.find(':');
-        if (colon == std::string::npos) {
-            int tid = sam_hdr_name2tid(hdr, rs.c_str());
-            if (tid < 0) {
-                had_error = true;
-                snprintf(buffer, buffer_len, "Unknown contig: %s\n", rs.c_str());
-                return -1;
-            }
-            hts_pos_t L = sam_hdr_tid2len(hdr, tid);
-            if (L > 0) spans.push_back(std::make_tuple(tid, (hts_pos_t)0, L));
-            continue;
-        }
-        std::string name = rs.substr(0, colon);
-        std::string posstr = rs.substr(colon + 1);
-        size_t dash = posstr.find('-');
-        if (dash == std::string::npos) {
+        int tid = -1;
+        hts_pos_t beg = 0, end = 0;
+        const char *ok = sam_parse_region(hdr, rs.c_str(), &tid, &beg, &end, 0);
+        if (ok == NULL || tid < 0) {
             had_error = true;
-            snprintf(buffer, buffer_len,
-                     "Malformed region (expected 'name:beg-end'): %s\n", rs.c_str());
+            snprintf(buffer, buffer_len, "Invalid region: %s\n", rs.c_str());
             return -1;
         }
-        errno = 0;
-        long long beg_in = strtoll(posstr.substr(0, dash).c_str(), NULL, 10);
-        errno = 0;
-        long long end_in = strtoll(posstr.substr(dash + 1).c_str(), NULL, 10);
-        if (errno != 0 || beg_in < 1 || end_in < beg_in) {
-            had_error = true;
-            snprintf(buffer, buffer_len,
-                     "Invalid region position in: %s\n", rs.c_str());
-            return -1;
-        }
-        int tid = sam_hdr_name2tid(hdr, name.c_str());
-        if (tid < 0) {
-            had_error = true;
-            snprintf(buffer, buffer_len, "Unknown contig: %s\n", name.c_str());
-            return -1;
-        }
+        // Clamp end to contig length (htslib may return INT64_MAX for
+        // the "open end" forms REF and REF:START)
         hts_pos_t hdr_len = sam_hdr_tid2len(hdr, tid);
-        hts_pos_t beg = (hts_pos_t)beg_in - 1;                       // 0-based
-        hts_pos_t end = (hts_pos_t)end_in > hdr_len ? hdr_len : (hts_pos_t)end_in; // exclusive, clamped
+        if (end > hdr_len) end = hdr_len;
         if (end > beg) {
             spans.push_back(std::make_tuple(tid, beg, end));
         }
@@ -1206,8 +1186,11 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
 //'
 //' @param bamfile A character scalar with the bam file name (and path).
 //' @param regions Character vector specifying the region(s) for which
-//'     to calculate coverage, in the form \code{"."}, \code{"chr"} or
-//'     \code{"chr:start-end"}. If \code{NULL}, the whole genome
+//'     to calculate coverage. Each region uses the grammar supported by the
+//'     \code{htslib} function \code{sam_parse_region}, for example
+//'     \code{"."} (all contigs), \code{"chr"} (whole contig),
+//'     \code{"chr:START"}, \code{"chr:-END"} or
+//'     \code{"chr:START-END"}. If \code{NULL}, the whole genome
 //'     (\code{"."}) is used by default.
 //' @param maxDepth An integer scalar defining the maximal depth to consider.
 //' @param nThreads A numeric scalar with the number of threads used for

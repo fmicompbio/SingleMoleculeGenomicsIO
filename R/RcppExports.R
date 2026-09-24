@@ -790,8 +790,11 @@ complement <- function(n) {
 #'
 #' @param bamfile A character scalar with the bam file name (and path).
 #' @param regions Character vector specifying the region(s) for which
-#'     to calculate coverage, in the form \code{"."}, \code{"chr"} or
-#'     \code{"chr:start-end"}. If \code{NULL}, the whole genome
+#'     to calculate coverage. Each region uses the grammar supported by the
+#'     \code{htslib} function \code{sam_parse_region}, for example
+#'     \code{"."} (all contigs), \code{"chr"} (whole contig),
+#'     \code{"chr:START"}, \code{"chr:-END"} or
+#'     \code{"chr:START-END"}. If \code{NULL}, the whole genome
 #'     (\code{"."}) is used by default.
 #' @param maxDepth An integer scalar defining the maximal depth to consider.
 #' @param nThreads A numeric scalar with the number of threads used for

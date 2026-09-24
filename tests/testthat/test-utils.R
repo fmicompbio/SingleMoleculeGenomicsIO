@@ -387,13 +387,9 @@ test_that("getBaseCoverageForBam works", {
     expect_error(getBaseCoverageForBam(bamfile = "NO_SUCH_FILE.bam"),
                  "Could not open input file")
     expect_error(getBaseCoverageForBam(bamfile, regions = "notarealcontig"),
-                 "Unknown contig")
-    expect_error(getBaseCoverageForBam(bamfile, regions = "chr1:6940000"),
-                 "Malformed region")
+                 "Invalid region")
     expect_error(getBaseCoverageForBam(bamfile, regions = "chr1:5-3"),
-                 "Invalid region position")
-    expect_error(getBaseCoverageForBam(bamfile, regions = "chr1:-10"),
-                 "Invalid region position")
+                 "Invalid region")
 
     ## -- whole genome (NULL == ".") ------------------------------------------ ##
     vNULL <- getBaseCoverageForBam(bamfile, regions = NULL)
@@ -455,4 +451,14 @@ test_that("getBaseCoverageForBam works", {
     v2t <- getBaseCoverageForBam(
         bamfile, regions = "chr1:6940000-6960000", nThreads = 2L)
     expect_identical(v2t, vRegion)
+
+    ## -- htslib grammar: REF:START (open end) & REF:-END (open start) -------- ##
+    # "chr1:6940000" means chr1:6940000 to end of contig (clamped to length)
+    vOpenEnd <- getBaseCoverageForBam(bamfile, regions = "chr1:6940000")
+    # identical to the (6940000, contig-length) span
+    expect_identical(vOpenEnd, vClamp)
+    # "chr1:-10" means positions 1..10 of chr1
+    vOpenStart <- getBaseCoverageForBam(bamfile, regions = "chr1:-10")
+    expect_equal(sum(vOpenStart), 10)
+
 })
