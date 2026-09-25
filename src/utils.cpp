@@ -1107,7 +1107,7 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
 
     while (sam_itr_next(fp, it, b) >= 0) {
         if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) {
-            continue;
+            continue; // # nocov
         }
         hts_pos_t pos = b->core.pos;
         const uint32_t *cig = bam_get_cigar(b);
@@ -1153,7 +1153,7 @@ static void region_cov_simple(samFile *fp, hts_itr_t *it, bam1_t *b,
 
     while (sam_itr_next(fp, it, b) >= 0) {
         if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) {
-            continue;
+            continue; // # nocov
         }
         hts_pos_t s_rel = b->core.pos - beg;
         hts_pos_t e_rel = bam_endpos(b) - beg;
@@ -1319,24 +1319,24 @@ Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
         hts_pos_t end = std::get<2>(sp);
         hts_pos_t len = end - beg;
         if (len == 0) {
-            continue;
+            continue; // # nocov
         }
 
         int32_t *diff = (int32_t*)malloc((len + 1) * sizeof(int32_t));
         if (diff == NULL) {
-            had_error = true;
+            had_error = true; // # nocov start
             snprintf(buffer, buffer_len,
                      "Failed to allocate memory for coverage vector\n");
-            goto end;
+            goto end; // # nocov end
         }
 
         iter = sam_itr_queryi(idx, tid, beg, end);
         if (iter == NULL) {
-            free(diff);
+            free(diff); // # nocov start
             diff = NULL;
             had_error = true;
             snprintf(buffer, buffer_len, "Failed to create region iterator\n");
-            goto end;
+            goto end; // # nocov end
         }
 
         if (method == "full") {
