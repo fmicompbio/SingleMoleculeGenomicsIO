@@ -1,3 +1,7 @@
+# SingleMoleculeGenomicsIO 0.1.8
+
+* Add `getBaseCoverageForBam` and `countAlignmentsInBam` functions
+
 # SingleMoleculeGenomicsIO 0.1.7
 
 * Default to sample reads from all chromosomes in the bam files if no explicit sequence name(s) are given
