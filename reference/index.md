@@ -20,6 +20,9 @@
 - [`checkSEValidity()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/checkSEValidity.md)
   : Check internal consistency of SummarizedExperiment object
 
+- [`countAlignmentsInBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countAlignmentsInBam.md)
+  : Count alignments in an indexed bam file
+
 - [`countMismatchStatePairs()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/countMismatchStatePairs.md)
   : Count pairs of modified bases by distance and modification state for
   bam files where modifications are indicated by sequence mismatches

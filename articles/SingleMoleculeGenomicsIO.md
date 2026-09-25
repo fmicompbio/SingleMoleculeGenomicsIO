@@ -128,13 +128,13 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [52ms]
+#> ✔ finding unique genomic positions... [65ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [18ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [28ms]
 #> 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [502ms]
+#> ✔ extracting sequence contexts [645ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -560,10 +560,10 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [25ms]
+#> ✔ finding unique genomic positions... [805ms]
 #> 
 #> ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [39ms]
+#> ✔ collapsed 11211 positions to 7967 unique ones [60ms]
 #> 
 se_summary2
 #> class: RangedSummarizedExperiment 
@@ -664,10 +664,10 @@ se_sample <- readModBam(bamfiles = modbamfiles,
 #> ℹ removed 1165 unaligned (e.g. soft-masked) of 20091 called bases
 #> ℹ read 7 alignments
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [30ms]
+#> ✔ finding unique genomic positions... [37ms]
 #> 
 #> ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [205ms]
+#> ✔ collapsed 31912 positions to 7238 unique ones [316ms]
 #> 
 se_sample$n_reads
 #> [1] 5 7
@@ -1105,8 +1105,8 @@ res
 #> 1     s1
 #>                                                                                infile
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
-#>                                                                             outfile
-#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpEp9q8K/file7fe3774a9c76.bam
+#>                                                                            outfile
+#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmphJqn7I/file82bce3b1345.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        8                 0                  0                      0
 #>   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction
@@ -1330,7 +1330,7 @@ sessioninfo::session_info()
 #>  collate  en_US.UTF-8
 #>  ctype    en_US.UTF-8
 #>  tz       UTC
-#>  date     2026-09-22
+#>  date     2026-09-25
 #>  pandoc   3.8.3 @ /usr/local/bin/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -1353,7 +1353,7 @@ sessioninfo::session_info()
 #>  crayon                     1.5.3      2024-06-20 [1] CRAN (R 4.6.0)
 #>  curl                       8.0.0      2026-08-25 [1] CRAN (R 4.6.1)
 #>  data.table                 1.18.6.1   2026-08-24 [1] CRAN (R 4.6.1)
-#>  DelayedArray               0.39.6     2026-08-21 [1] https://bioc.r-universe.dev (R 4.6.1)
+#>  DelayedArray               0.39.7     2026-09-23 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  desc                       1.4.3      2023-12-10 [1] CRAN (R 4.6.0)
 #>  digest                     0.6.39     2025-11-19 [1] CRAN (R 4.6.0)
 #>  dplyr                      1.2.1      2026-04-03 [1] CRAN (R 4.6.0)
@@ -1399,15 +1399,15 @@ sessioninfo::session_info()
 #>  rmarkdown                  2.32       2026-09-01 [1] CRAN (R 4.6.1)
 #>  Rsamtools                  2.29.0     2026-05-18 [1] Bioconductor 3.24 (R 4.6.0)
 #>  rtracklayer                1.73.0     2026-05-18 [1] Bioconductor 3.24 (R 4.6.0)
-#>  S4Arrays                 * 1.13.0     2026-05-18 [1] Bioconductor 3.24 (R 4.6.0)
+#>  S4Arrays                 * 1.13.1     2026-09-22 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  S4Vectors                * 0.51.10    2026-09-15 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  S7                         0.2.2      2026-04-22 [1] CRAN (R 4.6.0)
 #>  sass                       0.4.10     2025-04-11 [1] CRAN (R 4.6.0)
 #>  scales                     1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
 #>  Seqinfo                  * 1.3.2      2026-08-26 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  sessioninfo                1.2.4      2026-06-04 [1] CRAN (R 4.6.0)
-#>  SingleMoleculeGenomicsIO * 0.1.7      2026-09-22 [1] Bioconductor
-#>  SparseArray              * 1.13.2     2026-05-18 [1] Bioconductor 3.24 (R 4.6.0)
+#>  SingleMoleculeGenomicsIO * 0.1.7      2026-09-25 [1] Bioconductor
+#>  SparseArray              * 1.13.3     2026-09-22 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  SummarizedExperiment     * 1.43.0     2026-05-18 [1] Bioconductor 3.24 (R 4.6.0)
 #>  systemfonts                1.3.2      2026-03-05 [1] RSPM (R 4.6.0)
 #>  textshaping                1.0.5      2026-03-06 [1] RSPM (R 4.6.0)
