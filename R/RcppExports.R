@@ -711,6 +711,20 @@ NULL
 #' @keywords internal
 NULL
 
+#' Helper function for getBaseCoverageForBam
+#' @noRd
+#' @keywords internal
+NULL
+
+#' Simple coverage: a read covers the whole reference span between its first
+#' and last aligned position, regardless of CIGAR operations (soft-clip bases
+#' and read-inserted bases are also counted as covered). htslib's
+#' bam_endpos() gives exactly this reference span (pos-1 .. endpos-2, 0-based
+#' inclusive; it equals pos-1 if the CIGAR ends in a soft-clip).
+#' @noRd
+#' @keywords internal
+NULL
+
 #' Concatenate files
 #'
 #' @param input_files Character vector with input file names to concatenate.
@@ -800,5 +814,52 @@ get_unmodified_base <- function(b) {
 #' @keywords internal
 complement <- function(n) {
     .Call(`_SingleMoleculeGenomicsIO_complement`, n)
+}
+
+#' Get base coverage histogram for a BAM file
+#'
+#' @param bamfile A character scalar with the bam file name (and path).
+#' @param regions Character vector specifying the region(s) for which
+#'     to calculate coverage. Each region uses the grammar supported by the
+#'     \code{htslib} function \code{sam_parse_region}, for example
+#'     \code{"."} (all contigs), \code{"chr"} (whole contig),
+#'     \code{"chr:START"}, \code{"chr:-END"} or
+#'     \code{"chr:START-END"}. If \code{NULL}, the whole genome
+#'     (\code{"."}) is used by default.
+#' @param maxDepth An integer scalar defining the maximal depth to consider.
+#' @param method Character scalar with the method used for coverage
+#'     calculation. \code{"full"} (the default) considers CIGAR
+#'     operations, thus not counting soft-clip bases and read-inserted
+#'     positions as covered. \code{"simple"} ignores the CIGAR strings and
+#'     covers the whole reference span between the first and the last
+#'     aligned position of each alignment (using \code{htslib}'s
+#'     \code{bam_endpos}); this is slightly faster but overestimates
+#'     coverage in the soft-clipped ends and around indels.
+#' @param nThreads A numeric scalar with the number of threads used for
+#'     decompressing BAM records.
+#'
+#' @details Secondary and supplementary alignments and unmapped reads are
+#'     not included.
+#'
+#' @references The algorithm was described in Pedersen BS and Quinlan AR.
+#'     "Mosdepth: quick coverage calculation for genomes and exomes".
+#'     Bioinformatics. 2018; 34(5):867-868.
+#'     \url{https://doi.org/10.1093/bioinformatics/btx699}
+#'
+#' @examples
+#' modbamfile <- system.file("extdata", "6mA_1_10reads.bam", package = "SingleMoleculeGenomicsIO")
+#' getBaseCoverageForBam(modbamfile, "chr1", 12L, "full")
+#' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "full")
+#' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "simple")
+#'
+#' @return A named numeric vector of length \code{maxDepth + 1}, with values at
+#'     index \code{i} giving the number of positions that were overlapped by
+#'     exactly \code{i-1} alignments. Positions overlapped by more than
+#'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
+#'     at index \code{maxDepth + 1}.
+#'
+#' @export
+getBaseCoverageForBam <- function(bamfile, regions = NULL, maxDepth = 200L, method = "full", nThreads = 3L) {
+    .Call(`_SingleMoleculeGenomicsIO_getBaseCoverageForBam`, bamfile, regions, maxDepth, method, nThreads)
 }
 

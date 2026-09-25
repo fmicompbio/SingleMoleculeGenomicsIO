@@ -3,6 +3,8 @@
 #include <htslib/thread_pool.h>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cerrno>
 #include <Rcpp.h>
 #include "utils.h"
 
@@ -263,6 +265,7 @@ Rcpp::CharacterVector getChromosomeNamesFromBam(const std::string bamfile) {
             return chrs;
         }
 }
+
 
 //' Get target and text lines from loaded BAM header
 //'
@@ -1191,4 +1194,284 @@ int check_bam_format(samFile *infile,
         }
     }
     return result;
+}
+
+
+//' Helper function for getBaseCoverageForBam
+//' @noRd
+//' @keywords internal
+static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
+                       hts_pos_t beg, hts_pos_t end, int32_t *diff,
+                       uint64_t *hist, uint32_t maxd) {
+    hts_pos_t len = end - beg;
+    memset(diff, 0, (len + 1) * sizeof(int32_t));
+
+    while (sam_itr_next(fp, it, b) >= 0) {
+        if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) {
+            continue; // # nocov
+        }
+        hts_pos_t pos = b->core.pos;
+        const uint32_t *cig = bam_get_cigar(b);
+
+        for (uint32_t i = 0; i < b->core.n_cigar; i++) {
+            uint32_t opl = bam_cigar_oplen(cig[i]);
+            int op = bam_cigar_op(cig[i]);
+            if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
+                // soft-clips before this op consumed no reference bases,
+                // so the reference position of this op's start is still `pos`
+                hts_pos_t s_rel = pos - beg;
+                hts_pos_t e_rel = s_rel + opl;
+                if (e_rel > 0 && s_rel < len) {
+                    diff[s_rel < 0 ? 0 : s_rel]++;
+                    diff[e_rel > len ? len : e_rel]--;
+                }
+                pos += opl;
+            } else if (op == BAM_CDEL || op == BAM_CREF_SKIP) {
+                pos += opl;
+            }
+            // S / I / P do not advance the reference position
+        }
+    }
+    int32_t d = 0;
+    for (hts_pos_t i = 0; i < len; i++) {
+        d += diff[i];
+        hist[d < maxd ? d : maxd]++;
+    }
+}
+
+//' Simple coverage: a read covers the whole reference span between its first
+//' and last aligned position, regardless of CIGAR operations (soft-clip bases
+//' and read-inserted bases are also counted as covered). htslib's
+//' bam_endpos() gives exactly this reference span (pos-1 .. endpos-2, 0-based
+//' inclusive; it equals pos-1 if the CIGAR ends in a soft-clip).
+//' @noRd
+//' @keywords internal
+static void region_cov_simple(samFile *fp, hts_itr_t *it, bam1_t *b,
+                              hts_pos_t beg, hts_pos_t end, int32_t *diff,
+                              uint64_t *hist, uint32_t maxd) {
+    hts_pos_t len = end - beg;
+    memset(diff, 0, (len + 1) * sizeof(int32_t));
+
+    while (sam_itr_next(fp, it, b) >= 0) {
+        if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) {
+            continue; // # nocov
+        }
+        hts_pos_t s_rel = b->core.pos - beg;
+        hts_pos_t e_rel = bam_endpos(b) - beg;
+        if (e_rel > 0 && s_rel < len) {
+            diff[s_rel < 0 ? 0 : s_rel]++;
+            diff[e_rel > len ? len : e_rel]--;
+        }
+    }
+    int32_t d = 0;
+    for (hts_pos_t i = 0; i < len; i++) {
+        d += diff[i];
+        hist[d < maxd ? d : maxd]++;
+    }
+}
+
+// Resolve a vector of region strings into (tid, beg, end) spans, where
+// `beg` is 0-based and `end` is exclusive. "." or "*" expands to all
+// non-empty contigs. Individual region strings are parsed with htslib's
+// sam_parse_region(), which accepts the forms:
+//     REF          -> entire contig
+//     REF:START    -> REF:START to end of contig
+//     REF:-END     -> begin of contig to END
+//     REF:START-END
+// Returns 0 on success, -1 on failure (message in buffer).
+static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
+                                    sam_hdr_t *hdr,
+                                    std::vector<std::tuple<int, hts_pos_t, hts_pos_t>> &spans,
+                                    bool &had_error, int buffer_len, char *buffer) {
+    int n = sam_hdr_nref(hdr);
+    for (const std::string &rs : regionsvect) {
+        // htslib treats "." and "*" as "all contigs" via sam_parse_region,
+        // but we only want non-empty contigs, so handle them explicitly
+        if (rs == "." || rs == "*") {
+            spans.clear();
+            for (int t = 0; t < n; t++) {
+                hts_pos_t L = sam_hdr_tid2len(hdr, t);
+                if (L > 0) spans.push_back(std::make_tuple(t, (hts_pos_t)0, L));
+            }
+            break;
+        }
+        int tid = -1;
+        hts_pos_t beg = 0, end = 0;
+        const char *ok = sam_parse_region(hdr, rs.c_str(), &tid, &beg, &end, 0);
+        if (ok == NULL || tid < 0) {
+            had_error = true;
+            snprintf(buffer, buffer_len, "Invalid region: %s\n", rs.c_str());
+            return -1;
+        }
+        // Clamp end to contig length (htslib may return INT64_MAX for
+        // the "open end" forms REF and REF:START)
+        hts_pos_t hdr_len = sam_hdr_tid2len(hdr, tid);
+        if (end > hdr_len) end = hdr_len;
+        if (end > beg) {
+            spans.push_back(std::make_tuple(tid, beg, end));
+        }
+    }
+    return 0;
+}
+
+
+//' Get base coverage histogram for a BAM file
+//'
+//' @param bamfile A character scalar with the bam file name (and path).
+//' @param regions Character vector specifying the region(s) for which
+//'     to calculate coverage. Each region uses the grammar supported by the
+//'     \code{htslib} function \code{sam_parse_region}, for example
+//'     \code{"."} (all contigs), \code{"chr"} (whole contig),
+//'     \code{"chr:START"}, \code{"chr:-END"} or
+//'     \code{"chr:START-END"}. If \code{NULL}, the whole genome
+//'     (\code{"."}) is used by default.
+//' @param maxDepth An integer scalar defining the maximal depth to consider.
+//' @param method Character scalar with the method used for coverage
+//'     calculation. \code{"full"} (the default) considers CIGAR
+//'     operations, thus not counting soft-clip bases and read-inserted
+//'     positions as covered. \code{"simple"} ignores the CIGAR strings and
+//'     covers the whole reference span between the first and the last
+//'     aligned position of each alignment (using \code{htslib}'s
+//'     \code{bam_endpos}); this is slightly faster but overestimates
+//'     coverage in the soft-clipped ends and around indels.
+//' @param nThreads A numeric scalar with the number of threads used for
+//'     decompressing BAM records.
+//'
+//' @details Secondary and supplementary alignments and unmapped reads are
+//'     not included.
+//'
+//' @references The algorithm was described in Pedersen BS and Quinlan AR.
+//'     "Mosdepth: quick coverage calculation for genomes and exomes".
+//'     Bioinformatics. 2018; 34(5):867-868.
+//'     \url{https://doi.org/10.1093/bioinformatics/btx699}
+//'
+//' @examples
+//' modbamfile <- system.file("extdata", "6mA_1_10reads.bam", package = "SingleMoleculeGenomicsIO")
+//' getBaseCoverageForBam(modbamfile, "chr1", 12L, "full")
+//' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "full")
+//' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "simple")
+//'
+//' @return A named numeric vector of length \code{maxDepth + 1}, with values at
+//'     index \code{i} giving the number of positions that were overlapped by
+//'     exactly \code{i-1} alignments. Positions overlapped by more than
+//'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
+//'     at index \code{maxDepth + 1}.
+//'
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
+                                          Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
+                                          const uint32_t maxDepth = 200,
+                                          const std::string method = "full",
+                                          int nThreads = 3) {
+
+    std::vector<std::string> allowed_methods = {"full", "simple"};
+    if (std::find(allowed_methods.begin(), allowed_methods.end(), method) == allowed_methods.end()) {
+        Rcpp::stop(std::string("Invalid method: '") + method +
+                   "' (only 'full' and 'simple' are supported)");
+    }
+
+    int buffer_len = 2000, success = 0;
+    char buffer[2000];
+    bool had_error = false;
+    std::vector<std::string> regionsvect;
+    std::vector<std::tuple<int, hts_pos_t, hts_pos_t>> spans;
+    samFile *inbamfile = NULL;
+    const char* inname = bamfile.c_str();
+    bam1_t *bamdata = NULL;
+    hts_idx_t *idx = NULL;
+    hts_itr_t *iter = NULL;
+    sam_hdr_t *inbamhdr = NULL;
+    uint64_t *hist = (uint64_t*)calloc(maxDepth + 1, sizeof(uint64_t)); // hist[maxDepth] = overflow bin
+    Rcpp::NumericVector histvect(maxDepth + 1);
+    Rcpp::IntegerVector histvectNamesInt = Rcpp::seq(0, maxDepth);
+    Rcpp::CharacterVector histvectNames = Rcpp::as<Rcpp::CharacterVector>(histvectNamesInt);
+    histvect.attr("names") = histvectNames;
+
+    // set default regions if NULL
+    if (regions.isNotNull()) {
+        regionsvect = Rcpp::as<std::vector<std::string>>(regions);
+    } else {
+        regionsvect = {"."}; // default: whole genome
+    }
+
+    // turn htslib logging off -> handle via Rcpp::warning or Rcpp::stop
+    hts_set_log_level(HTS_LOG_OFF);
+
+    // open bam file and read index and header
+    success = open_bam_and_read_index_and_header(bamdata, inname,
+                                                 inbamfile, idx,
+                                                 inbamhdr, nThreads,
+                                                 had_error, buffer_len, buffer);
+    if (success != 0) {
+        goto end;
+    }
+
+    // resolve regions to (tid, beg, end) spans in header coordinates
+    success = resolve_regions_to_spans(regionsvect, inbamhdr, spans,
+                                       had_error, buffer_len, buffer);
+    if (success != 0) {
+        goto end;
+    }
+
+    // process each span independently, accumulating into `hist`
+    for (const std::tuple<int, hts_pos_t, hts_pos_t> &sp : spans) {
+        int tid = std::get<0>(sp);
+        hts_pos_t beg = std::get<1>(sp);
+        hts_pos_t end = std::get<2>(sp);
+        hts_pos_t len = end - beg;
+        if (len == 0) {
+            continue; // # nocov
+        }
+
+        int32_t *diff = (int32_t*)malloc((len + 1) * sizeof(int32_t));
+        if (diff == NULL) {
+            had_error = true; // # nocov start
+            snprintf(buffer, buffer_len,
+                     "Failed to allocate memory for coverage vector\n");
+            goto end; // # nocov end
+        }
+
+        iter = sam_itr_queryi(idx, tid, beg, end);
+        if (iter == NULL) {
+            free(diff); // # nocov start
+            diff = NULL;
+            had_error = true;
+            snprintf(buffer, buffer_len, "Failed to create region iterator\n");
+            goto end; // # nocov end
+        }
+
+        if (method == "full") {
+            region_cov(inbamfile, iter, bamdata, beg, end, diff, hist, maxDepth);
+        } else { // method == "simple"
+            region_cov_simple(inbamfile, iter, bamdata, beg, end, diff, hist, maxDepth);
+        }
+
+        if (iter) {
+            sam_itr_destroy(iter);
+        }
+        iter = NULL;
+        free(diff);
+        diff = NULL;
+    }
+
+    // copy result into return vector before releasing `hist`
+    for (int i = 0; i <= maxDepth; i++) {
+        histvect[i] = (double) hist[i];
+    }
+
+    end:
+        // cleanup
+        if (hist) free(hist);
+        if (bamdata) bam_destroy1(bamdata);
+        if (idx) hts_idx_destroy(idx);
+        if (inbamhdr) sam_hdr_destroy(inbamhdr);
+        if (inbamfile) sam_close(inbamfile);
+
+    if (had_error) {
+        // we encountered an error (message in `buffer`) --> stop
+        Rcpp::stop(buffer);
+    }
+
+    return histvect;
 }
