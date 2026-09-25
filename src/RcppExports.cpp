@@ -259,14 +259,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // getBaseCoverageForBam
-Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile, Rcpp::Nullable<std::vector<std::string>> regions, const uint maxDepth, const std::string method, int nThreads);
+Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile, Rcpp::Nullable<std::vector<std::string>> regions, const uint32_t maxDepth, const std::string method, int nThreads);
 RcppExport SEXP _SingleMoleculeGenomicsIO_getBaseCoverageForBam(SEXP bamfileSEXP, SEXP regionsSEXP, SEXP maxDepthSEXP, SEXP methodSEXP, SEXP nThreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string >::type bamfile(bamfileSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<std::vector<std::string>> >::type regions(regionsSEXP);
-    Rcpp::traits::input_parameter< const uint >::type maxDepth(maxDepthSEXP);
+    Rcpp::traits::input_parameter< const uint32_t >::type maxDepth(maxDepthSEXP);
     Rcpp::traits::input_parameter< const std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< int >::type nThreads(nThreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(getBaseCoverageForBam(bamfile, regions, maxDepth, method, nThreads));

@@ -1202,7 +1202,7 @@ int check_bam_format(samFile *infile,
 //' @keywords internal
 static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
                        hts_pos_t beg, hts_pos_t end, int32_t *diff,
-                       uint64_t *hist, uint maxd) {
+                       uint64_t *hist, uint32_t maxd) {
     hts_pos_t len = end - beg;
     memset(diff, 0, (len + 1) * sizeof(int32_t));
 
@@ -1248,7 +1248,7 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
 //' @keywords internal
 static void region_cov_simple(samFile *fp, hts_itr_t *it, bam1_t *b,
                               hts_pos_t beg, hts_pos_t end, int32_t *diff,
-                              uint64_t *hist, uint maxd) {
+                              uint64_t *hist, uint32_t maxd) {
     hts_pos_t len = end - beg;
     memset(diff, 0, (len + 1) * sizeof(int32_t));
 
@@ -1360,7 +1360,7 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
 // [[Rcpp::export]]
 Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
                                           Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
-                                          const uint maxDepth = 200,
+                                          const uint32_t maxDepth = 200,
                                           const std::string method = "full",
                                           int nThreads = 3) {
 
