@@ -225,6 +225,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// countAlignmentsInBam
+Rcpp::List countAlignmentsInBam(const std::string bamfile);
+RcppExport SEXP _SingleMoleculeGenomicsIO_countAlignmentsInBam(SEXP bamfileSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string >::type bamfile(bamfileSEXP);
+    rcpp_result_gen = Rcpp::wrap(countAlignmentsInBam(bamfile));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_unmodified_base
 char get_unmodified_base(char b);
 RcppExport SEXP _SingleMoleculeGenomicsIO_get_unmodified_base(SEXP bSEXP) {
@@ -276,6 +287,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SingleMoleculeGenomicsIO_concatenate_files", (DL_FUNC) &_SingleMoleculeGenomicsIO_concatenate_files, 2},
     {"_SingleMoleculeGenomicsIO_concatenate_hts_files", (DL_FUNC) &_SingleMoleculeGenomicsIO_concatenate_hts_files, 3},
     {"_SingleMoleculeGenomicsIO_getChromosomeNamesFromBam", (DL_FUNC) &_SingleMoleculeGenomicsIO_getChromosomeNamesFromBam, 1},
+    {"_SingleMoleculeGenomicsIO_countAlignmentsInBam", (DL_FUNC) &_SingleMoleculeGenomicsIO_countAlignmentsInBam, 1},
     {"_SingleMoleculeGenomicsIO_get_unmodified_base", (DL_FUNC) &_SingleMoleculeGenomicsIO_get_unmodified_base, 1},
     {"_SingleMoleculeGenomicsIO_complement", (DL_FUNC) &_SingleMoleculeGenomicsIO_complement, 1},
     {"_SingleMoleculeGenomicsIO_getBaseCoverageForBam", (DL_FUNC) &_SingleMoleculeGenomicsIO_getBaseCoverageForBam, 5},
