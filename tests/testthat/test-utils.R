@@ -462,3 +462,77 @@ test_that("getBaseCoverageForBam works", {
     expect_equal(sum(vOpenStart), 10)
 
 })
+
+## Checks, getBaseCoverageForBam method = "simple"
+## -------------------------------------------------------------------------- ##
+test_that("getBaseCoverageForBam method='simple' works", {
+    bamfile <- system.file("extdata", "6mA_1_10reads.bam",
+                           package = "SingleMoleculeGenomicsIO")
+    expect_true(file.exists(bamfile))
+
+    ## -- default method is "full" -------------------------------------------- ##
+    vDefault <- getBaseCoverageForBam(bamfile, regions = "chr1:6940000-6960000")
+    vFull    <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-6960000", method = "full")
+    expect_identical(vDefault, vFull)
+
+    ## -- invalid method ------------------------------------------------------- ##
+    expect_error(getBaseCoverageForBam(bamfile, method = "bogus"),
+                 "Invalid method")
+
+    ## -- "simple" on a region spanned by reads with soft-clips ---------------- ##
+    # reads aligned in this window have non-zero soft-clips, so the simple
+    # method (which covers the full first..last aligned reference span,
+    # including soft-clip bases and inserted bases) gives a slightly
+    # different histogram than the full method.
+    # Verified ground truth:
+    #   full   -> c(18370, 841, 651, 139, 0)
+    #   simple -> c(18369, 829, 660, 143, 0)
+    vRegionFull <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-6960000", method = "full")
+    vRegionSimple <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-6960000", method = "simple")
+    expect_identical(vRegionFull, c(18370, 841, 651, 139,
+        rep(0, 197)))
+    expect_identical(vRegionSimple, c(18369, 829, 660, 143,
+        rep(0, 197)))
+    # both cover all positions in the region
+    expect_equal(sum(vRegionSimple), 20001)
+    # simple does not create depth > full in this case (only soft-clip
+    # positions change, and max depth in full is already 4 here)
+    expect_true(max(which(vRegionSimple > 0)) >= max(which(vRegionFull > 0)))
+
+    ## -- "simple" on whole contig -------------------------------------------- ##
+    vChr1Full    <- getBaseCoverageForBam(
+        bamfile, regions = "chr1", method = "full")
+    vChr1Simple  <- getBaseCoverageForBam(
+        bamfile, regions = "chr1", method = "simple")
+    # both cover the whole contig
+    expect_equal(sum(vChr1Full), 195154279)
+    expect_equal(sum(vChr1Simple), 195154279)
+    # simple differs from full (reads have soft-clips)
+    expect_false(isTRUE(all.equal(vChr1Full, vChr1Simple)))
+    # specific first 5 bins
+    expect_identical(head(vChr1Simple, 5),
+        c(195138477, 3839, 823, 538, 991))
+
+    ## -- "simple" on maxDepth overflow bin ------------------------------------ ##
+    vSmall <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:6940000-6960000",
+        method = "simple", maxDepth = 2L)
+    # simple's max depth is also 4; index 2 catches depth 3+4 bins
+    expect_identical(vSmall, c(18369, 829, 660 + 143))
+
+    ## -- "simple" on a region fully outside any read span -------------------- ##
+    # positions never covered by any read -> all positions go into the
+    # zero-depth bin (index 1), same as full
+    vNoneFull   <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:10000000-10001000")
+    vNoneSimple <- getBaseCoverageForBam(
+        bamfile, regions = "chr1:10000000-10001000", method = "simple")
+    expect_identical(vNoneFull, vNoneSimple)
+    expect_equal(vNoneSimple[1L], 1001)  # all positions at zero depth
+    expect_true(all(vNoneSimple[-1L] == 0))
+    expect_equal(sum(vNoneSimple), 1001)  # region length
+})
+

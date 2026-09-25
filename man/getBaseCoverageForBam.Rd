@@ -4,7 +4,13 @@
 \alias{getBaseCoverageForBam}
 \title{Get base coverage histogram for a BAM file}
 \usage{
-getBaseCoverageForBam(bamfile, regions = NULL, maxDepth = 200L, nThreads = 3L)
+getBaseCoverageForBam(
+  bamfile,
+  regions = NULL,
+  maxDepth = 200L,
+  method = "full",
+  nThreads = 3L
+)
 }
 \arguments{
 \item{bamfile}{A character scalar with the bam file name (and path).}
@@ -18,6 +24,15 @@ to calculate coverage. Each region uses the grammar supported by the
 (\code{"."}) is used by default.}
 
 \item{maxDepth}{An integer scalar defining the maximal depth to consider.}
+
+\item{method}{Character scalar with the method used for coverage
+calculation. \code{"full"} (the default) considers CIGAR
+operations, thus not counting soft-clip bases and read-inserted
+positions as covered. \code{"simple"} ignores the CIGAR strings and
+covers the whole reference span between the first and the last
+aligned position of each alignment (using \code{htslib}'s
+\code{bam_endpos}); this is slightly faster but overestimates
+coverage in the soft-clipped ends and around indels.}
 
 \item{nThreads}{A numeric scalar with the number of threads used for
 decompressing BAM records.}
@@ -33,9 +48,15 @@ at index \code{maxDepth + 1}.
 Get base coverage histogram for a BAM file
 }
 \details{
-CIGAR operations are considered, thus not counting the genomic
-bases in a read-insertion as covered. Secondary and supplementary
-alignments are not included.
+Secondary and supplementary alignments and unmapped reads are
+not included.
+}
+\examples{
+modbamfile <- system.file("extdata", "6mA_1_10reads.bam", package = "SingleMoleculeGenomicsIO")
+getBaseCoverageForBam(modbamfile, "chr1", 12L, "full")
+getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "full")
+getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "simple")
+
 }
 \references{
 The algorithm was described in Pedersen BS and Quinlan AR.

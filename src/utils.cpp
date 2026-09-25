@@ -3,6 +3,7 @@
 #include <htslib/thread_pool.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <cerrno>
 #include <Rcpp.h>
 #include "utils.h"
@@ -1137,6 +1138,37 @@ static void region_cov(samFile *fp, hts_itr_t *it, bam1_t *b,
     }
 }
 
+//' Simple coverage: a read covers the whole reference span between its first
+//' and last aligned position, regardless of CIGAR operations (soft-clip bases
+//' and read-inserted bases are also counted as covered). htslib's
+//' bam_endpos() gives exactly this reference span (pos-1 .. endpos-2, 0-based
+//' inclusive; it equals pos-1 if the CIGAR ends in a soft-clip).
+//' @noRd
+//' @keywords internal
+static void region_cov_simple(samFile *fp, hts_itr_t *it, bam1_t *b,
+                              hts_pos_t beg, hts_pos_t end, int32_t *diff,
+                              uint64_t *hist, uint maxd) {
+    hts_pos_t len = end - beg;
+    memset(diff, 0, (len + 1) * sizeof(int32_t));
+
+    while (sam_itr_next(fp, it, b) >= 0) {
+        if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) {
+            continue;
+        }
+        hts_pos_t s_rel = b->core.pos - beg;
+        hts_pos_t e_rel = bam_endpos(b) - beg;
+        if (e_rel > 0 && s_rel < len) {
+            diff[s_rel < 0 ? 0 : s_rel]++;
+            diff[e_rel > len ? len : e_rel]--;
+        }
+    }
+    int32_t d = 0;
+    for (hts_pos_t i = 0; i < len; i++) {
+        d += diff[i];
+        hist[d < maxd ? d : maxd]++;
+    }
+}
+
 // Resolve a vector of region strings into (tid, beg, end) spans, where
 // `beg` is 0-based and `end` is exclusive. "." or "*" expands to all
 // non-empty contigs. Individual region strings are parsed with htslib's
@@ -1193,17 +1225,30 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
 //'     \code{"chr:START-END"}. If \code{NULL}, the whole genome
 //'     (\code{"."}) is used by default.
 //' @param maxDepth An integer scalar defining the maximal depth to consider.
+//' @param method Character scalar with the method used for coverage
+//'     calculation. \code{"full"} (the default) considers CIGAR
+//'     operations, thus not counting soft-clip bases and read-inserted
+//'     positions as covered. \code{"simple"} ignores the CIGAR strings and
+//'     covers the whole reference span between the first and the last
+//'     aligned position of each alignment (using \code{htslib}'s
+//'     \code{bam_endpos}); this is slightly faster but overestimates
+//'     coverage in the soft-clipped ends and around indels.
 //' @param nThreads A numeric scalar with the number of threads used for
 //'     decompressing BAM records.
 //'
-//' @details CIGAR operations are considered, thus not counting the genomic
-//'     bases in a read-insertion as covered. Secondary and supplementary
-//'     alignments are not included.
+//' @details Secondary and supplementary alignments and unmapped reads are
+//'     not included.
 //'
 //' @references The algorithm was described in Pedersen BS and Quinlan AR.
 //'     "Mosdepth: quick coverage calculation for genomes and exomes".
 //'     Bioinformatics. 2018; 34(5):867-868.
 //'     \url{https://doi.org/10.1093/bioinformatics/btx699}
+//'
+//' @examples
+//' modbamfile <- system.file("extdata", "6mA_1_10reads.bam", package = "SingleMoleculeGenomicsIO")
+//' getBaseCoverageForBam(modbamfile, "chr1", 12L, "full")
+//' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "full")
+//' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "simple")
 //'
 //' @return A numeric vector of length \code{maxDepth + 1}, with values at
 //'     index \code{i} giving the number of positions that were overlapped by
@@ -1215,7 +1260,14 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
 Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
                                           Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
                                           const uint maxDepth = 200,
+                                          const std::string method = "full",
                                           int nThreads = 3) {
+
+    std::vector<std::string> allowed_methods = {"full", "simple"};
+    if (std::find(allowed_methods.begin(), allowed_methods.end(), method) == allowed_methods.end()) {
+        Rcpp::stop(std::string("Invalid method: '") + method +
+                   "' (only 'full' and 'simple' are supported)");
+    }
 
     int buffer_len = 2000, success = 0;
     char buffer[2000];
@@ -1284,7 +1336,11 @@ Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
             goto end;
         }
 
-        region_cov(inbamfile, iter, bamdata, beg, end, diff, hist, maxDepth);
+        if (method == "full") {
+            region_cov(inbamfile, iter, bamdata, beg, end, diff, hist, maxDepth);
+        } else { // method == "simple"
+            region_cov_simple(inbamfile, iter, bamdata, beg, end, diff, hist, maxDepth);
+        }
 
         if (iter) {
             sam_itr_destroy(iter);
