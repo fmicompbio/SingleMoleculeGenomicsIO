@@ -128,13 +128,13 @@ se <- readModBam(bamfiles = modbamfiles,
                  BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [65ms]
+#> ✔ finding unique genomic positions... [43ms]
 #> 
 #> ℹ collapsed 17739 positions to 7967 unique ones
-#> ✔ collapsed 17739 positions to 7967 unique ones [28ms]
+#> ✔ collapsed 17739 positions to 7967 unique ones [16ms]
 #> 
 #> ℹ extracting sequence contexts
-#> ✔ extracting sequence contexts [645ms]
+#> ✔ extracting sequence contexts [385ms]
 #> 
 se
 #> class: RangedSummarizedExperiment 
@@ -559,12 +559,14 @@ se_summary2 <- readModBam(bamfiles = modbamfiles,
                           verbose = TRUE, 
                           BPPARAM = SerialParam())
 #> ℹ extracting base modifications from modBAM files
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [805ms]
+#> ✔ finding unique genomic positions... [324ms]
 #> 
-#> ℹ collapsed 11211 positions to 7967 unique ones
-#> ✔ collapsed 11211 positions to 7967 unique ones [60ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ collapsed 11211 positions to 7967 unique ones
+#> ✔ collapsed 11211 positions to 7967 unique ones [34ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 se_summary2
 #> class: RangedSummarizedExperiment 
 #> dim: 7967 2 
@@ -653,22 +655,23 @@ se_sample <- readModBam(bamfiles = modbamfiles,
                         verbose = TRUE, 
                         BPPARAM = SerialParam(RNGseed = 1327828L))
 #> ℹ extracting base modifications from modBAM files
-#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ℹ sampling alignments with probability 0.5
-#> ℹ reading alignments
-#> ℹ removed 150 unaligned (e.g. soft-masked) of 13136 called bases
-#> ℹ read 5 alignments
-#> ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
-#> ℹ sampling alignments with probability 0.5
-#> ℹ reading alignments
-#> ℹ removed 1165 unaligned (e.g. soft-masked) of 20091 called bases
-#> ℹ read 7 alignments
-#> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [37ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ sampling alignments with probability 0.5
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ reading alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ removed 150 unaligned (e.g. soft-masked) of 13136 called bases
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ read 5 alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ opening input file /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_2_10reads.bam using 1 thread
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ sampling alignments with probability 0.5
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ reading alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ removed 1165 unaligned (e.g. soft-masked) of 20091 called bases
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ read 7 alignments
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ finding unique genomic positions...
+#> ✔ finding unique genomic positions... [21ms]
 #> 
-#> ℹ collapsed 31912 positions to 7238 unique ones
-#> ✔ collapsed 31912 positions to 7238 unique ones [316ms]
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ collapsed 31912 positions to 7238 unique ones
+#> ✔ collapsed 31912 positions to 7238 unique ones [153ms]
 #> 
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 se_sample$n_reads
 #> [1] 5 7
 ```
@@ -1098,15 +1101,16 @@ res <- filterReadsModBam(infiles = modbamfile,
                          BPPARAM = BiocParallel::SerialParam(),
                          verbose = TRUE)
 #> ℹ start filtering of /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam using 1 thread
-#> ℹ merging 1 filtered chunks
-#> ℹ done filtering: retained 8 of 10 records (80%)
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ merging 1 filtered chunks
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]ℹ done filtering: retained 8 of 10 records (80%)
+#> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 res
 #>   sample
 #> 1     s1
 #>                                                                                infile
 #> 1 /Users/runner/work/_temp/Library/SingleMoleculeGenomicsIO/extdata/6mA_1_10reads.bam
-#>                                                                            outfile
-#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmphJqn7I/file82bce3b1345.bam
+#>                                                                             outfile
+#> 1 /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T//RtmpwLJhZe/file659456058875.bam
 #>   total retained filtered_unmapped filtered_secondary filtered_supplementary
 #> 1    10        8                 0                  0                      0
 #>   filtered_minReadLength filtered_minAlignedLength filtered_minAlignedFraction
@@ -1406,7 +1410,7 @@ sessioninfo::session_info()
 #>  scales                     1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
 #>  Seqinfo                  * 1.3.2      2026-08-26 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  sessioninfo                1.2.4      2026-06-04 [1] CRAN (R 4.6.0)
-#>  SingleMoleculeGenomicsIO * 0.1.7      2026-09-25 [1] Bioconductor
+#>  SingleMoleculeGenomicsIO * 0.1.8      2026-09-25 [1] Bioconductor
 #>  SparseArray              * 1.13.3     2026-09-22 [1] https://bioc.r-universe.dev (R 4.6.1)
 #>  SummarizedExperiment     * 1.43.0     2026-05-18 [1] Bioconductor 3.24 (R 4.6.0)
 #>  systemfonts                1.3.2      2026-03-05 [1] RSPM (R 4.6.0)

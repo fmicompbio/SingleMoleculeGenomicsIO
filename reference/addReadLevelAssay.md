@@ -138,10 +138,10 @@ se <- readModBam(bamfiles = modbamfile, regions = "chr1:6940000-6955000",
                  BPPARAM = BiocParallel::SerialParam())
 #> ℹ extracting base modifications from modBAM files
 #> ℹ finding unique genomic positions...
-#> ✔ finding unique genomic positions... [63ms]
+#> ✔ finding unique genomic positions... [29ms]
 #> 
 #> ℹ collapsed 11300 positions to 4772 unique ones
-#> ✔ collapsed 11300 positions to 4772 unique ones [467ms]
+#> ✔ collapsed 11300 positions to 4772 unique ones [182ms]
 #> 
 # duplicate the 'mod_prob' assay into a new assay named 'new_assay'
 se <- addReadLevelAssay(se, assayDF = assay(se, "mod_prob"),

@@ -65,6 +65,9 @@
 - [`flattenReadLevelAssay()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/flattenReadLevelAssay.md)
   : Summarize a read-level object to sample-level
 
+- [`getBaseCoverageForBam()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getBaseCoverageForBam.md)
+  : Get base coverage histogram for a BAM file
+
 - [`getReadLevelAssayNames()`](https://fmicompbio.github.io/SingleMoleculeGenomicsIO/reference/getReadLevelAssayNames.md)
   : Get names of assays containing read-level data
 
