@@ -858,6 +858,7 @@ complement <- function(n) {
 #'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 #'     at index \code{maxDepth + 1}.
 #'
+#' @export
 getBaseCoverageForBam <- function(bamfile, regions = NULL, maxDepth = 200L, method = "full", nThreads = 3L) {
     .Call(`_SingleMoleculeGenomicsIO_getBaseCoverageForBam`, bamfile, regions, maxDepth, method, nThreads)
 }

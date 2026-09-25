@@ -1357,6 +1357,7 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
 //'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 //'     at index \code{maxDepth + 1}.
 //'
+//' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
                                           Rcpp::Nullable<std::vector<std::string>> regions = R_NilValue,
