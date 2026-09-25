@@ -757,6 +757,27 @@ getChromosomeNamesFromBam <- function(bamfile) {
     .Call(`_SingleMoleculeGenomicsIO_getChromosomeNamesFromBam`, bamfile)
 }
 
+#' Count alignments in an indexed bam file
+#'
+#' Report the number of mapped and unmapped alignments in a sorted
+#' and indexed bam file.
+#'
+#' @param bamfile Character scalar giving the name of the bam file to count
+#'     alignments in. The file must have an associated index.
+#'
+#' @return A named list with elements \code{"mapped"} and \code{"unmapped"},
+#'     where the \code{"mapped"} element is a named vector with the number
+#'     of alignments per chromosome, and the \code{"unmapped"} element is
+#'     a numeric scalar giving the number of unmapped reads in the bam file.
+#'
+#' @examples
+#' countAlignmentsInBam(system.file("extdata/6mA_1_10reads.bam",
+#'                                  package = "SingleMoleculeGenomicsIO"))
+#' @export
+countAlignmentsInBam <- function(bamfile) {
+    .Call(`_SingleMoleculeGenomicsIO_countAlignmentsInBam`, bamfile)
+}
+
 #' Get unmodified base corresponding to a modified base
 #'
 #' @param b Modified base as a char
