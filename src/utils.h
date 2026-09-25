@@ -90,6 +90,6 @@ int check_bam_format(samFile *infile,
 
 Rcpp::NumericVector getBaseCoverageForBam(const std::string,
                                           Rcpp::Nullable<std::vector<std::string>>,
-                                          const uint,
+                                          const uint32_t,
                                           const std::string,
                                           int);
