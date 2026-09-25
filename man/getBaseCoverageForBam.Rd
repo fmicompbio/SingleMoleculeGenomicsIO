@@ -38,9 +38,9 @@ coverage in the soft-clipped ends and around indels.}
 decompressing BAM records.}
 }
 \value{
-A numeric vector of length \code{maxDepth + 1}, with values at
+A named numeric vector of length \code{maxDepth + 1}, with values at
 index \code{i} giving the number of positions that were overlapped by
-exactly \code{i} alignments. Positions overlapped by more than
+exactly \code{i-1} alignments. Positions overlapped by more than
 \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 at index \code{maxDepth + 1}.
 }

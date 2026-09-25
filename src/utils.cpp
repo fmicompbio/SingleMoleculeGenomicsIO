@@ -1250,9 +1250,9 @@ static int resolve_regions_to_spans(const std::vector<std::string> &regionsvect,
 //' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "full")
 //' getBaseCoverageForBam(modbamfile, "chr1:6000000-7000000", 12L, "simple")
 //'
-//' @return A numeric vector of length \code{maxDepth + 1}, with values at
+//' @return A named numeric vector of length \code{maxDepth + 1}, with values at
 //'     index \code{i} giving the number of positions that were overlapped by
-//'     exactly \code{i} alignments. Positions overlapped by more than
+//'     exactly \code{i-1} alignments. Positions overlapped by more than
 //'     \code{maxDepth} alignments are also added to the value for \code{maxDepth}
 //'     at index \code{maxDepth + 1}.
 //'
@@ -1282,6 +1282,9 @@ Rcpp::NumericVector getBaseCoverageForBam(const std::string bamfile,
     sam_hdr_t *inbamhdr = NULL;
     uint64_t *hist = (uint64_t*)calloc(maxDepth + 1, sizeof(uint64_t)); // hist[maxDepth] = overflow bin
     Rcpp::NumericVector histvect(maxDepth + 1);
+    Rcpp::IntegerVector histvectNamesInt = Rcpp::seq(0, maxDepth);
+    Rcpp::CharacterVector histvectNames = Rcpp::as<Rcpp::CharacterVector>(histvectNamesInt);
+    histvect.attr("names") = histvectNames;
 
     // set default regions if NULL
     if (regions.isNotNull()) {

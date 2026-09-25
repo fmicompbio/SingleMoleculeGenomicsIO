@@ -403,7 +403,7 @@ test_that("getBaseCoverageForBam works", {
 
     # ground truth (verified against samtools depth -a)
     expect_identical(head(vNULL, 11),
-        c(2728206677, 3841, 811, 563, 973, 596, 675, 463, 420, 1066, 6366))
+        setNames(c(2728206677, 3841, 811, 563, 973, 596, 675, 463, 420, 1066, 6366), 0:10))
     expect_true(all(vNULL[12:201] == 0))  # max depth is 10 for 10 reads
 
     ## -- single contig (no coordinates) -------------------------------------- ##
@@ -411,14 +411,14 @@ test_that("getBaseCoverageForBam works", {
     # the whole genome, but with zero-count restricted to chr1 length.
     vChr1 <- getBaseCoverageForBam(bamfile, regions = "chr1")
     expect_identical(head(vChr1, 11),
-        c(195138505, 3841, 811, 563, 973, 596, 675, 463, 420, 1066, 6366))
+        setNames(c(195138505, 3841, 811, 563, 973, 596, 675, 463, 420, 1066, 6366), 0:10))
     expect_true(all(vChr1[12:201] == 0))
     expect_equal(sum(vChr1), 195154279)  # contig length
 
     ## -- bounded region ------------------------------------------------------ ##
     vRegion <- getBaseCoverageForBam(bamfile, regions = "chr1:6940000-6960000")
     expect_identical(head(vRegion, 5),
-        c(18370, 841, 651, 139, 0))
+        setNames(c(18370, 841, 651, 139, 0), 0:4))
     expect_true(all(vRegion[6:201] == 0))
     expect_equal(sum(vRegion), 20001)  # total positions in region
 
@@ -426,7 +426,7 @@ test_that("getBaseCoverageForBam works", {
     vClamp <- getBaseCoverageForBam(
         bamfile, regions = "chr1:6940000-999999999")
     expect_identical(head(vClamp, 4),
-        c(188212649, 841, 651, 139))
+        setNames(c(188212649, 841, 651, 139), 0:3))
     # clamped to chr1 length, so sum = 195154279 - 6939999
     expect_equal(sum(vClamp), 195154279 - 6939999)
 
@@ -445,7 +445,7 @@ test_that("getBaseCoverageForBam works", {
         bamfile, regions = "chr1:6940000-6960000", maxDepth = 2L)
     expect_length(vSmall, 3L)
     # index 2 = overflow: positions covered by depth 3 AND 4
-    expect_identical(vSmall, c(18370, 841, 651 + 139))
+    expect_identical(vSmall, setNames(c(18370, 841, 651 + 139), 0:2))
 
     ## -- nThreads parameter does not affect result ---------------------------- ##
     v2t <- getBaseCoverageForBam(
@@ -492,10 +492,10 @@ test_that("getBaseCoverageForBam method='simple' works", {
         bamfile, regions = "chr1:6940000-6960000", method = "full")
     vRegionSimple <- getBaseCoverageForBam(
         bamfile, regions = "chr1:6940000-6960000", method = "simple")
-    expect_identical(vRegionFull, c(18370, 841, 651, 139,
-        rep(0, 197)))
-    expect_identical(vRegionSimple, c(18369, 829, 660, 143,
-        rep(0, 197)))
+    expect_identical(vRegionFull,
+                     setNames(c(18370, 841, 651, 139, rep(0, 197)), 0:200))
+    expect_identical(vRegionSimple,
+                     setNames(c(18369, 829, 660, 143, rep(0, 197)), 0:200))
     # both cover all positions in the region
     expect_equal(sum(vRegionSimple), 20001)
     # simple does not create depth > full in this case (only soft-clip
@@ -514,14 +514,14 @@ test_that("getBaseCoverageForBam method='simple' works", {
     expect_false(isTRUE(all.equal(vChr1Full, vChr1Simple)))
     # specific first 5 bins
     expect_identical(head(vChr1Simple, 5),
-        c(195138477, 3839, 823, 538, 991))
+        setNames(c(195138477, 3839, 823, 538, 991), 0:4))
 
     ## -- "simple" on maxDepth overflow bin ------------------------------------ ##
     vSmall <- getBaseCoverageForBam(
         bamfile, regions = "chr1:6940000-6960000",
         method = "simple", maxDepth = 2L)
     # simple's max depth is also 4; index 2 catches depth 3+4 bins
-    expect_identical(vSmall, c(18369, 829, 660 + 143))
+    expect_identical(vSmall, setNames(c(18369, 829, 660 + 143), 0:2))
 
     ## -- "simple" on a region fully outside any read span -------------------- ##
     # positions never covered by any read -> all positions go into the
@@ -531,7 +531,7 @@ test_that("getBaseCoverageForBam method='simple' works", {
     vNoneSimple <- getBaseCoverageForBam(
         bamfile, regions = "chr1:10000000-10001000", method = "simple")
     expect_identical(vNoneFull, vNoneSimple)
-    expect_equal(vNoneSimple[1L], 1001)  # all positions at zero depth
+    expect_equal(vNoneSimple[1L], c("0" = 1001))  # all positions at zero depth
     expect_true(all(vNoneSimple[-1L] == 0))
     expect_equal(sum(vNoneSimple), 1001)  # region length
 })
