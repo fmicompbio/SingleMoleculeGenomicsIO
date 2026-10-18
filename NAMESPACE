@@ -36,6 +36,7 @@ export(subsetReads)
 importFrom(BSgenome,getSeq)
 importFrom(BiocGenerics,
   "%in%",
+  "strand<-",
   as.data.frame,
   as.list,
   cbind,

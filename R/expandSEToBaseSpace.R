@@ -16,7 +16,11 @@
 #'     expand to base space. Only these assays will be present in the returned
 #'     object.
 #' @param ignore.strand A logical scalar defining whether to ignore the strand
-#'     of the \code{rowRanges(se)}.
+#'     of the \code{rowRanges(se)}. If \code{FALSE}, \code{se} is first
+#'     filtered (using \code{filterPositions(..., filters = "repeated.positions")})
+#'     to resolve any positions represented on both strands.
+#' @param verbose Logical scalar indicating whether to print out progress
+#'     messages.
 #'
 #' @importFrom SummarizedExperiment SummarizedExperiment colData assays
 #' @importFrom S4Vectors metadata
@@ -24,12 +28,17 @@
 #' @importFrom GenomicRanges GPos
 #' @importFrom utils modifyList
 #' @importFrom cli cli_abort
-#' @importFrom BiocGenerics start end nrow ncol colnames unstrand
+#' @importFrom BiocGenerics start end nrow ncol colnames unstrand strand strand<-
 #' @importFrom SparseArray NaArray nnawhich
 #' @importFrom Seqinfo seqnames seqinfo
 #'
-#' @return A single-base resolution \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
-#'     corresponding to \code{se}.
+#' @return A single-base resolution
+#'     \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
+#'     corresponding to \code{se}. If \code{ignore.strand} is \code{TRUE},
+#'     the return object is unstranded. If \code{ignore.strand} is \code{FALSE},
+#'     all positions present in the input object will retain the assigned
+#'     strand, while all other positions will be unstranded.
+#'
 #' @author Charlotte Soneson, Michael Stadler
 #'
 #' @examples
@@ -47,7 +56,8 @@ expandSEToBaseSpace <- function(se,
                                 regions = NULL,
                                 seqinfo = NULL,
                                 keepAssays = getReadLevelAssayNames(se),
-                                ignore.strand = TRUE) {
+                                ignore.strand = TRUE,
+                                verbose = FALSE) {
     # check arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")
     .assertVector(x = keepAssays, type = "character",
@@ -83,7 +93,7 @@ expandSEToBaseSpace <- function(se,
             })))
         }
         .assertVector(x = regions, type = "GRanges")
-        .assertScalar(x = ignore.strand, type = "logical", validValues = TRUE)
+        .assertScalar(x = ignore.strand, type = "logical", validValues = c(TRUE, FALSE))
 
         # note: commenting out for now, in order to allow shrinking of the
         #       range covered by the SE as well
@@ -92,23 +102,32 @@ expandSEToBaseSpace <- function(se,
         #     cli_abort("Not all positions in {.arg se} are within {.arg region}")
         # }
 
-        # create base-resolution rowRanges
-        if (ignore.strand) {
-            rr <- GPos(seqnames = rep(seqnames(regions), width(regions)),
-                       pos = unlist(lapply(seq_along(regions), function(i) {
-                           seq(start(regions)[i], end(regions)[i])
-                       })),
-                       strand = "*",
-                       seqinfo = seqinfo)
-        } else {
-            cli_abort("{.arg ignore.strand = FALSE} is not supported yet") # nocov
-        }
-
         # subset SE to only the requested regions
         se <- subsetByOverlaps(se, regions, ignore.strand = TRUE)
 
+        # create base-resolution rowRanges
+        rr <- GPos(seqnames = rep(seqnames(regions), width(regions)),
+                   pos = unlist(lapply(seq_along(regions), function(i) {
+                       seq(start(regions)[i], end(regions)[i])
+                   })),
+                   strand = "*",
+                   seqinfo = seqinfo)
+        if (!ignore.strand) {
+            nrowpre <- nrow(se)
+            se <- filterPositions(se, filters = "repeated.positions",
+                                  assayNameNA = NULL,
+                                  assayNameAmbig = "mod_prob")
+            nrowpost <- nrow(se)
+            if (nrowpost != nrowpre) {
+                .message("{nrowpre - nrowpost} positions filtered out due to ambiguous strand assignment", noTimer = TRUE)
+            }
+            m <- match(rowRanges(se), rr, ignore.strand = TRUE)
+            i <- which(!is.na(m))
+            strand(rr)[m[i]] <- strand(se)[i]
+        }
+
         # iterate over assays
-        newRowIdx <- match(unstrand(rowRanges(se)), rr)
+        newRowIdx <- match(rowRanges(se), rr, ignore.strand = ignore.strand)
         assayL <- lapply(assays(se, withDimnames = FALSE)[keepAssays], function(Df) {
             endoapply(Df, function(naArr) {
                 naArrBases <- NaArray(

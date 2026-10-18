@@ -9,7 +9,8 @@ expandSEToBaseSpace(
   regions = NULL,
   seqinfo = NULL,
   keepAssays = getReadLevelAssayNames(se),
-  ignore.strand = TRUE
+  ignore.strand = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -33,11 +34,20 @@ expand to base space. Only these assays will be present in the returned
 object.}
 
 \item{ignore.strand}{A logical scalar defining whether to ignore the strand
-of the \code{rowRanges(se)}.}
+of the \code{rowRanges(se)}. If \code{FALSE}, \code{se} is first
+filtered (using \code{filterPositions(..., filters = "repeated.positions")})
+to resolve any positions represented on both strands.}
+
+\item{verbose}{Logical scalar indicating whether to print out progress
+messages.}
 }
 \value{
-A single-base resolution \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
-corresponding to \code{se}.
+A single-base resolution
+\code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
+corresponding to \code{se}. If \code{ignore.strand} is \code{TRUE},
+the return object is unstranded. If \code{ignore.strand} is \code{FALSE},
+all positions present in the input object will retain the assigned
+strand, while all other positions will be unstranded.
 }
 \description{
 Expand the rows of a \code{RangedSummarizedExperiment} to single base resolution.
