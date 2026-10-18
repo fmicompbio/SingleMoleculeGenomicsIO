@@ -1,3 +1,7 @@
+# SingleMoleculeGenomicsIO 0.1.9
+
+* Allow `ignore.strand=FALSE` in `expandSEToBaseSpace`
+
 # SingleMoleculeGenomicsIO 0.1.8
 
 * Add `getBaseCoverageForBam` and `countAlignmentsInBam` functions
