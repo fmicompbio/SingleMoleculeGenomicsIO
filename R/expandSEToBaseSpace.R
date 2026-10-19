@@ -19,6 +19,10 @@
 #'     of the \code{rowRanges(se)}. If \code{FALSE}, \code{se} is first
 #'     filtered (using \code{filterPositions(..., filters = "repeated.positions")})
 #'     to resolve any positions represented on both strands.
+#' @param assayNameAmbig A character scalar indicating the assay to use to
+#'     decide which row to retain if multiple rows represent the same genomic
+#'     position (on different strands). The row with the largest row sum in
+#'     this assay is retained. Only used if \code{ignore.strand} is \code{FALSE}.
 #' @param verbose Logical scalar indicating whether to print out progress
 #'     messages.
 #'
@@ -57,6 +61,7 @@ expandSEToBaseSpace <- function(se,
                                 seqinfo = NULL,
                                 keepAssays = getReadLevelAssayNames(se),
                                 ignore.strand = TRUE,
+                                assayNameAmbig = "mod_prob",
                                 verbose = FALSE) {
     # check arguments
     .assertVector(x = se, type = "RangedSummarizedExperiment")
@@ -95,13 +100,6 @@ expandSEToBaseSpace <- function(se,
         .assertVector(x = regions, type = "GRanges")
         .assertScalar(x = ignore.strand, type = "logical", validValues = c(TRUE, FALSE))
 
-        # note: commenting out for now, in order to allow shrinking of the
-        #       range covered by the SE as well
-        # if (countOverlaps(query = range(unstrand(rowRanges(se))),
-        #                   subject = region, type = "within") == 0L) {
-        #     cli_abort("Not all positions in {.arg se} are within {.arg region}")
-        # }
-
         # subset SE to only the requested regions
         se <- subsetByOverlaps(se, regions, ignore.strand = TRUE)
 
@@ -116,7 +114,7 @@ expandSEToBaseSpace <- function(se,
             nrowpre <- nrow(se)
             se <- filterPositions(se, filters = "repeated.positions",
                                   assayNameNA = NULL,
-                                  assayNameAmbig = "mod_prob")
+                                  assayNameAmbig = assayNameAmbig)
             nrowpost <- nrow(se)
             if (nrowpost != nrowpre) {
                 .message("{nrowpre - nrowpost} positions filtered out due to ambiguous strand assignment", noTimer = TRUE)

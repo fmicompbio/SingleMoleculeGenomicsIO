@@ -10,6 +10,7 @@ expandSEToBaseSpace(
   seqinfo = NULL,
   keepAssays = getReadLevelAssayNames(se),
   ignore.strand = TRUE,
+  assayNameAmbig = "mod_prob",
   verbose = FALSE
 )
 }
@@ -37,6 +38,11 @@ object.}
 of the \code{rowRanges(se)}. If \code{FALSE}, \code{se} is first
 filtered (using \code{filterPositions(..., filters = "repeated.positions")})
 to resolve any positions represented on both strands.}
+
+\item{assayNameAmbig}{A character scalar indicating the assay to use to
+decide which row to retain if multiple rows represent the same genomic
+position (on different strands). The row with the largest row sum in
+this assay is retained. Only used if \code{ignore.strand} is \code{FALSE}.}
 
 \item{verbose}{Logical scalar indicating whether to print out progress
 messages.}

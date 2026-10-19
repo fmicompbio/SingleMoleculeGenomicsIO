@@ -74,12 +74,8 @@ test_that("expandSEToBaseSpace works", {
     )
 
     # expected fails
-    # expect_error(expandSEToBaseSpace(se = se, regions = "chr1:6940100-6941000"),
-    #              "Not all positions in .se. are within .region.")
     expect_error(expandSEToBaseSpace(se = se, keepAssays = "doesnt-exist"),
                  "All values in .keepAssays. must be one of: mod_prob")
-    # expect_error(expandSEToBaseSpace(se = se, ignore.strand = FALSE),
-    #              "All values in .ignore.strand. must be one of: TRUE")
 
     # empty input
     seExp0 <- expandSEToBaseSpace(se = se[numeric(0), ])
