@@ -7,9 +7,12 @@
 expandSEToBaseSpace(
   se,
   regions = NULL,
+  flank = 0L,
   seqinfo = NULL,
   keepAssays = getReadLevelAssayNames(se),
-  ignore.strand = TRUE
+  ignore.strand = TRUE,
+  assayNameAmbig = "mod_prob",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -22,6 +25,11 @@ regions can be specified as character scalars (e.g. "chr1:1200-1300")
 that can be coerced into a \code{GRanges} object. If \code{NULL} (the
 default), \code{regions} is set to the range of the data in \code{se}.}
 
+\item{flank}{Integer scalar. If \code{regions=NULL} and \code{flank} is
+non-zero, \code{flank} positions will be added on both sides of each
+range in the derived \code{regions}. This is useful to add a buffer of
+NA values between observed values in non-overlapping regions.}
+
 \item{seqinfo}{\code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 containing information about the set of genomic sequences (chromosomes).
 Alternatively, a named numeric vector with genomic sequence names and
@@ -33,11 +41,25 @@ expand to base space. Only these assays will be present in the returned
 object.}
 
 \item{ignore.strand}{A logical scalar defining whether to ignore the strand
-of the \code{rowRanges(se)}.}
+of the \code{rowRanges(se)}. If \code{FALSE}, \code{se} is first
+filtered (using \code{filterPositions(..., filters = "repeated.positions")})
+to resolve any positions represented on both strands.}
+
+\item{assayNameAmbig}{A character scalar indicating the assay to use to
+decide which row to retain if multiple rows represent the same genomic
+position (on different strands). The row with the largest row sum in
+this assay is retained. Only used if \code{ignore.strand} is \code{FALSE}.}
+
+\item{verbose}{Logical scalar indicating whether to print out progress
+messages.}
 }
 \value{
-A single-base resolution \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
-corresponding to \code{se}.
+A single-base resolution
+\code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
+corresponding to \code{se}. If \code{ignore.strand} is \code{TRUE},
+the return object is unstranded. If \code{ignore.strand} is \code{FALSE},
+all positions present in the input object will retain the assigned
+strand, while all other positions will be unstranded.
 }
 \description{
 Expand the rows of a \code{RangedSummarizedExperiment} to single base resolution.
