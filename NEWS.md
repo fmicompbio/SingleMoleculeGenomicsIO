@@ -1,6 +1,7 @@
 # SingleMoleculeGenomicsIO 0.1.9
 
 * Allow `ignore.strand=FALSE` in `expandSEToBaseSpace`
+* Add `flank` argument to `expandSEToBaseSpace`
 
 # SingleMoleculeGenomicsIO 0.1.8
 

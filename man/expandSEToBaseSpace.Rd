@@ -7,6 +7,7 @@
 expandSEToBaseSpace(
   se,
   regions = NULL,
+  flank = 0L,
   seqinfo = NULL,
   keepAssays = getReadLevelAssayNames(se),
   ignore.strand = TRUE,
@@ -23,6 +24,11 @@ regions defining the ranges for expanding \code{se}. Alternatively, the
 regions can be specified as character scalars (e.g. "chr1:1200-1300")
 that can be coerced into a \code{GRanges} object. If \code{NULL} (the
 default), \code{regions} is set to the range of the data in \code{se}.}
+
+\item{flank}{Integer scalar. If \code{regions=NULL} and \code{flank} is
+non-zero, \code{flank} positions will be added on both sides of each
+range in the derived \code{regions}. This is useful to add a buffer of
+NA values between observed values in non-overlapping regions.}
 
 \item{seqinfo}{\code{NULL} or a \code{\link[Seqinfo]{Seqinfo}} object
 containing information about the set of genomic sequences (chromosomes).

@@ -76,6 +76,8 @@ test_that("expandSEToBaseSpace works", {
     # expected fails
     expect_error(expandSEToBaseSpace(se = se, keepAssays = "doesnt-exist"),
                  "All values in .keepAssays. must be one of: mod_prob")
+    expect_error(expandSEToBaseSpace(se = se, flank = c(1, 2)),
+                 ".flank. must have length 1")
 
     # empty input
     seExp0 <- expandSEToBaseSpace(se = se[numeric(0), ])
@@ -104,8 +106,8 @@ test_that("expandSEToBaseSpace works", {
         valsExp <- SparseArray::nnavals(assayExp)
         expect_identical(valsOrig, valsExp)
 
-        posOrig <- GenomicRanges::start(se)[SparseArray::nnawhich(assayOrig)]
-        posExp <- GenomicRanges::start(seExp1)[SparseArray::nnawhich(assayExp)]
+        posOrig <- GenomicRanges::start(se)[SparseArray::nnawhich(assayOrig, arr.ind = TRUE)[, 1]]
+        posExp <- GenomicRanges::start(seExp1)[SparseArray::nnawhich(assayExp, arr.ind = TRUE)[, 1]]
         expect_identical(posOrig, posExp)
     }
     expect_identical(as.character(unique(GenomicRanges::strand(seExp1))), "*")
@@ -128,8 +130,8 @@ test_that("expandSEToBaseSpace works", {
         valsExp <- SparseArray::nnavals(assayExp)
         expect_identical(valsOrig, valsExp)
 
-        posOrig <- GenomicRanges::start(se)[SparseArray::nnawhich(assayOrig)]
-        posExp <- GenomicRanges::start(seExp2)[SparseArray::nnawhich(assayExp)]
+        posOrig <- GenomicRanges::start(se)[SparseArray::nnawhich(assayOrig, arr.ind = TRUE)[, 1]]
+        posExp <- GenomicRanges::start(seExp2)[SparseArray::nnawhich(assayExp, arr.ind = TRUE)[, 1]]
         expect_identical(posOrig, posExp)
     }
     expect_identical(as.character(unique(GenomicRanges::strand(seExp2))), "*")
@@ -152,8 +154,8 @@ test_that("expandSEToBaseSpace works", {
         valsExp <- SparseArray::nnavals(assayExp)
         expect_identical(valsOrig, valsExp)
 
-        posOrig <- GenomicRanges::start(seTwoChrom[seqnames(seTwoChrom) == "chr1", ])[SparseArray::nnawhich(assayOrig)]
-        posExp <- GenomicRanges::start(seTwoChromExp)[SparseArray::nnawhich(assayExp)]
+        posOrig <- GenomicRanges::start(seTwoChrom[seqnames(seTwoChrom) == "chr1", ])[SparseArray::nnawhich(assayOrig, arr.ind = TRUE)[, 1]]
+        posExp <- GenomicRanges::start(seTwoChromExp)[SparseArray::nnawhich(assayExp, arr.ind = TRUE)[, 1]]
         expect_identical(posOrig, posExp)
     }
     expect_identical(as.character(unique(GenomicRanges::strand(seTwoChromExp))), "*")
@@ -177,9 +179,31 @@ test_that("expandSEToBaseSpace works", {
         valsExp <- SparseArray::nnavals(assayExp)
         expect_identical(valsOrig, valsExp)
 
-        posOrig <- GenomicRanges::start(subsetByOverlaps(seTwoChrom, reg3))[SparseArray::nnawhich(assayOrig)]
-        posExp <- GenomicRanges::start(seTwoChromExp)[SparseArray::nnawhich(assayExp)]
+        posOrig <- GenomicRanges::start(subsetByOverlaps(seTwoChrom, reg3))[SparseArray::nnawhich(assayOrig, arr.ind = TRUE)[, 1]]
+        posExp <- GenomicRanges::start(seTwoChromExp)[SparseArray::nnawhich(assayExp, arr.ind = TRUE)[, 1]]
         expect_identical(posOrig, posExp)
+    }
+    expect_identical(as.character(unique(GenomicRanges::strand(seTwoChromExp))), "*")
+
+    # multiple chromosomes with flank != 0
+    seTwoChromExp0 <- expandSEToBaseSpace(se = seTwoChrom, flank = 0L,
+                                          ignore.strand = TRUE)
+    seTwoChromExp10 <- expandSEToBaseSpace(se = seTwoChrom, flank = 10L,
+                                           ignore.strand = TRUE)
+    expect_identical(nrow(seTwoChromExp10), nrow(seTwoChromExp0) + 40L)
+    expect_identical(lapply(assay(seTwoChrom, "mod_prob"), colnames),
+                     lapply(assay(seTwoChromExp10, "mod_prob"), colnames))
+    for (s in colnames(seTwoChrom)) {
+        assayExp0 <- assay(seTwoChromExp0, "mod_prob")[[s]]
+        assayExp10 <- assay(seTwoChromExp10, "mod_prob")[[s]]
+
+        valsExp0 <- SparseArray::nnavals(assayExp0)
+        valsExp10 <- SparseArray::nnavals(assayExp10)
+        expect_identical(valsExp0, valsExp10)
+
+        posExp0 <- GenomicRanges::start(seTwoChromExp0)[SparseArray::nnawhich(assayExp0, arr.ind = TRUE)[, 1]]
+        posExp10 <- GenomicRanges::start(seTwoChromExp10)[SparseArray::nnawhich(assayExp10, arr.ind = TRUE)[, 1]]
+        expect_identical(posExp0, posExp10)
     }
     expect_identical(as.character(unique(GenomicRanges::strand(seTwoChromExp))), "*")
 
@@ -202,8 +226,8 @@ test_that("expandSEToBaseSpace works", {
         valsExp <- SparseArray::nnavals(assayExp)
         expect_identical(valsOrig, valsExp)
 
-        posOrig <- GenomicRanges::start(subsetByOverlaps(seTwoChrom, reg3))[SparseArray::nnawhich(assayOrig)]
-        posExp <- GenomicRanges::start(seTwoChromExp)[SparseArray::nnawhich(assayExp)]
+        posOrig <- GenomicRanges::start(subsetByOverlaps(seTwoChrom, reg3))[SparseArray::nnawhich(assayOrig, arr.ind = TRUE)[, 1]]
+        posExp <- GenomicRanges::start(seTwoChromExp)[SparseArray::nnawhich(assayExp, arr.ind = TRUE)[, 1]]
         expect_identical(posOrig, posExp)
     }
     expect_identical(GenomicRanges::strand(subsetByOverlaps(seTwoChrom, seTwoChromExp)),
@@ -232,8 +256,8 @@ test_that("expandSEToBaseSpace works", {
         valsExp <- SparseArray::nnavals(assayExp)
         expect_identical(valsOrig, valsExp)
 
-        posOrig <- GenomicRanges::start(seDupPos)[SparseArray::nnawhich(assayOrig)]
-        posExp <- GenomicRanges::start(seDupPosExp)[SparseArray::nnawhich(assayExp)]
+        posOrig <- GenomicRanges::start(seDupPos)[SparseArray::nnawhich(assayOrig, arr.ind = TRUE)[, 1]]
+        posExp <- GenomicRanges::start(seDupPosExp)[SparseArray::nnawhich(assayExp, arr.ind = TRUE)[, 1]]
         expect_identical(posOrig, posExp)
     }
     expect_identical(GenomicRanges::strand(subsetByOverlaps(seDupPos, seDupPosExp)),
