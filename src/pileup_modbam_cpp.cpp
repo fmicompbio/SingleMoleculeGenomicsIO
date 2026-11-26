@@ -120,18 +120,17 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
     plpconf conf = {0};
     conf.inname = inname_str.c_str();
     bam_plp_t plpiter = NULL;
-    int tid = -1, depth = -1, j = 0, k = 0, modlen = 0, success = 0;
+    int tid = -1, depth = -1, j = 0, k = 0, modlen = 0, success = 0, ntype = 0;
+    int t = 0, strand = 0, impl = 0, refpos = -1;
+    int *codes = NULL;
     #define NMODS 5
     hts_base_mod mods[NMODS] = {{0}}; //ACGTN
-    int refpos = -1;
     const bam_pileup1_t *plp = NULL;
-    bool had_error = false;
+    bool had_error = false, rev = false, called = false;
     int buffer_len = 2000;
     char buffer[2000];
-    char readbase = '0';
+    char readbase = '0', expected = '0', canonical = '0';
     uint64_t refposcount = 0;
-    int strand = 0, impl = 0;
-    char canonical = '0';
     Rcpp::List res;
 
     // ... return values (one per modification)
@@ -159,10 +158,6 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
 
     // ... cli progress bar
     Rcpp::RObject bar;
-
-    // get expected unmodified base corresponding to modbase
-    char unmodbase = get_unmodified_base(modbase);
-    char unmodbase_complement = complement(unmodbase);
 
     // prepare bam file for reading
     success = open_bam_and_read_index_and_header(bamdata, conf.inname,
@@ -232,12 +227,8 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
                 continue;
             }
 
-            // check if read j has expected base
             readbase = toupper(seq_nt16_str[bam_seqi(bam_get_seq(plp[j].b),
                                                      plp[j].qpos)]);
-            if (readbase != (bam_is_rev(plp[j].b) ? unmodbase_complement : unmodbase)) {
-                continue;
-            }
 
             // retrieve base modification
             if ((modlen = bam_mods_at_qpos(plp[j].b, plp[j].qpos,
@@ -254,45 +245,76 @@ Rcpp::List pileup_modbam_cpp(std::string inname_str,
             }
 
             // increment curr_Nmod[curr_strand] if base is modified and has the expected base
-            if (bam_mods_query_type((hts_base_mod_state*)plp[j].cd.p,
-                                    modbase, &strand, &impl, &canonical) == 0) {
+            hts_base_mod_state *st = (hts_base_mod_state*) plp[j].cd.p;
+            rev = bam_is_rev(plp[j].b);
 
-                if (modlen > (int)(sizeof(mods) / sizeof(mods[0]))) {
-                    had_error = true;
-                    snprintf(buffer, buffer_len,
-                             "More modifications than SingleMoleculeGenomicsIO:::pileup_modbam_cpp can handle (read %s)\n",
-                             bam_get_qname(plp[j].b));
-                    goto end;
-                } else if (modlen > 0) {
-                    for (k = 0; k < modlen; k++) {
-                        if (mods[k].modified_base == modbase) {
-                            // found modified base of the right type -> add to results
-                            curr_strand = bam_is_rev(plp[j].b) == mods[k].strand ? 0 : 1;
-                            if (level == "summary") {
-                                curr_Nvalid[curr_strand]++;
-                                if ((((double) mods[k].qual + 0.5) / 256.0) >= mod_prob_thresh) {
-                                    curr_Nmod[curr_strand]++;
-                                }
-                            } else if (level == "read") {
-                                chrom.push_back(sam_hdr_tid2name(conf.in_samhdr, tid));
-                                ref_position.push_back(refpos + 1);
-                                ref_mod_strand.push_back(curr_strand == 0 ? '+' : '-');
-                                read_id.push_back(bam_get_qname(plp[j].b));
-                                mod_prob.push_back(((double) mods[k].qual + 0.5) / 256.0);
-                            }
-                        }
-                    }
-                } else if (!modlen && impl) {
-                    curr_strand = bam_is_rev(plp[j].b) ? 1 : 0;
+            if (modlen > NMODS) {
+                had_error = true;
+                snprintf(buffer, buffer_len,
+                         "More modifications than SingleMoleculeGenomicsIO:::pileup_modbam_cpp can handle (read %s)\n",
+                         bam_get_qname(plp[j].b));
+                goto end;
+            }
+
+            // explicit calls
+            for (k = 0; k < modlen; k++) {
+                if (mods[k].modified_base == modbase) {
+                    curr_strand = (rev == mods[k].strand) ? 0 : 1;
+                    double p = ((double) mods[k].qual + 0.5) / 256.0;
                     if (level == "summary") {
                         curr_Nvalid[curr_strand]++;
+                        if (p >= mod_prob_thresh) curr_Nmod[curr_strand]++;
                     } else if (level == "read") {
                         chrom.push_back(sam_hdr_tid2name(conf.in_samhdr, tid));
                         ref_position.push_back(refpos + 1);
                         ref_mod_strand.push_back(curr_strand == 0 ? '+' : '-');
                         read_id.push_back(bam_get_qname(plp[j].b));
-                        mod_prob.push_back(-1.0);
+                        mod_prob.push_back(p);
                     }
+                }
+            }
+
+            // implicit unmodified bases, one check per MM entry with this code
+            ntype = 0;
+            codes = bam_mods_recorded(st, &ntype);   // owned by st
+            for (t = 0; t < ntype; t++) {
+                if (codes[t] != modbase) {
+                    continue;
+                }
+                if (bam_mods_queryi(st, t, &strand, &impl, &canonical) != 0) {
+                    continue;
+                }
+                if (!impl) {
+                    continue;                       // '?': unknown, skip
+                }
+
+                expected = rev ? complement(canonical) : canonical;   // stored orientation
+                if (readbase != expected) {
+                    continue;                       // not a candidate base
+                }
+
+                called = false;
+                for (k = 0; k < modlen; k++) {
+                    if (mods[k].modified_base == modbase &&
+                        mods[k].strand == strand &&
+                        mods[k].canonical_base == canonical) {
+                        called = true;
+                        break;
+                    }
+                }
+                if (called) {
+                    continue;
+                }
+
+                curr_strand = (rev == strand) ? 0 : 1;
+                if (level == "summary") {
+                    curr_Nvalid[curr_strand]++;
+                } else if (level == "read") {
+                    chrom.push_back(sam_hdr_tid2name(conf.in_samhdr, tid));
+                    ref_position.push_back(refpos + 1);
+                    ref_mod_strand.push_back(curr_strand == 0 ? '+' : '-');
+                    read_id.push_back(bam_get_qname(plp[j].b));
+                    mod_prob.push_back(-1.0);
                 }
             }
         }

@@ -1,3 +1,7 @@
+# SingleMoleculeGenomicsIO 0.1.10
+
+* Fix parsing of modification tags for bam entries containing modification calls on both strands (e.g. SAMOSA)
+
 # SingleMoleculeGenomicsIO 0.1.9
 
 * Allow `ignore.strand=FALSE` in `expandSEToBaseSpace`

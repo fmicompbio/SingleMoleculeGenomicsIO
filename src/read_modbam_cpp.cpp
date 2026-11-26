@@ -44,14 +44,22 @@ int process_bam_record(bam1_t *bamdata,        // bam record
                        Rcpp::CharacterVector &df_variant_label,
                        Rcpp::CharacterVector &df_ref_strand) {
     // allocate variable only used inside process_bam_record()
-    int i = 0, j = 0, strand = 0, impl = 0, pos = 0, r = 0;
-    hts_base_mod mod[5] = {{0}};  //for ATCGN
-    char canonical = '0', unmodbase = '0';
+    int i = 0, j = 0, pos = 0, r = 0, s = 0, im = 0, t = 0, ntype = 0;
+    char c = '0';
+    size_t e = 0;
+    bool called = false;
+    #define NMODS 5
+    hts_base_mod mod[NMODS] = {{0}}; //ACGTN
     int this_read_len = bamdata->core.l_qseq;
     size_t size_before_this_read = read_id.size();
 
-    // get expected unmodified base corresponding to `modbase`
-    unmodbase = get_unmodified_base(modbase);
+    struct ModEntry {
+        int strand;
+        int impl;
+        char canon;
+    };
+    std::vector<ModEntry> entries;
+    int *codes = NULL;
 
     // process alignment
     alncnt++;
@@ -82,7 +90,16 @@ int process_bam_record(bam1_t *bamdata,        // bam record
     //       (`impl` is a boolean for whether unlisted positions should be
     //        implicitly assumed to be unmodified, or require an explicit
     //        score and should be considered as unknown)
-    if (bam_mods_query_type(ms, modbase, &strand, &impl, &canonical) == 0) {
+    codes = bam_mods_recorded(ms, &ntype);       // owned by ms, don't free
+    for (t = 0; t < ntype; t++) {
+        if (codes[t] != modbase) {
+            continue;
+        }
+        if (bam_mods_queryi(ms, t, &s, &im, &c) == 0) {
+            entries.push_back({s, im, c});
+        }
+    }
+    if (!entries.empty()) {
         // ... loop over sequence positions i
         for (i = 0; i < this_read_len; i++) {
             // i is the position in the aligned read (possibly reverse-complemented)
@@ -94,7 +111,7 @@ int process_bam_record(bam1_t *bamdata,        // bam record
             }
 
             // r: number of found modifications (>=1, 0 or -1 if failed)
-            r = bam_mods_at_next_pos(bamdata, ms, mod, sizeof(mod)/sizeof(mod[0]));
+            r = bam_mods_at_next_pos(bamdata, ms, mod, NMODS);
             if (r <= -1) {
                 had_error = true; // # nocov start
                 snprintf(buffer, buffer_len,
@@ -102,30 +119,16 @@ int process_bam_record(bam1_t *bamdata,        // bam record
                          bam_get_qname(bamdata));
                 return -2; // # nocov end
 
-            } else if (r > (int)(sizeof(mod) / sizeof(mod[0]))) {
+            } else if (r > NMODS) {
                 had_error = true;
                 snprintf(buffer, buffer_len,
                          "More modifications than SingleMoleculeGenomicsIO:::read_modbam_cpp can handle (read %s)\n",
                          bam_get_qname(bamdata));
                 return -3;
-
-            } else if (!r && impl) {
-                // implied base without modification at position i
-                if (qseq[pos] == unmodbase) {
-                    // base of the right type -> add to results
-                    read_id.push_back(bam_get_qname(bamdata));
-                    aligned_read_position.push_back(i);
-                    forward_read_position.push_back(pos);
-                    chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
-                    call_code.push_back('-');
-                    canonical_base.push_back(canonical);
-                    ref_mod_strand.push_back(bam_is_rev(bamdata) ? '-' : '+');
-                    mod_prob.push_back(-1.0); // special value of -1.0 indicates inferred unmodified base
-                }
             }
             // modifications
             for (j = 0; j < r; j++) {
-                if (mod[j].modified_base == modbase) {
+                if (mod[j].modified_base == modbase && qseq[pos] == mod[j].canonical_base) {
                     // found modified base of the right type -> add to results
                     read_id.push_back(bam_get_qname(bamdata));
                     aligned_read_position.push_back(i);
@@ -138,6 +141,34 @@ int process_bam_record(bam1_t *bamdata,        // bam record
                     //     in [N/256, (N+1)/256] -> store midpoint
                     mod_prob.push_back(((double) mod[j].qual + 0.5) / 256.0);
                 }
+            }
+            for (e = 0; e < entries.size(); e++) {
+                if (!entries[e].impl) {
+                    continue;                 // '?': no information
+                }
+                if (qseq[pos] != entries[e].canon) {
+                    continue;                 // not a candidate base
+                }
+                called = false;
+                for (j = 0; j < r; j++) {
+                    if (mod[j].modified_base == modbase &&
+                        mod[j].strand == entries[e].strand &&
+                        mod[j].canonical_base == entries[e].canon) {
+                        called = true;
+                        break;
+                    }
+                }
+                if (called) {
+                    continue;
+                }
+                read_id.push_back(bam_get_qname(bamdata));
+                aligned_read_position.push_back(i);
+                forward_read_position.push_back(pos);
+                chrom.push_back(sam_hdr_tid2name(in_samhdr, bamdata->core.tid));
+                call_code.push_back('-');
+                canonical_base.push_back(entries[e].canon);
+                ref_mod_strand.push_back(bam_is_rev(bamdata) == entries[e].strand ? '+' : '-');
+                mod_prob.push_back(-1.0);
             }
         }
     }
@@ -214,16 +245,23 @@ int count_pairs_bam_record(
         Rcpp::NumericMatrix &pair_counts) { // matrix for counters
 
     // allocate variable only used inside count_pairs_bam_record()
-    int i = 0, j = 0, strand = 0, impl = 0, pos = 0, r = 0;
-    hts_base_mod mod[5] = {{0}};  //for ATCGN
-    char canonical = '0', unmodbase = '0';
+    int i = 0, j = 0, pos = 0, r = 0, s = 0, im = 0, ntype = 0;
+    char c = '0';
+    size_t e = 0;
+    bool called = false;
+    #define NMODS 5
+    hts_base_mod mod[NMODS] = {{0}}; //ACGTN
+    struct ModEntry {
+        int strand;
+        int impl;
+        char canon;
+    };
+    std::vector<ModEntry> entries;
+    int *codes = NULL;
     int this_read_len = bamdata->core.l_qseq;
     std::vector<int> modposaln; // alignment position of modified bases
     std::vector<int> modstate; // modification states of the bases (0: unmod, 1: mod)
     double modprob = 0.0; // modification probability
-
-    // get expected unmodified base corresponding to `modbase`
-    unmodbase = get_unmodified_base(modbase);
 
     // process alignment
     alncnt++;
@@ -254,7 +292,14 @@ int count_pairs_bam_record(
     //       (`impl` is a boolean for whether unlisted positions should be
     //        implicitly assumed to be unmodified, or require an explicit
     //        score and should be considered as unknown)
-    if (bam_mods_query_type(ms, modbase, &strand, &impl, &canonical) == 0) {
+    codes = bam_mods_recorded(ms, &ntype);   // owned by ms
+    for (int t = 0; t < ntype; t++) {
+        if (codes[t] != modbase) continue;
+        if (bam_mods_queryi(ms, t, &s, &im, &c) == 0)
+            entries.push_back({s, im, c});
+    }
+
+    if (!entries.empty()) {
         // ... loop over sequence positions i
         for (i = 0; i < this_read_len; i++) {
             // i is the position in the aligned read (possibly reverse-complemented)
@@ -266,7 +311,7 @@ int count_pairs_bam_record(
             }
 
             // r: number of found modifications (>=1, 0 or -1 if failed)
-            r = bam_mods_at_next_pos(bamdata, ms, mod, sizeof(mod)/sizeof(mod[0]));
+            r = bam_mods_at_next_pos(bamdata, ms, mod, NMODS);
             if (r <= -1) {
                 had_error = true; // # nocov start
                 snprintf(buffer, buffer_len,
@@ -274,40 +319,51 @@ int count_pairs_bam_record(
                          bam_get_qname(bamdata));
                 return -2; // # nocov end
 
-            } else if (r > (int)(sizeof(mod) / sizeof(mod[0]))) {
+            } else if (r > NMODS) {
                 had_error = true;
                 snprintf(buffer, buffer_len,
                          "More modifications than SingleMoleculeGenomicsIO:::read_modbam_cpp can handle (read %s)\n",
                          bam_get_qname(bamdata));
                 return -3;
 
-            } else if (!r && impl) {
-                // implied base without modification at position i
-                if (qseq[pos] == unmodbase) {
-                    // base of the right type -> add to results
-                    modposaln.push_back(i);
-                    modstate.push_back(0);
-                }
             }
 
-            // modifications
+            // explicit calls
             for (j = 0; j < r; j++) {
-                if (mod[j].modified_base == modbase) {
-                    // found modified base of the right type -> binarize:
-                    //   `qual` of N corresponds to call probability
-                    //       in [N/256, (N+1)/256] -> calculate midpoint
+                if (mod[j].modified_base == modbase && qseq[pos] == mod[j].canonical_base) {
                     modprob = ((double) mod[j].qual + 0.5) / 256.0;
-
                     if (modprob < thresh_unmod) {
                         modposaln.push_back(i);
                         modstate.push_back(0);
-
                     } else if (modprob >= thresh_mod) {
                         modposaln.push_back(i);
                         modstate.push_back(1);
                     }
-
                 }
+            }
+
+            // implicit unmodified bases, per MM entry
+            for (e = 0; e < entries.size(); e++) {
+                if (!entries[e].impl) {
+                    continue;               // '?': unknown
+                }
+                if (qseq[pos] != entries[e].canon) {
+                    continue;               // not a candidate base
+                }
+                called = false;
+                for (j = 0; j < r; j++) {
+                    if (mod[j].modified_base == modbase &&
+                        mod[j].strand == entries[e].strand &&
+                        mod[j].canonical_base == entries[e].canon) {
+                        called = true;
+                        break;
+                    }
+                }
+                if (called) {
+                    continue;
+                }
+                modposaln.push_back(i);
+                modstate.push_back(0);
             }
         }
     }
