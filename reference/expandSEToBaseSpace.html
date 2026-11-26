@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SingleMoleculeGenomicsIO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,9 +43,12 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expandSEToBaseSpace</span><span class="op">(</span></span>
 <span>  <span class="va">se</span>,</span>
 <span>  regions <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  flank <span class="op">=</span> <span class="fl">0L</span>,</span>
 <span>  seqinfo <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keepAssays <span class="op">=</span> <span class="fu"><a href="getReadLevelAssayNames.html">getReadLevelAssayNames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>,</span>
-<span>  ignore.strand <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  ignore.strand <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  assayNameAmbig <span class="op">=</span> <span class="st">"mod_prob"</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -66,6 +69,13 @@ that can be coerced into a <code>GRanges</code> object. If <code>NULL</code> (th
 default), <code>regions</code> is set to the range of the data in <code>se</code>.</p></dd>
 
 
+<dt id="arg-flank">flank<a class="anchor" aria-label="anchor" href="#arg-flank"></a></dt>
+<dd><p>Integer scalar. If <code>regions=NULL</code> and <code>flank</code> is
+non-zero, <code>flank</code> positions will be added on both sides of each
+range in the derived <code>regions</code>. This is useful to add a buffer of
+NA values between observed values in non-overlapping regions.</p></dd>
+
+
 <dt id="arg-seqinfo">seqinfo<a class="anchor" aria-label="anchor" href="#arg-seqinfo"></a></dt>
 <dd><p><code>NULL</code> or a <code><a href="https://rdrr.io/pkg/Seqinfo/man/Seqinfo-class.html" class="external-link">Seqinfo</a></code> object
 containing information about the set of genomic sequences (chromosomes).
@@ -82,13 +92,31 @@ object.</p></dd>
 
 <dt id="arg-ignore-strand">ignore.strand<a class="anchor" aria-label="anchor" href="#arg-ignore-strand"></a></dt>
 <dd><p>A logical scalar defining whether to ignore the strand
-of the <code>rowRanges(se)</code>.</p></dd>
+of the <code>rowRanges(se)</code>. If <code>FALSE</code>, <code>se</code> is first
+filtered (using <code>filterPositions(..., filters = "repeated.positions")</code>)
+to resolve any positions represented on both strands.</p></dd>
+
+
+<dt id="arg-assaynameambig">assayNameAmbig<a class="anchor" aria-label="anchor" href="#arg-assaynameambig"></a></dt>
+<dd><p>A character scalar indicating the assay to use to
+decide which row to retain if multiple rows represent the same genomic
+position (on different strands). The row with the largest row sum in
+this assay is retained. Only used if <code>ignore.strand</code> is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical scalar indicating whether to print out progress
+messages.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A single-base resolution <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/RangedSummarizedExperiment-class.html" class="external-link">RangedSummarizedExperiment</a></code>
-corresponding to <code>se</code>.</p>
+    <p>A single-base resolution
+<code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/RangedSummarizedExperiment-class.html" class="external-link">RangedSummarizedExperiment</a></code>
+corresponding to <code>se</code>. If <code>ignore.strand</code> is <code>TRUE</code>,
+the return object is unstranded. If <code>ignore.strand</code> is <code>FALSE</code>,
+all positions present in the input object will retain the assigned
+strand, while all other positions will be unstranded.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -105,16 +133,16 @@ corresponding to <code>se</code>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> extracting base modifications from modBAM files</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> finding unique genomic positions...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[17ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> finding unique genomic positions... <span style="color: #B2B2B2;">[49ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> collapsed 11300 positions to 4772 unique ones</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 11300 positions to 4772 unique ones <span style="color: #B2B2B2;">[101ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> collapsed 11300 positions to 4772 unique ones <span style="color: #B2B2B2;">[407ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.002 Mio./s) [1ms]
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ⠙ 0.000 Mio. genomic positions processed (0.001 Mio./s) [2ms]
 </span>
 <span class="r-in"><span><span class="va">se_exp</span> <span class="op">&lt;-</span> <span class="fu">expandSEToBaseSpace</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
